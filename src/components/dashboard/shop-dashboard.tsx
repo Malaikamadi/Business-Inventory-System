@@ -37,8 +37,8 @@ export async function ShopDashboard({ user }: { user: SessionUser }) {
   if (!shopId) {
     return (
       <EmptyState
-        title="no shop yet"
-        description="you're not assigned to a shop. ping the owner so you can start ringing stuff up."
+        title="No shop assigned"
+        description="Your account is not assigned to a shop yet. Ask the business owner to assign you before recording sales."
       />
     );
   }
@@ -56,18 +56,18 @@ export async function ShopDashboard({ user }: { user: SessionUser }) {
     <div className="space-y-6">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h1 className="font-display text-3xl font-bold tracking-tight text-text-primary after:mt-2 after:block after:h-1.5 after:w-12 after:rounded-full after:bg-accent sm:text-4xl">
-            aight {user.firstName}.
+          <h1 className="text-2xl font-semibold tracking-tight text-text-primary sm:text-3xl">
+            Welcome, {user.firstName}
           </h1>
           <p className="mt-2 text-sm text-text-secondary">
-            {shop?.name ?? "your shop"} is live. go make the day.
+            {shop?.name ?? "Your shop"} — record sales and check stock from here.
           </p>
         </div>
         {can(user, PERMISSIONS.SALES_CREATE) && (
           <Button asChild size="lg" className="w-full sm:w-auto">
             <Link href="/sales/new">
               <Plus className="h-4 w-4" />
-              Ring it up
+              Record sale
             </Link>
           </Button>
         )}
@@ -80,18 +80,18 @@ export async function ShopDashboard({ user }: { user: SessionUser }) {
         className="grid grid-cols-2 gap-4 lg:grid-cols-4"
       >
         <StatCard
-          title="today's bag"
+          title="Today's revenue"
           value={formatCurrency(kpis.todayRevenue)}
           icon={Banknote}
         />
         <StatCard
-          title="rung up"
+          title="Sales today"
           value={formatNumber(kpis.todaySales)}
           subtitle={`${formatNumber(kpis.todayItemsSold)} items sold`}
           icon={Receipt}
         />
         <StatCard
-          title="almost out"
+          title="Low stock"
           value={formatNumber(kpis.lowStockCount)}
           icon={AlertTriangle}
           iconClassName={
@@ -101,7 +101,7 @@ export async function ShopDashboard({ user }: { user: SessionUser }) {
           }
         />
         <StatCard
-          title="sold out"
+          title="Out of stock"
           value={formatNumber(kpis.outOfStockCount)}
           icon={PackageX}
           iconClassName={
@@ -114,12 +114,12 @@ export async function ShopDashboard({ user }: { user: SessionUser }) {
 
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0">
-          <CardTitle>just now</CardTitle>
+          <CardTitle>Recent sales</CardTitle>
           <Link
             href="/sales"
             className="text-sm font-medium text-accent hover:underline"
           >
-            see all
+            View all
           </Link>
         </CardHeader>
         <CardContent className="p-0">
@@ -127,11 +127,11 @@ export async function ShopDashboard({ user }: { user: SessionUser }) {
             <div className="px-6">
               <EmptyState
                 icon={ShoppingBag}
-                title="crickets."
-                description="once you ring something up, it shows here."
+                title="No sales yet"
+                description="Sales you record at this shop will appear here."
                 actionLabel={
                   can(user, PERMISSIONS.SALES_CREATE)
-                    ? "ring the first one"
+                    ? "Record your first sale"
                     : undefined
                 }
                 actionHref={
@@ -194,7 +194,7 @@ function RoleShortcuts({ user, shopId }: { user: SessionUser; shopId: string }) 
         <Link
           key={item.href}
           href={item.href}
-          className="flex items-center gap-2.5 rounded-2xl border-2 border-primary bg-surface px-3 py-2.5 text-sm font-semibold text-text-primary shadow-[3px_3px_0_0_#121212] transition-all hover:-translate-x-0.5 hover:-translate-y-0.5 hover:bg-accent"
+          className="flex items-center gap-2.5 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm font-medium text-text-primary transition-colors hover:border-accent hover:bg-surface-hover"
         >
           <item.icon className="h-4 w-4 shrink-0" />
           {item.label}

@@ -37,12 +37,12 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
   return (
     <div className="space-y-6">
       <div>
-          <h1 className="font-display text-3xl font-bold tracking-tight text-text-primary after:mt-2 after:block after:h-1.5 after:w-12 after:rounded-full after:bg-accent sm:text-4xl">
-          hey {firstName}. here&apos;s the bag.
+        <h1 className="text-2xl font-semibold tracking-tight text-text-primary sm:text-3xl">
+          Welcome, {firstName}
         </h1>
         <p className="mt-2 max-w-xl text-sm text-text-secondary">
-          {kpis.totalShops} shop{kpis.totalShops === 1 ? "" : "s"} in motion.
-          staff handle the till — you&apos;re here for the big picture.
+          Overview of {kpis.totalShops} shop{kpis.totalShops === 1 ? "" : "s"}.
+          Shop staff record sales; this view is for the business as a whole.
         </p>
       </div>
 
@@ -51,27 +51,27 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
         <StatCard
-          title="today's bag"
+          title="Today's revenue"
           value={formatCurrency(kpis.totalRevenue)}
-          subtitle={`${formatNumber(kpis.totalSales)} ${kpis.totalSales === 1 ? "sale" : "sales"} landed`}
+          subtitle={`${formatNumber(kpis.totalSales)} ${kpis.totalSales === 1 ? "sale" : "sales"}`}
           icon={Banknote}
         />
         <StatCard
-          title="month so far"
+          title="This month"
           value={formatCurrency(kpis.monthlyRevenue)}
-          subtitle={`${formatNumber(kpis.monthlySales)} sales and counting`}
+          subtitle={`${formatNumber(kpis.monthlySales)} sales`}
           icon={TrendingUp}
         />
         <StatCard
-          title="on the floor"
+          title="Stock on hand"
           value={formatNumber(kpis.totalInventoryUnits)}
-          subtitle={`${formatCurrency(inventoryValue)} sitting at cost`}
+          subtitle={`${formatCurrency(inventoryValue)} at cost`}
           icon={Boxes}
         />
         <StatCard
-          title="needs a restock"
+          title="Stock alerts"
           value={formatNumber(alertCount)}
-          subtitle={`${kpis.outOfStockCount} out of stock, ${kpis.lowStockCount} running low`}
+          subtitle={`${kpis.outOfStockCount} out of stock, ${kpis.lowStockCount} low`}
           icon={alertCount > 0 ? AlertTriangle : Store}
           iconClassName={
             kpis.outOfStockCount > 0
@@ -88,7 +88,7 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <Card className="xl:col-span-2">
           <CardHeader>
-            <CardTitle>the last 30 days</CardTitle>
+            <CardTitle>Last 30 days</CardTitle>
           </CardHeader>
           <CardContent>
             <RevenueChart data={trend} />
@@ -97,14 +97,14 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
 
         <Card>
           <CardHeader>
-            <CardTitle>who&apos;s eating</CardTitle>
+            <CardTitle>Shop performance</CardTitle>
           </CardHeader>
           <CardContent>
             {shops.length > 0 ? (
               <ShopPerformanceChart data={shops} />
             ) : (
               <p className="py-8 text-center text-sm text-text-muted">
-                quiet month. nobody&apos;s rung anything up yet.
+                No sales recorded this month yet.
               </p>
             )}
           </CardContent>
@@ -113,12 +113,12 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
 
       <Card>
         <CardHeader>
-          <CardTitle>what&apos;s popping</CardTitle>
+            <CardTitle>Top products</CardTitle>
         </CardHeader>
         <CardContent>
           {topProducts.length === 0 ? (
             <p className="py-8 text-center text-sm text-text-muted">
-              waiting on the first sale of the month. staff, do your thing.
+              Shop staff have not recorded sales this month yet.
             </p>
           ) : (
             <ol className="space-y-3">
@@ -150,12 +150,12 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
 
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0">
-          <CardTitle>shop scoreboard</CardTitle>
+          <CardTitle>Shops</CardTitle>
           <Link
             href="/shops"
             className="text-sm font-medium text-accent hover:underline"
           >
-            run shops
+            View all
           </Link>
         </CardHeader>
         <CardContent className="p-0">
