@@ -8,7 +8,7 @@ import { requireCan } from "@/server/page-guards";
 import { PageHeader } from "@/components/shared/page-header";
 import { UserForm } from "@/components/users/user-form";
 
-export const metadata = { title: "Edit user · inv." };
+export const metadata = { title: "Edit user · InvSys" };
 
 export default async function EditUserPage(props: {
   params: Promise<{ userId: string }>;

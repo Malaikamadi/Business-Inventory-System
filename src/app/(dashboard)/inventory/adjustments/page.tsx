@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StockEntryForm } from "@/components/inventory/stock-entry-form";
 
-export const metadata = { title: "Stock adjustments · inv." };
+export const metadata = { title: "Stock adjustments · InvSys" };
 
 export default async function AdjustmentsPage() {
   const user = await getCurrentUser();

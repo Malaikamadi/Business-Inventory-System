@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { CategoryForm } from "@/components/products/category-form";
 
-export const metadata = { title: "Categories · inv." };
+export const metadata = { title: "Categories · InvSys" };
 
 export default async function CategoriesPage() {
   const user = await getCurrentUser();

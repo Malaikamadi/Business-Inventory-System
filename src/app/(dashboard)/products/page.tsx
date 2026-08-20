@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ProductFilters } from "@/components/products/product-filters";
 import { ProductThumbnail } from "@/components/products/product-thumbnail";
 
-export const metadata = { title: "Products · inv." };
+export const metadata = { title: "Products · InvSys" };
 
 export default async function ProductsPage(props: {
   searchParams: Promise<{

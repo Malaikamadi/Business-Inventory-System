@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export const metadata = { title: "Shops · inv." };
+export const metadata = { title: "Shops · InvSys" };
 
 export default async function ShopsPage() {
   const user = await getCurrentUser();

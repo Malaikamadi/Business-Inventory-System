@@ -8,7 +8,7 @@ import { requireCan } from "@/server/page-guards";
 import { PageHeader } from "@/components/shared/page-header";
 import { ShopForm } from "@/components/shops/shop-form";
 
-export const metadata = { title: "Edit shop · inv." };
+export const metadata = { title: "Edit shop · InvSys" };
 
 export default async function EditShopPage(props: {
   params: Promise<{ shopId: string }>;

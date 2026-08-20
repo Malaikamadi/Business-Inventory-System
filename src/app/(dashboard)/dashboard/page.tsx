@@ -4,7 +4,7 @@ import { requireCanAny } from "@/server/page-guards";
 import { OwnerDashboard } from "@/components/dashboard/owner-dashboard";
 import { ShopDashboard } from "@/components/dashboard/shop-dashboard";
 
-export const metadata = { title: "Dashboard · inv." };
+export const metadata = { title: "Dashboard · InvSys" };
 
 /**
  * One route, two very different jobs: an owner needs a business overview while

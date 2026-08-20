@@ -9,7 +9,7 @@ import { getProductDetail } from "@/server/services/product.queries";
 import { PageHeader } from "@/components/shared/page-header";
 import { ProductForm } from "@/components/products/product-form";
 
-export const metadata = { title: "Edit product · inv." };
+export const metadata = { title: "Edit product · InvSys" };
 
 export default async function EditProductPage(props: {
   params: Promise<{ productId: string }>;

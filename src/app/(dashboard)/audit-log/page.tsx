@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Pagination } from "@/components/shared/pagination";
 import { Card, CardContent } from "@/components/ui/card";
 
-export const metadata = { title: "Audit log · inv." };
+export const metadata = { title: "Audit log · InvSys" };
 
 const ACTION_LABELS: Record<string, string> = {
   "login.success": "Signed in",

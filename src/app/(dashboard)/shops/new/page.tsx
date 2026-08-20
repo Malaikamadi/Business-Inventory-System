@@ -6,7 +6,7 @@ import { requireCan } from "@/server/page-guards";
 import { PageHeader } from "@/components/shared/page-header";
 import { ShopForm } from "@/components/shops/shop-form";
 
-export const metadata = { title: "Add shop · inv." };
+export const metadata = { title: "Add shop · InvSys" };
 
 export default async function NewShopPage() {
   const user = await getCurrentUser();

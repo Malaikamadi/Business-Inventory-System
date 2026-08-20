@@ -7,7 +7,7 @@ import { SaleForm } from "@/components/sales/sale-form";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 
-export const metadata = { title: "ring it up · inv." };
+export const metadata = { title: "Record sale · InvSys" };
 
 export default async function NewSalePage(props: {
   searchParams: Promise<{ shop?: string }>;

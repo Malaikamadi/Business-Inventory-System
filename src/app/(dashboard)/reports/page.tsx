@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { PeriodTabs } from "@/components/reports/period-tabs";
 
-export const metadata = { title: "Reports · inv." };
+export const metadata = { title: "Reports · InvSys" };
 
 const PERIODS = {
   today: { label: "Today", days: 1 },

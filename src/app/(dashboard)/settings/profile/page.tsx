@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChangePasswordForm } from "@/components/settings/change-password-form";
 
-export const metadata = { title: "Profile · inv." };
+export const metadata = { title: "Profile · InvSys" };
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();

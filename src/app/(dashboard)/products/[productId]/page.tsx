@@ -26,7 +26,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ProductThumbnail } from "@/components/products/product-thumbnail";
 
-export const metadata = { title: "Product · inv." };
+export const metadata = { title: "Product · InvSys" };
 
 const STATUS_BADGE = {
   OUT_OF_STOCK: { label: "Out of stock", variant: "danger" as const },

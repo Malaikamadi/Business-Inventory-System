@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SalesFilters } from "@/components/sales/sales-filters";
 
-export const metadata = { title: "Sales · inv." };
+export const metadata = { title: "Sales · InvSys" };
 
 export default async function SalesPage(props: {
   searchParams: Promise<{

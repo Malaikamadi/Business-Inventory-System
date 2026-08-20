@@ -12,7 +12,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { Card, CardContent } from "@/components/ui/card";
 import { MovementFilters } from "@/components/inventory/movement-filters";
 
-export const metadata = { title: "Stock movements · inv." };
+export const metadata = { title: "Stock movements · InvSys" };
 
 /** Links a movement back to the document that caused it, where one exists. */
 function referenceHref(referenceType: string | null, referenceId: string | null) {

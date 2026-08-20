@@ -7,7 +7,7 @@ import { requireCan } from "@/server/page-guards";
 import { PageHeader } from "@/components/shared/page-header";
 import { ProductForm } from "@/components/products/product-form";
 
-export const metadata = { title: "Add product · inv." };
+export const metadata = { title: "Add product · InvSys" };
 
 export default async function NewProductPage() {
   const user = await getCurrentUser();

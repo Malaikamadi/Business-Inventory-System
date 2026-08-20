@@ -3,7 +3,7 @@ import {
   type InventorySearchParams,
 } from "@/components/inventory/inventory-page";
 
-export const metadata = { title: "Inventory · inv." };
+export const metadata = { title: "Inventory · InvSys" };
 
 export default async function Page(props: {
   searchParams: Promise<InventorySearchParams>;

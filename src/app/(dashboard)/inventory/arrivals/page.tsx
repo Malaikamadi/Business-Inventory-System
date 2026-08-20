@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StockEntryForm } from "@/components/inventory/stock-entry-form";
 
-export const metadata = { title: "Stock arrivals · inv." };
+export const metadata = { title: "Stock arrivals · InvSys" };
 
 export default async function ArrivalsPage() {
   const user = await getCurrentUser();

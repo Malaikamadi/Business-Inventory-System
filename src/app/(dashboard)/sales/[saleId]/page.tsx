@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { VoidSaleDialog } from "@/components/sales/void-sale-dialog";
 
-export const metadata = { title: "Sale · inv." };
+export const metadata = { title: "Sale · InvSys" };
 
 export default async function SaleDetailPage(props: {
   params: Promise<{ saleId: string }>;

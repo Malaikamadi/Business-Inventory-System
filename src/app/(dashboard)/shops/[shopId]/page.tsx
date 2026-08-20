@@ -30,7 +30,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InventoryTable } from "@/components/inventory/inventory-table";
 import { RecentSalesTable } from "@/components/dashboard/recent-sales-table";
 
-export const metadata = { title: "Shop · inv." };
+export const metadata = { title: "Shop · InvSys" };
 
 export default async function ShopDetailPage(props: {
   params: Promise<{ shopId: string }>;
