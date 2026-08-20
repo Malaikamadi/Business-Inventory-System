@@ -4,62 +4,62 @@ import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
 
+import { PERMISSIONS, SALESPERSON_PERMISSIONS } from "../src/lib/constants";
+
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
-const PERMISSIONS_DATA = [
-  // Dashboard
-  { key: "dashboard:global:view", resource: "dashboard", action: "global:view", description: "View global dashboard" },
-  { key: "dashboard:shop:view", resource: "dashboard", action: "shop:view", description: "View shop dashboard" },
-  // Shops
-  { key: "shops:create", resource: "shops", action: "create", description: "Create shops" },
-  { key: "shops:update", resource: "shops", action: "update", description: "Update shops" },
-  { key: "shops:delete", resource: "shops", action: "delete", description: "Delete shops" },
-  { key: "shops:view:all", resource: "shops", action: "view:all", description: "View all shops" },
-  { key: "shops:view:assigned", resource: "shops", action: "view:assigned", description: "View assigned shop" },
-  // Products
-  { key: "products:create", resource: "products", action: "create", description: "Create products" },
-  { key: "products:update", resource: "products", action: "update", description: "Update products" },
-  { key: "products:delete", resource: "products", action: "delete", description: "Delete products" },
-  { key: "products:view", resource: "products", action: "view", description: "View products" },
-  // Categories
-  { key: "categories:manage", resource: "categories", action: "manage", description: "Manage categories" },
-  // Inventory
-  { key: "inventory:view:all", resource: "inventory", action: "view:all", description: "View all inventory" },
-  { key: "inventory:view:assigned", resource: "inventory", action: "view:assigned", description: "View assigned inventory" },
-  // Stock
-  { key: "stock:arrivals:create", resource: "stock", action: "arrivals:create", description: "Record stock arrivals" },
-  { key: "stock:adjustments:create", resource: "stock", action: "adjustments:create", description: "Make stock adjustments" },
-  { key: "stock:movements:view:all", resource: "stock", action: "movements:view:all", description: "View all movements" },
-  { key: "stock:movements:view:assigned", resource: "stock", action: "movements:view:assigned", description: "View assigned movements" },
-  // Sales
-  { key: "sales:create", resource: "sales", action: "create", description: "Create sales" },
-  { key: "sales:view:all", resource: "sales", action: "view:all", description: "View all sales" },
-  { key: "sales:view:assigned", resource: "sales", action: "view:assigned", description: "View assigned sales" },
-  { key: "sales:void", resource: "sales", action: "void", description: "Void sales" },
-  // Users
-  { key: "users:create", resource: "users", action: "create", description: "Create users" },
-  { key: "users:update", resource: "users", action: "update", description: "Update users" },
-  { key: "users:deactivate", resource: "users", action: "deactivate", description: "Deactivate users" },
-  { key: "users:view", resource: "users", action: "view", description: "View users" },
-  // Reports
-  { key: "reports:global", resource: "reports", action: "global", description: "Access global reports" },
-  { key: "reports:shop", resource: "reports", action: "shop", description: "Access shop reports" },
-  // Audit
-  { key: "audit:view", resource: "audit", action: "view", description: "View audit logs" },
-];
+/**
+ * Permission rows are derived from the application's own permission list rather
+ * than restated here. Keeping a second copy meant a permission could exist in
+ * code while being absent from every role in the database, which fails as a
+ * silent loss of access rather than an error.
+ */
+const DESCRIPTIONS: Record<string, string> = {
+  "dashboard:global:view": "View the business-wide dashboard",
+  "dashboard:shop:view": "View the dashboard for an assigned shop",
+  "shops:create": "Create shops",
+  "shops:update": "Update shop details",
+  "shops:delete": "Delete shops",
+  "shops:view:all": "View every shop",
+  "shops:view:assigned": "View an assigned shop",
+  "products:create": "Add products to the catalogue",
+  "products:update": "Update products",
+  "products:delete": "Discontinue products",
+  "products:view": "View products and selling prices",
+  "products:view:cost": "View cost prices, margins and stock valuation",
+  "categories:manage": "Manage product categories",
+  "inventory:view:all": "View inventory at every shop",
+  "inventory:view:assigned": "View inventory at an assigned shop",
+  "stock:arrivals:create": "Record stock arrivals",
+  "stock:adjustments:create": "Make stock adjustments",
+  "stock:movements:view:all": "View the movement ledger for every shop",
+  "stock:movements:view:assigned": "View the movement ledger for an assigned shop",
+  "sales:create": "Record sales",
+  "sales:view:all": "View sales at every shop",
+  "sales:view:assigned": "View sales at an assigned shop",
+  "sales:void": "Void sales",
+  "users:create": "Create users",
+  "users:update": "Update users",
+  "users:deactivate": "Deactivate users",
+  "users:view": "View users",
+  "reports:global": "View business-wide reports",
+  "reports:shop": "View reports for an assigned shop",
+  "audit:view": "View the audit log",
+};
 
-const SALESPERSON_PERMISSION_KEYS = [
-  "dashboard:shop:view",
-  "shops:view:assigned",
-  "products:view",
-  "inventory:view:assigned",
-  "stock:movements:view:assigned",
-  "sales:create",
-  "sales:view:assigned",
-  "reports:shop",
-];
+const PERMISSIONS_DATA = Object.values(PERMISSIONS).map((key) => {
+  const [resource, ...rest] = key.split(":");
+  return {
+    key,
+    resource,
+    action: rest.join(":"),
+    description: DESCRIPTIONS[key] ?? key,
+  };
+});
+
+const SALESPERSON_PERMISSION_KEYS: string[] = SALESPERSON_PERMISSIONS;
 
 async function main() {
   console.log("🌱 Seeding database...\n");

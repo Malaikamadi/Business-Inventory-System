@@ -26,9 +26,21 @@ export interface NavItem {
   label: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
-  permission?: string;
+  /** Holding any one of these reveals the item. Mirrors the route guard, where
+   *  most sections are reachable business-wide or for your own shop. */
+  anyOf?: string[];
   children?: NavItem[];
 }
+
+const INVENTORY_VIEW = [
+  PERMISSIONS.INVENTORY_VIEW_ALL,
+  PERMISSIONS.INVENTORY_VIEW_ASSIGNED,
+];
+
+const SALES_VIEW = [
+  PERMISSIONS.SALES_VIEW_ALL,
+  PERMISSIONS.SALES_VIEW_ASSIGNED,
+];
 
 const ALL_NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
@@ -36,31 +48,31 @@ const ALL_NAV_ITEMS: NavItem[] = [
     label: "Shops",
     href: "/shops",
     icon: Store,
-    permission: PERMISSIONS.SHOPS_VIEW_ALL,
+    anyOf: [PERMISSIONS.SHOPS_VIEW_ALL],
   },
   {
     label: "Record Sale",
     href: "/sales/new",
     icon: ShoppingCart,
-    permission: PERMISSIONS.SALES_CREATE,
+    anyOf: [PERMISSIONS.SALES_CREATE],
   },
   {
     label: "Products",
     href: "/products",
     icon: Package,
-    permission: PERMISSIONS.PRODUCTS_VIEW,
+    anyOf: [PERMISSIONS.PRODUCTS_VIEW],
     children: [
       {
         label: "All Products",
         href: "/products",
         icon: Package,
-        permission: PERMISSIONS.PRODUCTS_VIEW,
+        anyOf: [PERMISSIONS.PRODUCTS_VIEW],
       },
       {
         label: "Categories",
         href: "/products/categories",
         icon: Tags,
-        permission: PERMISSIONS.CATEGORIES_MANAGE,
+        anyOf: [PERMISSIONS.CATEGORIES_MANAGE],
       },
     ],
   },
@@ -68,56 +80,68 @@ const ALL_NAV_ITEMS: NavItem[] = [
     label: "Inventory",
     href: "/inventory",
     icon: Boxes,
+    anyOf: INVENTORY_VIEW,
     children: [
-      { label: "Overview", href: "/inventory", icon: Boxes },
-      { label: "Low Stock", href: "/inventory/low-stock", icon: AlertTriangle },
+      { label: "Overview", href: "/inventory", icon: Boxes, anyOf: INVENTORY_VIEW },
+      {
+        label: "Low Stock",
+        href: "/inventory/low-stock",
+        icon: AlertTriangle,
+        anyOf: INVENTORY_VIEW,
+      },
       {
         label: "Out of Stock",
         href: "/inventory/out-of-stock",
         icon: PackageX,
+        anyOf: INVENTORY_VIEW,
       },
       {
         label: "Stock Arrivals",
         href: "/inventory/arrivals",
         icon: TruckIcon,
-        permission: PERMISSIONS.STOCK_ARRIVALS_CREATE,
+        anyOf: [PERMISSIONS.STOCK_ARRIVALS_CREATE],
       },
       {
         label: "Adjustments",
         href: "/inventory/adjustments",
         icon: Wrench,
-        permission: PERMISSIONS.STOCK_ADJUSTMENTS_CREATE,
+        anyOf: [PERMISSIONS.STOCK_ADJUSTMENTS_CREATE],
       },
       {
         label: "Movements",
         href: "/inventory/movements",
         icon: ArrowRightLeft,
+        anyOf: [
+          PERMISSIONS.STOCK_MOVEMENTS_VIEW_ALL,
+          PERMISSIONS.STOCK_MOVEMENTS_VIEW_ASSIGNED,
+        ],
       },
     ],
   },
-  { label: "Sales", href: "/sales", icon: ShoppingCart },
+  { label: "Sales", href: "/sales", icon: ShoppingCart, anyOf: SALES_VIEW },
   {
     label: "Reports",
     href: "/reports",
     icon: BarChart3,
-    permission: PERMISSIONS.REPORTS_GLOBAL,
+    anyOf: [PERMISSIONS.REPORTS_GLOBAL, PERMISSIONS.REPORTS_SHOP],
   },
   {
     label: "Users",
     href: "/users",
     icon: Users,
-    permission: PERMISSIONS.USERS_VIEW,
+    anyOf: [PERMISSIONS.USERS_VIEW],
   },
   {
     label: "Audit Log",
     href: "/audit-log",
     icon: ClipboardList,
-    permission: PERMISSIONS.AUDIT_VIEW,
+    anyOf: [PERMISSIONS.AUDIT_VIEW],
   },
 ];
 
 function isVisible(item: NavItem, permissions: string[]): boolean {
-  return !item.permission || permissions.includes(item.permission);
+  if (!item.anyOf) return true;
+  return item.anyOf.some((permission) => permissions.includes(permission));
 }
 
 export function navItemsFor(permissions: string[]): NavItem[] {

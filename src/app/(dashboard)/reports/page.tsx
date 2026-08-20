@@ -6,7 +6,12 @@ import {
   startOfBusinessMonth,
 } from "@/lib/dates";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import { assertCan, getCurrentUser, resolveShopScope } from "@/server/auth-context";
+import {
+  assertCanAny,
+  can,
+  getCurrentUser,
+  resolveShopScope,
+} from "@/server/auth-context";
 import {
   getRevenueTrend,
   getSalespersonPerformance,
@@ -46,7 +51,14 @@ export default async function ReportsPage(props: {
   searchParams: Promise<{ period?: string }>;
 }) {
   const user = await getCurrentUser();
-  assertCan(user, PERMISSIONS.REPORTS_GLOBAL);
+  assertCanAny(user, [PERMISSIONS.REPORTS_GLOBAL, PERMISSIONS.REPORTS_SHOP]);
+
+  // Everyone sees the same report, over the shops they are entitled to. For a
+  // salesperson that is the branch they work at, which makes the by-shop and
+  // by-salesperson breakdowns a view of their own trade rather than a league
+  // table of the whole business.
+  const isGlobal = can(user, PERMISSIONS.REPORTS_GLOBAL);
+  const canSeeStaff = can(user, PERMISSIONS.USERS_VIEW);
 
   const params = await props.searchParams;
   const period = (
@@ -70,7 +82,11 @@ export default async function ReportsPage(props: {
     <div className="space-y-6">
       <PageHeader
         title="Reports"
-        description="Sales performance by shop, product and salesperson. Voided sales are excluded."
+        description={
+          isGlobal
+            ? "Sales performance by shop, product and salesperson. Voided sales are excluded."
+            : "Sales performance for the shop you are assigned to. Voided sales are excluded."
+        }
       />
 
       <PeriodTabs
@@ -124,27 +140,32 @@ export default async function ReportsPage(props: {
       </Card>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
-        <ReportTable
-          title="By shop"
-          columns={["Shop", "Sales", "Revenue"]}
-          rows={shops.map((shop) => ({
-            key: shop.shopId,
-            href: `/shops/${shop.shopId}`,
-            label: shop.shopName,
-            values: [
-              formatNumber(shop.salesCount),
-              formatCurrency(shop.revenue),
-            ],
-          }))}
-          emptyMessage="No sales in this period."
-        />
+        {/* A single-shop breakdown would just restate the totals above it. */}
+        {shops.length > 1 && (
+          <ReportTable
+            title="By shop"
+            columns={["Shop", "Sales", "Revenue"]}
+            rows={shops.map((shop) => ({
+              key: shop.shopId,
+              href: `/shops/${shop.shopId}`,
+              label: shop.shopName,
+              values: [
+                formatNumber(shop.salesCount),
+                formatCurrency(shop.revenue),
+              ],
+            }))}
+            emptyMessage="No sales in this period."
+          />
+        )}
 
         <ReportTable
           title="By salesperson"
           columns={["Salesperson", "Sales", "Revenue"]}
           rows={staff.map((person) => ({
             key: person.userId,
-            href: `/users/${person.userId}`,
+            // Staff records are owner-only, so the name is plain text for
+            // everyone else rather than a link into a page they cannot open.
+            href: canSeeStaff ? `/users/${person.userId}` : undefined,
             label: person.name,
             values: [
               formatNumber(person.salesCount),
@@ -181,7 +202,12 @@ function ReportTable({
 }: {
   title: string;
   columns: string[];
-  rows: { key: string; href: string; label: string; values: string[] }[];
+  rows: {
+    key: string;
+    href?: string;
+    label: string;
+    values: string[];
+  }[];
   emptyMessage: string;
 }) {
   return (
@@ -217,12 +243,18 @@ function ReportTable({
                 {rows.map((row) => (
                   <tr key={row.key} className="hover:bg-surface-hover">
                     <td className="px-6 py-3">
-                      <Link
-                        href={row.href}
-                        className="font-medium text-text-primary hover:text-accent"
-                      >
-                        {row.label}
-                      </Link>
+                      {row.href ? (
+                        <Link
+                          href={row.href}
+                          className="font-medium text-text-primary hover:text-accent"
+                        >
+                          {row.label}
+                        </Link>
+                      ) : (
+                        <span className="font-medium text-text-primary">
+                          {row.label}
+                        </span>
+                      )}
                     </td>
                     {row.values.map((value, index) => (
                       <td

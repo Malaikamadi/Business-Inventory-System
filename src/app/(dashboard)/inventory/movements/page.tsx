@@ -3,7 +3,12 @@ import { ArrowRightLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { MOVEMENT_TYPE_LABELS, PERMISSIONS } from "@/lib/constants";
 import { cn, formatDateTime, formatNumber } from "@/lib/utils";
-import { can, getCurrentUser, resolveShopScope } from "@/server/auth-context";
+import {
+  assertCanAny,
+  can,
+  getCurrentUser,
+  resolveShopScope,
+} from "@/server/auth-context";
 import { listMovements } from "@/server/services/inventory.queries";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -23,17 +28,27 @@ function referenceHref(referenceType: string | null, referenceId: string | null)
 }
 
 export default async function MovementsPage(props: {
-  searchParams: Promise<{ shop?: string; type?: string; page?: string }>;
+  searchParams: Promise<{
+    shop?: string;
+    type?: string;
+    page?: string;
+    product?: string;
+  }>;
 }) {
   const user = await getCurrentUser();
+  assertCanAny(user, [
+    PERMISSIONS.STOCK_MOVEMENTS_VIEW_ALL,
+    PERMISSIONS.STOCK_MOVEMENTS_VIEW_ASSIGNED,
+  ]);
   const params = await props.searchParams;
 
   const shopIds = resolveShopScope(user, params.shop);
   const canSeeAllShops = can(user, PERMISSIONS.STOCK_MOVEMENTS_VIEW_ALL);
 
-  const [result, shops] = await Promise.all([
+  const [result, shops, product] = await Promise.all([
     listMovements({
       shopIds,
+      productId: params.product,
       movementType: params.type,
       page: Number(params.page) || 1,
     }),
@@ -43,18 +58,43 @@ export default async function MovementsPage(props: {
           orderBy: { name: "asc" },
         })
       : Promise.resolve([]),
+    params.product
+      ? prisma.product.findUnique({
+          where: { id: params.product },
+          select: { id: true, name: true },
+        })
+      : Promise.resolve(null),
   ]);
 
   const query = new URLSearchParams();
   if (params.shop) query.set("shop", params.shop);
   if (params.type) query.set("type", params.type);
+  if (params.product) query.set("product", params.product);
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Stock movements"
-        description="Every change to stock, in order. This ledger is append-only and is what current quantities are derived from."
+        description={
+          product
+            ? `Every change to ${product.name}, in order.`
+            : "Every change to stock, in order. This ledger is append-only and is what current quantities are derived from."
+        }
       />
+
+      {product && (
+        <div className="flex items-center gap-3 rounded-md border border-border bg-muted/50 px-4 py-2.5 text-sm">
+          <span className="text-text-secondary">
+            Filtered to <strong className="text-text-primary">{product.name}</strong>
+          </span>
+          <Link
+            href="/inventory/movements"
+            className="font-medium text-accent hover:underline"
+          >
+            Show all products
+          </Link>
+        </div>
+      )}
 
       <MovementFilters
         shops={shops}

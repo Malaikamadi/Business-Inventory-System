@@ -3,7 +3,12 @@ import { Package, Plus } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import { assertCan, can, getCurrentUser } from "@/server/auth-context";
+import {
+  assertCan,
+  can,
+  getCurrentUser,
+  resolveShopScope,
+} from "@/server/auth-context";
 import { listProducts } from "@/server/services/product.queries";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -29,6 +34,9 @@ export default async function ProductsPage(props: {
 
   const params = await props.searchParams;
   const canManage = can(user, PERMISSIONS.PRODUCTS_CREATE);
+  const canSeeCost = can(user, PERMISSIONS.PRODUCTS_VIEW_COST);
+  const canSeeAllShops = can(user, PERMISSIONS.INVENTORY_VIEW_ALL);
+  const shopIds = resolveShopScope(user);
 
   const [result, categories] = await Promise.all([
     listProducts({
@@ -36,6 +44,7 @@ export default async function ProductsPage(props: {
       categoryId: params.category,
       status: params.status === "DISCONTINUED" ? "DISCONTINUED" : "ACTIVE",
       page: Number(params.page) || 1,
+      shopIds,
     }),
     prisma.category.findMany({
       where: { isActive: true },
@@ -96,12 +105,14 @@ export default async function ProductsPage(props: {
                       <th className="hidden px-4 py-3 font-medium md:table-cell">
                         Category
                       </th>
-                      <th className="hidden px-4 py-3 text-right font-medium lg:table-cell">
-                        Cost
-                      </th>
+                      {canSeeCost && (
+                        <th className="hidden px-4 py-3 text-right font-medium lg:table-cell">
+                          Cost
+                        </th>
+                      )}
                       <th className="px-4 py-3 text-right font-medium">Price</th>
                       <th className="px-4 py-3 text-right font-medium">
-                        Total stock
+                        {canSeeAllShops ? "Total stock" : "Your stock"}
                       </th>
                       <th className="px-4 py-3 text-right font-medium">
                         Restock
@@ -141,16 +152,20 @@ export default async function ProductsPage(props: {
                           <td className="hidden px-4 py-3 text-text-secondary md:table-cell">
                             {product.category?.name ?? "—"}
                           </td>
-                          <td className="hidden px-4 py-3 text-right tabular-nums text-text-secondary lg:table-cell">
-                            {formatCurrency(Number(product.costPrice))}
-                          </td>
+                          {canSeeCost && (
+                            <td className="hidden px-4 py-3 text-right tabular-nums text-text-secondary lg:table-cell">
+                              {formatCurrency(Number(product.costPrice))}
+                            </td>
+                          )}
                           <td className="px-4 py-3 text-right">
                             <span className="font-medium tabular-nums">
                               {formatCurrency(Number(product.sellingPrice))}
                             </span>
-                            <p className="text-xs text-text-muted">
-                              {marginPct.toFixed(0)}% margin
-                            </p>
+                            {canSeeCost && (
+                              <p className="text-xs text-text-muted">
+                                {marginPct.toFixed(0)}% margin
+                              </p>
+                            )}
                           </td>
                           <td className="px-4 py-3 text-right font-semibold tabular-nums">
                             {formatNumber(product.totalStock)}

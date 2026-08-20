@@ -8,13 +8,17 @@ export interface ProductQuery {
   status?: "ACTIVE" | "DISCONTINUED";
   page?: number;
   pageSize?: number;
+  /**
+   * Limits the stock rollup to these shops. The catalog itself is business-wide
+   * — every shop sells the same products — but the quantities beside each one
+   * must not report branches the viewer has no access to. `undefined` means all
+   * shops and should only come from `resolveShopScope`.
+   */
+  shopIds?: string[];
 }
 
 /**
- * Catalog listing with stock rolled up across shops.
- *
- * The catalog itself is business-wide, so this is not shop-scoped; the per-shop
- * breakdown lives on the product detail page and in the inventory screens.
+ * Catalog listing with stock rolled up across the shops in scope.
  */
 export async function listProducts(query: ProductQuery) {
   const page = Math.max(1, query.page ?? 1);
@@ -50,7 +54,10 @@ export async function listProducts(query: ProductQuery) {
         imageUrl: true,
         status: true,
         category: { select: { id: true, name: true } },
-        shopInventory: { select: { quantity: true } },
+        shopInventory: {
+          where: query.shopIds ? { shopId: { in: query.shopIds } } : undefined,
+          select: { quantity: true },
+        },
       },
     }),
     prisma.product.count({ where }),
@@ -118,12 +125,24 @@ export async function getProductDetail(productId: string) {
   });
 }
 
-/** Units sold and revenue for a product over a period, used on its detail page. */
-export async function getProductSalesSummary(productId: string, since: Date) {
+/**
+ * Units sold and revenue for a product over a period, used on its detail page.
+ * `shopIds` narrows this to the branches the viewer may see, so staff read their
+ * own trade rather than the whole business's.
+ */
+export async function getProductSalesSummary(
+  productId: string,
+  since: Date,
+  shopIds?: string[]
+) {
   const result = await prisma.saleItem.aggregate({
     where: {
       productId,
-      sale: { status: "COMPLETED", createdAt: { gte: since } },
+      sale: {
+        status: "COMPLETED",
+        createdAt: { gte: since },
+        ...(shopIds ? { shopId: { in: shopIds } } : {}),
+      },
     },
     _sum: { quantity: true, lineTotal: true },
   });

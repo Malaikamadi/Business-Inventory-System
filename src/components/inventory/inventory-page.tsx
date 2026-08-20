@@ -2,7 +2,12 @@ import { Boxes } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import { can, getCurrentUser, resolveShopScope } from "@/server/auth-context";
+import {
+  assertCanAny,
+  can,
+  getCurrentUser,
+  resolveShopScope,
+} from "@/server/auth-context";
 import {
   getInventoryValue,
   listInventory,
@@ -45,8 +50,14 @@ export async function InventoryPage({
   searchParams: InventorySearchParams;
 }) {
   const user = await getCurrentUser();
+  assertCanAny(user, [
+    PERMISSIONS.INVENTORY_VIEW_ALL,
+    PERMISSIONS.INVENTORY_VIEW_ASSIGNED,
+  ]);
+
   const shopIds = resolveShopScope(user, searchParams.shop);
   const canSeeAllShops = can(user, PERMISSIONS.INVENTORY_VIEW_ALL);
+  const canSeeCost = can(user, PERMISSIONS.PRODUCTS_VIEW_COST);
 
   const filter =
     lockedFilter ??
@@ -74,7 +85,7 @@ export async function InventoryPage({
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
-    getInventoryValue(shopIds),
+    canSeeCost ? getInventoryValue(shopIds) : Promise.resolve(0),
   ]);
 
   const query = new URLSearchParams();
@@ -121,7 +132,7 @@ export async function InventoryPage({
                     <> · {formatNumber(unitsOnPage)} units on this page</>
                   )}
                 </span>
-                {!lockedFilter && (
+                {!lockedFilter && canSeeCost && (
                   <span className="font-medium">
                     {formatCurrency(totalValue)}{" "}
                     <span className="font-normal text-text-muted">
@@ -131,7 +142,11 @@ export async function InventoryPage({
                 )}
               </div>
 
-              <InventoryTable rows={result.data} showShop={canSeeAllShops} />
+              <InventoryTable
+                rows={result.data}
+                showShop={canSeeAllShops}
+                showValue={canSeeCost}
+              />
 
               <Pagination
                 page={result.page}

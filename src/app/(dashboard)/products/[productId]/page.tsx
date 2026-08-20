@@ -9,7 +9,13 @@ import {
   formatNumber,
   getStockStatus,
 } from "@/lib/utils";
-import { can, getCurrentUser } from "@/server/auth-context";
+import {
+  assertCan,
+  can,
+  canAny,
+  getCurrentUser,
+  resolveShopScope,
+} from "@/server/auth-context";
 import {
   getProductDetail,
   getProductSalesSummary,
@@ -34,10 +40,24 @@ export default async function ProductDetailPage(props: {
   const { productId } = await props.params;
   const user = await getCurrentUser();
 
+  assertCan(user, PERMISSIONS.PRODUCTS_VIEW);
+
   const product = await getProductDetail(productId);
   if (!product) notFound();
 
-  const sales = await getProductSalesSummary(productId, startOfBusinessMonth());
+  // Staff can open the branch they work at, but the rows below may list shops
+  // they have no claim on, so a link is only offered where it would resolve.
+  const canOpenShops = canAny(user, [
+    PERMISSIONS.SHOPS_VIEW_ALL,
+    PERMISSIONS.SHOPS_VIEW_ASSIGNED,
+  ]);
+  const canSeeCost = can(user, PERMISSIONS.PRODUCTS_VIEW_COST);
+
+  const sales = await getProductSalesSummary(
+    productId,
+    startOfBusinessMonth(),
+    resolveShopScope(user)
+  );
 
   // Staff only see the branches they work at; owners see the whole picture.
   const visibleInventory = can(user, PERMISSIONS.INVENTORY_VIEW_ALL)
@@ -116,12 +136,18 @@ export default async function ProductDetailPage(props: {
                       return (
                         <tr key={row.shop.id} className="hover:bg-surface-hover">
                           <td className="px-6 py-3">
-                            <Link
-                              href={`/shops/${row.shop.id}`}
-                              className="font-medium text-text-primary hover:text-accent"
-                            >
-                              {row.shop.name}
-                            </Link>
+                            {canOpenShops ? (
+                              <Link
+                                href={`/shops/${row.shop.id}`}
+                                className="font-medium text-text-primary hover:text-accent"
+                              >
+                                {row.shop.name}
+                              </Link>
+                            ) : (
+                              <span className="font-medium text-text-primary">
+                                {row.shop.name}
+                              </span>
+                            )}
                           </td>
                           <td className="px-6 py-3 text-right font-semibold tabular-nums">
                             {formatNumber(row.quantity)}
@@ -177,7 +203,7 @@ export default async function ProductDetailPage(props: {
                     {formatCurrency(Number(product.sellingPrice))}
                   </dd>
                 </div>
-                {can(user, PERMISSIONS.REPORTS_GLOBAL) && (
+                {canSeeCost && (
                   <>
                     <div className="flex justify-between gap-4">
                       <dt className="text-text-secondary">Cost price</dt>

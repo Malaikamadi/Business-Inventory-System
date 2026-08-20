@@ -172,7 +172,7 @@ export default async function SaleDetailPage(props: {
                 </dd>
               </div>
 
-              {can(user, PERMISSIONS.REPORTS_GLOBAL) && (
+              {can(user, PERMISSIONS.PRODUCTS_VIEW_COST) && (
                 <>
                   <div className="flex justify-between gap-4 border-t border-border pt-3">
                     <dt className="text-text-secondary">Cost of goods</dt>

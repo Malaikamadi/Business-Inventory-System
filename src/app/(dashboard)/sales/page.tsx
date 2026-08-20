@@ -3,7 +3,12 @@ import { Plus, Receipt } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { formatCurrency, formatDateTime, formatNumber } from "@/lib/utils";
-import { can, getCurrentUser, resolveShopScope } from "@/server/auth-context";
+import {
+  assertCanAny,
+  can,
+  getCurrentUser,
+  resolveShopScope,
+} from "@/server/auth-context";
 import { listSales } from "@/server/services/sales.queries";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -24,6 +29,10 @@ export default async function SalesPage(props: {
   }>;
 }) {
   const user = await getCurrentUser();
+  assertCanAny(user, [
+    PERMISSIONS.SALES_VIEW_ALL,
+    PERMISSIONS.SALES_VIEW_ASSIGNED,
+  ]);
   const params = await props.searchParams;
 
   // Throws if a salesperson hand-edits the shop parameter to another branch.

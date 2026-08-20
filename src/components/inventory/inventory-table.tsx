@@ -13,9 +13,13 @@ const STATUS_BADGE = {
 export function InventoryTable({
   rows,
   showShop = true,
+  showValue = true,
 }: {
   rows: InventoryRow[];
   showShop?: boolean;
+  /** Stock value is derived from cost price, so it is hidden from staff who
+   *  may not see what the business pays. */
+  showValue?: boolean;
 }) {
   return (
     <div className="data-table-wrapper">
@@ -31,9 +35,11 @@ export function InventoryTable({
             <th className="hidden px-4 py-3 text-right font-medium sm:table-cell">
               Threshold
             </th>
-            <th className="hidden px-4 py-3 text-right font-medium xl:table-cell">
-              Stock value
-            </th>
+            {showValue && (
+              <th className="hidden px-4 py-3 text-right font-medium xl:table-cell">
+                Stock value
+              </th>
+            )}
             <th className="px-4 py-3 text-right font-medium">Status</th>
           </tr>
         </thead>
@@ -83,9 +89,11 @@ export function InventoryTable({
                 <td className="hidden px-4 py-3 text-right tabular-nums text-text-muted sm:table-cell">
                   {formatNumber(row.lowStockThreshold)}
                 </td>
-                <td className="hidden px-4 py-3 text-right tabular-nums text-text-secondary xl:table-cell">
-                  {formatCurrency(row.stockValue)}
-                </td>
+                {showValue && (
+                  <td className="hidden px-4 py-3 text-right tabular-nums text-text-secondary xl:table-cell">
+                    {formatCurrency(row.stockValue)}
+                  </td>
+                )}
                 <td className="px-4 py-3 text-right">
                   <Badge variant={badge.variant}>{badge.label}</Badge>
                 </td>

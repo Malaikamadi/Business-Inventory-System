@@ -1,5 +1,5 @@
 import { PERMISSIONS } from "@/lib/constants";
-import { can, getCurrentUser } from "@/server/auth-context";
+import { assertCanAny, can, getCurrentUser } from "@/server/auth-context";
 import { OwnerDashboard } from "@/components/dashboard/owner-dashboard";
 import { ShopDashboard } from "@/components/dashboard/shop-dashboard";
 
@@ -12,6 +12,10 @@ export const metadata = { title: "Dashboard · InvSys" };
  */
 export default async function DashboardPage() {
   const user = await getCurrentUser();
+  assertCanAny(user, [
+    PERMISSIONS.DASHBOARD_GLOBAL_VIEW,
+    PERMISSIONS.DASHBOARD_SHOP_VIEW,
+  ]);
 
   if (can(user, PERMISSIONS.DASHBOARD_GLOBAL_VIEW)) {
     return <OwnerDashboard firstName={user.firstName} />;

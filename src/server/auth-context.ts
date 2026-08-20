@@ -30,6 +30,29 @@ export function assertCan(user: SessionUser, permission: PermissionKey): void {
   }
 }
 
+/**
+ * Most read pages are reachable two ways — business-wide or limited to your own
+ * shop. Holding either is enough to open the page; which one you hold is what
+ * `resolveShopScope` then uses to decide how much of it you see.
+ */
+export function canAny(
+  user: SessionUser,
+  permissions: PermissionKey[]
+): boolean {
+  return permissions.some((permission) => can(user, permission));
+}
+
+export function assertCanAny(
+  user: SessionUser,
+  permissions: PermissionKey[]
+): void {
+  if (!canAny(user, permissions)) {
+    throw new ForbiddenError(
+      "You do not have permission to view this page."
+    );
+  }
+}
+
 /** Owners see every shop; everyone else is limited to their assignments. */
 export function canAccessShop(user: SessionUser, shopId: string): boolean {
   if (can(user, PERMISSIONS.SHOPS_VIEW_ALL)) return true;

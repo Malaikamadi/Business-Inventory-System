@@ -17,6 +17,12 @@ export const PERMISSIONS = {
   PRODUCTS_UPDATE: "products:update",
   PRODUCTS_DELETE: "products:delete",
   PRODUCTS_VIEW: "products:view",
+  /**
+   * Buying prices, margins, and stock valued at cost. Separate from
+   * `PRODUCTS_VIEW` because shop staff need to look up what to charge without
+   * learning what the business pays or earns per unit.
+   */
+  PRODUCTS_VIEW_COST: "products:view:cost",
 
   // Categories
   CATEGORIES_MANAGE: "categories:manage",
@@ -68,6 +74,11 @@ export const OWNER_PERMISSIONS: PermissionKey[] = Object.values(PERMISSIONS);
 
 // ─── Salesperson Permissions ─────────────────────────────────────────
 
+/**
+ * What a shop salesperson may do. Every entry is scoped to the branches they
+ * are assigned to; none of them grant a business-wide view, and none reveal
+ * cost or profit.
+ */
 export const SALESPERSON_PERMISSIONS: PermissionKey[] = [
   PERMISSIONS.DASHBOARD_SHOP_VIEW,
   PERMISSIONS.SHOPS_VIEW_ASSIGNED,

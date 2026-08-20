@@ -1,5 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
-import { canAccessPath } from "@/lib/route-access";
+import { NO_ACCESS_PATH, canAccessPath } from "@/lib/route-access";
 
 export const authConfig = {
   session: {
@@ -58,8 +58,16 @@ export const authConfig = {
         return Response.redirect(loginUrl);
       }
 
-      if (!canAccessPath(pathname, user.permissions ?? [])) {
-        return Response.redirect(new URL("/dashboard", nextUrl));
+      // Bouncing silently to the dashboard reads as a broken link. Send them
+      // somewhere that names what was refused instead, carrying the path so the
+      // page can say which section it was.
+      if (
+        pathname !== NO_ACCESS_PATH &&
+        !canAccessPath(pathname, user.permissions ?? [])
+      ) {
+        const noAccess = new URL(NO_ACCESS_PATH, nextUrl);
+        noAccess.searchParams.set("from", pathname);
+        return Response.redirect(noAccess);
       }
 
       return true;

@@ -40,7 +40,12 @@ export default async function ShopDetailPage(props: {
 }) {
   const { shopId } = await props.params;
   const user = await getCurrentUser();
+  // The route guard only established that this user may view *some* shop.
+  // Membership in this particular one is what decides access.
   assertShopAccess(user, shopId);
+
+  const canSeeAllShops = can(user, PERMISSIONS.SHOPS_VIEW_ALL);
+  const canSeeCost = can(user, PERMISSIONS.PRODUCTS_VIEW_COST);
 
   const shop = await prisma.shop.findUnique({
     where: { id: shopId },
@@ -86,7 +91,7 @@ export default async function ShopDetailPage(props: {
         _count: true,
       }),
       getStockAlertCounts([shopId]),
-      getInventoryValue([shopId]),
+        canSeeCost ? getInventoryValue([shopId]) : Promise.resolve(0),
       prisma.shopInventory.aggregate({
         where: { shopId },
         _sum: { quantity: true },
@@ -97,13 +102,15 @@ export default async function ShopDetailPage(props: {
 
   return (
     <div className="space-y-6">
-      <Link
-        href="/shops"
-        className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Back to shops
-      </Link>
+      {canSeeAllShops && (
+        <Link
+          href="/shops"
+          className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to shops
+        </Link>
+      )}
 
       <PageHeader
         title={shop.name}
@@ -133,7 +140,9 @@ export default async function ShopDetailPage(props: {
         <StatCard
           title="Stock on hand"
           value={formatNumber(units._sum.quantity ?? 0)}
-          subtitle={`${formatCurrency(inventoryValue)} at cost`}
+          subtitle={
+            canSeeCost ? `${formatCurrency(inventoryValue)} at cost` : undefined
+          }
           icon={Boxes}
         />
         <StatCard
@@ -228,7 +237,11 @@ export default async function ShopDetailPage(props: {
               Every product at this shop is above its low-stock threshold.
             </p>
           ) : (
-            <InventoryTable rows={lowStock.data} showShop={false} />
+            <InventoryTable
+              rows={lowStock.data}
+              showShop={false}
+              showValue={canSeeCost}
+            />
           )}
         </CardContent>
       </Card>
