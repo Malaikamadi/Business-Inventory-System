@@ -80,20 +80,28 @@ export async function recordAudit(input: AuditInput): Promise<void> {
   }
 }
 
+export type FieldDiff = Record<string, { from: string | null; to: string | null }>;
+
+/** Decimals, dates and enums all reach the log as their string form. */
+function toJsonScalar(value: unknown): string | null {
+  if (value === null || value === undefined) return null;
+  if (value instanceof Date) return value.toISOString();
+  return String(value);
+}
+
 /**
  * Reduces a before/after pair to only the fields that actually changed, so the
  * log answers "what changed" without storing whole record snapshots.
  */
 export function diffFields<T extends Record<string, unknown>>(
   before: T,
-  after: Partial<T>
-): Record<string, { from: unknown; to: unknown }> {
-  const changes: Record<string, { from: unknown; to: unknown }> = {};
+  after: Partial<Record<keyof T | string, unknown>>
+): FieldDiff {
+  const changes: FieldDiff = {};
   for (const [key, next] of Object.entries(after)) {
-    const previous = before[key];
-    if (String(previous) !== String(next)) {
-      changes[key] = { from: previous ?? null, to: next ?? null };
-    }
+    const from = toJsonScalar(before[key]);
+    const to = toJsonScalar(next);
+    if (from !== to) changes[key] = { from, to };
   }
   return changes;
 }

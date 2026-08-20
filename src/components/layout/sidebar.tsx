@@ -1,122 +1,45 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { ChevronLeft, ChevronRight, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
-import {
-  LayoutDashboard,
-  Store,
-  Package,
-  Boxes,
-  ShoppingCart,
-  BarChart3,
-  Users,
-  ClipboardList,
-  Settings,
-  ChevronLeft,
-  ChevronRight,
-  AlertTriangle,
-  PackageX,
-  TruckIcon,
-  Wrench,
-  ArrowRightLeft,
-  Tags,
-} from "lucide-react";
-import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
+import { navItemsFor, type NavItem } from "./nav-items";
 
-interface NavItem {
-  label: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  permission?: string;
-  children?: NavItem[];
+function isActivePath(pathname: string, href: string): boolean {
+  if (href === "/dashboard") return pathname === href;
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-const ownerNavItems: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Shops", href: "/shops", icon: Store },
-  {
-    label: "Products",
-    href: "/products",
-    icon: Package,
-    children: [
-      { label: "All Products", href: "/products", icon: Package },
-      { label: "Categories", href: "/products/categories", icon: Tags },
-    ],
-  },
-  {
-    label: "Inventory",
-    href: "/inventory",
-    icon: Boxes,
-    children: [
-      { label: "Overview", href: "/inventory", icon: Boxes },
-      { label: "Low Stock", href: "/inventory/low-stock", icon: AlertTriangle },
-      { label: "Out of Stock", href: "/inventory/out-of-stock", icon: PackageX },
-      { label: "Stock Arrivals", href: "/inventory/arrivals", icon: TruckIcon },
-      { label: "Adjustments", href: "/inventory/adjustments", icon: Wrench },
-      { label: "Movements", href: "/inventory/movements", icon: ArrowRightLeft },
-    ],
-  },
-  { label: "Sales", href: "/sales", icon: ShoppingCart },
-  { label: "Reports", href: "/reports/sales", icon: BarChart3 },
-  { label: "Users", href: "/users", icon: Users },
-  { label: "Audit Log", href: "/audit-log", icon: ClipboardList },
-];
-
-const salespersonNavItems: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Record Sale", href: "/sales/new", icon: ShoppingCart },
-  {
-    label: "Inventory",
-    href: "/inventory",
-    icon: Boxes,
-    children: [
-      { label: "Available Stock", href: "/inventory", icon: Boxes },
-      { label: "Low Stock", href: "/inventory/low-stock", icon: AlertTriangle },
-      { label: "Out of Stock", href: "/inventory/out-of-stock", icon: PackageX },
-    ],
-  },
-  { label: "Sales History", href: "/sales", icon: ShoppingCart },
-];
-
-interface SidebarProps {
-  userRole: string;
-  collapsed?: boolean;
-}
-
-export function Sidebar({ userRole }: SidebarProps) {
+export function Sidebar({ permissions }: { permissions: string[] }) {
   const [collapsed, setCollapsed] = useState(false);
   const pathname = usePathname();
-
-  const navItems = userRole === "owner" ? ownerNavItems : salespersonNavItems;
+  const navItems = navItemsFor(permissions);
 
   return (
     <aside
       className={cn(
-        "hidden lg:flex flex-col h-screen bg-sidebar text-white border-r border-white/5 transition-all duration-300 fixed left-0 top-0 z-40",
+        "fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-white/5 bg-sidebar text-white transition-[width] duration-200 lg:flex",
         collapsed ? "w-[68px]" : "w-[260px]"
       )}
     >
-      {/* Logo */}
-      <div className="flex h-16 items-center px-4 border-b border-white/10">
+      <div className="flex h-16 items-center border-b border-white/10 px-4">
         <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white font-bold text-sm shrink-0">
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-sm font-bold text-white">
             IS
           </div>
           {!collapsed && (
-            <span className="text-base font-semibold tracking-tight">
-              InvSys
-            </span>
+            <span className="text-base font-semibold tracking-tight">InvSys</span>
           )}
         </Link>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1">
+      <nav className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
         {navItems.map((item) => (
-          <NavItemComponent
+          <SidebarItem
             key={item.href}
             item={item}
             pathname={pathname}
@@ -127,7 +50,6 @@ export function Sidebar({ userRole }: SidebarProps) {
 
       <Separator className="bg-white/10" />
 
-      {/* Settings */}
       <div className="p-3">
         <NavLink
           href="/settings/profile"
@@ -138,13 +60,13 @@ export function Sidebar({ userRole }: SidebarProps) {
         />
       </div>
 
-      {/* Collapse Toggle */}
-      <div className="p-3 border-t border-white/10">
+      <div className="border-t border-white/10 p-3">
         <Button
           variant="ghost"
           size="icon-sm"
-          className="w-full text-white/60 hover:text-white hover:bg-sidebar-hover"
+          className="w-full text-white/60 hover:bg-sidebar-hover hover:text-white"
           onClick={() => setCollapsed(!collapsed)}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {collapsed ? (
             <ChevronRight className="h-4 w-4" />
@@ -157,7 +79,7 @@ export function Sidebar({ userRole }: SidebarProps) {
   );
 }
 
-function NavItemComponent({
+function SidebarItem({
   item,
   pathname,
   collapsed,
@@ -166,31 +88,27 @@ function NavItemComponent({
   pathname: string;
   collapsed: boolean;
 }) {
-  const [open, setOpen] = useState(false);
-  const isActive =
-    pathname === item.href ||
-    (item.children &&
-      item.children.some((child) => pathname === child.href));
+  const hasActiveChild =
+    item.children?.some((child) => isActivePath(pathname, child.href)) ?? false;
+  const [open, setOpen] = useState(hasActiveChild);
 
   if (item.children && !collapsed) {
     return (
       <div>
         <button
           onClick={() => setOpen(!open)}
+          aria-expanded={open}
           className={cn(
             "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
-            isActive
-              ? "text-white bg-sidebar-hover"
-              : "text-white/60 hover:text-white hover:bg-sidebar-hover"
+            hasActiveChild
+              ? "bg-sidebar-hover text-white"
+              : "text-white/60 hover:bg-sidebar-hover hover:text-white"
           )}
         >
           <item.icon className="h-[18px] w-[18px] shrink-0" />
           <span className="flex-1 text-left">{item.label}</span>
           <ChevronRight
-            className={cn(
-              "h-4 w-4 transition-transform",
-              open && "rotate-90"
-            )}
+            className={cn("h-4 w-4 transition-transform", open && "rotate-90")}
           />
         </button>
         {open && (
@@ -217,7 +135,7 @@ function NavItemComponent({
       href={item.href}
       icon={item.icon}
       label={item.label}
-      isActive={pathname === item.href}
+      isActive={isActivePath(pathname, item.href)}
       collapsed={collapsed}
     />
   );
@@ -241,12 +159,13 @@ function NavLink({
   return (
     <Link
       href={href}
+      aria-current={isActive ? "page" : undefined}
       className={cn(
-        "flex items-center gap-3 rounded-md text-sm font-medium transition-colors relative",
+        "relative flex items-center gap-3 rounded-md text-sm font-medium transition-colors",
         compact ? "px-3 py-2" : "px-3 py-2.5",
         isActive
-          ? "text-white bg-sidebar-active/20 nav-link-active"
-          : "text-white/60 hover:text-white hover:bg-sidebar-hover",
+          ? "nav-link-active bg-sidebar-active/20 text-white"
+          : "text-white/60 hover:bg-sidebar-hover hover:text-white",
         collapsed && "justify-center px-0"
       )}
       title={collapsed ? label : undefined}

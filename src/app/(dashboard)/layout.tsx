@@ -1,58 +1,35 @@
-"use client";
+import { prisma } from "@/lib/db";
+import { getCurrentUser } from "@/server/auth-context";
+import { AppShell } from "@/components/layout/app-shell";
 
-import { useState } from "react";
-import { useSession } from "next-auth/react";
-import { Sidebar } from "@/components/layout/sidebar";
-import { Header } from "@/components/layout/header";
-import { MobileNav, SaleFAB } from "@/components/layout/mobile-nav";
-import { cn } from "@/lib/utils";
-
-export default function DashboardLayout({
+export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { data: session } = useSession();
-  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  // The proxy already redirects anonymous requests; this resolves the identity
+  // that the shell renders from, so nothing is drawn before it is known.
+  const user = await getCurrentUser();
 
-  if (!session?.user) {
-    return null;
-  }
-
-  const user = session.user;
-  const userRole = user.role;
+  const shop = user.primaryShopId
+    ? await prisma.shop.findUnique({
+        where: { id: user.primaryShopId },
+        select: { name: true },
+      })
+    : null;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Desktop Sidebar */}
-      <Sidebar userRole={userRole} />
-
-      {/* Mobile Navigation */}
-      <MobileNav
-        isOpen={mobileNavOpen}
-        onClose={() => setMobileNavOpen(false)}
-        userRole={userRole}
-      />
-
-      {/* Main Content */}
-      <div className="lg:pl-[260px] flex flex-col min-h-screen">
-        <Header
-          user={{
-            firstName: user.firstName,
-            lastName: user.lastName,
-            email: user.email!,
-            role: userRole,
-          }}
-          onMenuClick={() => setMobileNavOpen(true)}
-        />
-
-        <main className="flex-1 p-4 lg:p-6 xl:p-8">
-          <div className="animate-fade-in">{children}</div>
-        </main>
-      </div>
-
-      {/* Salesperson FAB */}
-      {userRole === "salesperson" && <SaleFAB />}
-    </div>
+    <AppShell
+      user={{
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        role: user.role,
+        permissions: user.permissions,
+      }}
+      shopName={shop?.name}
+    >
+      {children}
+    </AppShell>
   );
 }

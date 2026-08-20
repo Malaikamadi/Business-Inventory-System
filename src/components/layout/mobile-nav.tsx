@@ -2,85 +2,51 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { Settings, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { X, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  LayoutDashboard,
-  Store,
-  Package,
-  Boxes,
-  BarChart3,
-  Users,
-  ClipboardList,
-  Settings,
-  AlertTriangle,
-  PackageX,
-  TruckIcon,
-  Wrench,
-  ArrowRightLeft,
-  Tags,
-} from "lucide-react";
+import { mobileBarItemsFor, navItemsFor } from "./nav-items";
 
-interface MobileNavProps {
+/** Full navigation drawer, opened from the header on small screens. */
+export function MobileNav({
+  isOpen,
+  onClose,
+  permissions,
+}: {
   isOpen: boolean;
   onClose: () => void;
-  userRole: string;
-}
-
-const ownerNavItems = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Shops", href: "/shops", icon: Store },
-  { label: "Products", href: "/products", icon: Package },
-  { label: "Categories", href: "/products/categories", icon: Tags },
-  { label: "Inventory", href: "/inventory", icon: Boxes },
-  { label: "Low Stock", href: "/inventory/low-stock", icon: AlertTriangle },
-  { label: "Out of Stock", href: "/inventory/out-of-stock", icon: PackageX },
-  { label: "Stock Arrivals", href: "/inventory/arrivals", icon: TruckIcon },
-  { label: "Adjustments", href: "/inventory/adjustments", icon: Wrench },
-  { label: "Movements", href: "/inventory/movements", icon: ArrowRightLeft },
-  { label: "Sales", href: "/sales", icon: ShoppingCart },
-  { label: "Reports", href: "/reports/sales", icon: BarChart3 },
-  { label: "Users", href: "/users", icon: Users },
-  { label: "Audit Log", href: "/audit-log", icon: ClipboardList },
-  { label: "Settings", href: "/settings/profile", icon: Settings },
-];
-
-const salespersonNavItems = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Record Sale", href: "/sales/new", icon: ShoppingCart },
-  { label: "Inventory", href: "/inventory", icon: Boxes },
-  { label: "Low Stock", href: "/inventory/low-stock", icon: AlertTriangle },
-  { label: "Out of Stock", href: "/inventory/out-of-stock", icon: PackageX },
-  { label: "Sales History", href: "/sales", icon: ShoppingCart },
-  { label: "Settings", href: "/settings/profile", icon: Settings },
-];
-
-export function MobileNav({ isOpen, onClose, userRole }: MobileNavProps) {
+  permissions: string[];
+}) {
   const pathname = usePathname();
-  const navItems =
-    userRole === "owner" ? ownerNavItems : salespersonNavItems;
+
+  // Sub-items are flattened here: a phone drawer should not require expanding
+  // a section to reach a destination.
+  const links = navItemsFor(permissions).flatMap((item) =>
+    item.children ? item.children : [item]
+  );
 
   return (
     <>
-      {/* Overlay */}
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-black/50 lg:hidden"
           onClick={onClose}
+          aria-hidden
         />
       )}
 
-      {/* Sheet */}
       <div
         className={cn(
-          "fixed inset-y-0 left-0 z-50 w-72 bg-sidebar text-white transform transition-transform duration-300 ease-in-out lg:hidden",
+          "fixed inset-y-0 left-0 z-50 w-72 transform bg-sidebar text-white transition-transform duration-200 ease-out lg:hidden",
           isOpen ? "translate-x-0" : "-translate-x-full"
         )}
+        role="dialog"
+        aria-modal={isOpen}
+        aria-label="Navigation"
       >
-        <div className="flex h-16 items-center justify-between px-4 border-b border-white/10">
+        <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-white font-bold text-sm">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-sm font-bold text-white">
               IS
             </div>
             <span className="text-base font-semibold">InvSys</span>
@@ -88,45 +54,78 @@ export function MobileNav({ isOpen, onClose, userRole }: MobileNavProps) {
           <Button
             variant="ghost"
             size="icon-sm"
-            className="text-white/60 hover:text-white hover:bg-sidebar-hover"
+            className="text-white/60 hover:bg-sidebar-hover hover:text-white"
             onClick={onClose}
+            aria-label="Close navigation"
           >
             <X className="h-5 w-5" />
           </Button>
         </div>
 
-        <nav className="overflow-y-auto py-4 px-3 space-y-1 h-[calc(100vh-4rem)]">
-          {navItems.map((item) => (
+        <nav className="h-[calc(100vh-4rem)] space-y-1 overflow-y-auto px-3 py-4">
+          {links.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               onClick={onClose}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors",
                 pathname === item.href
-                  ? "text-white bg-sidebar-active/20"
-                  : "text-white/60 hover:text-white hover:bg-sidebar-hover"
+                  ? "bg-sidebar-active/20 text-white"
+                  : "text-white/60 hover:bg-sidebar-hover hover:text-white"
               )}
             >
               <item.icon className="h-[18px] w-[18px] shrink-0" />
               <span>{item.label}</span>
             </Link>
           ))}
+
+          <Link
+            href="/settings/profile"
+            onClick={onClose}
+            className="flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium text-white/60 transition-colors hover:bg-sidebar-hover hover:text-white"
+          >
+            <Settings className="h-[18px] w-[18px] shrink-0" />
+            <span>Settings</span>
+          </Link>
         </nav>
       </div>
     </>
   );
 }
 
-// Floating Action Button for salesperson mobile view
-export function SaleFAB() {
+/**
+ * Persistent bottom bar on phones. Sales are often recorded one-handed, so the
+ * few destinations that matter stay within thumb reach instead of behind a menu.
+ */
+export function MobileTabBar({ permissions }: { permissions: string[] }) {
+  const pathname = usePathname();
+  const items = mobileBarItemsFor(permissions);
+
   return (
-    <Link
-      href="/sales/new"
-      className="fixed bottom-6 right-6 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-accent text-white shadow-lg shadow-accent/30 hover:bg-accent-hover transition-all duration-200 hover:scale-105 lg:hidden"
-    >
-      <ShoppingCart className="h-6 w-6" />
-      <span className="sr-only">Record Sale</span>
-    </Link>
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 backdrop-blur-sm lg:hidden">
+      <div className="mx-auto flex max-w-lg">
+        {items.map((item) => {
+          const active =
+            item.href === "/dashboard"
+              ? pathname === item.href
+              : pathname.startsWith(item.href);
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={active ? "page" : undefined}
+              className={cn(
+                "flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
+                active ? "text-accent" : "text-text-muted hover:text-text-secondary"
+              )}
+            >
+              <item.icon className="h-5 w-5" />
+              <span>{item.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
   );
 }
