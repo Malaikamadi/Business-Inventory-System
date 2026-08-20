@@ -147,7 +147,7 @@ async function main() {
   console.log("  ✓ Created 3 shops");
 
   // ─── Users ────────────────────────────────────────────────────────
-  const passwordHash = await bcrypt.hash("password123", 12);
+  const passwordHash = await bcrypt.hash("password123", 10);
 
   const admin = await prisma.user.create({
     data: {
