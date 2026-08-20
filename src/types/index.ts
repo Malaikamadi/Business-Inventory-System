@@ -1,4 +1,4 @@
-import type { Decimal } from "@prisma/client/runtime/library";
+import { Prisma } from "@prisma/client";
 
 // ─── User Types ──────────────────────────────────────────────────────
 
@@ -23,8 +23,8 @@ export interface ProductWithInventory {
   sku: string;
   categoryId: string | null;
   description: string | null;
-  costPrice: Decimal;
-  sellingPrice: Decimal;
+  costPrice: Prisma.Decimal;
+  sellingPrice: Prisma.Decimal;
   lowStockThreshold: number;
   imageUrl: string | null;
   status: string;
