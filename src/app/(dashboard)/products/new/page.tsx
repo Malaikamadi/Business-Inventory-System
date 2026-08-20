@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
-import { assertCan, getCurrentUser } from "@/server/auth-context";
+import { getCurrentUser } from "@/server/auth-context";
+import { requireCan } from "@/server/page-guards";
 import { PageHeader } from "@/components/shared/page-header";
 import { ProductForm } from "@/components/products/product-form";
 
@@ -10,7 +11,7 @@ export const metadata = { title: "Add product · InvSys" };
 
 export default async function NewProductPage() {
   const user = await getCurrentUser();
-  assertCan(user, PERMISSIONS.PRODUCTS_CREATE);
+  requireCan(user, PERMISSIONS.PRODUCTS_CREATE, "/products/new");
 
   const categories = await prisma.category.findMany({
     where: { isActive: true },

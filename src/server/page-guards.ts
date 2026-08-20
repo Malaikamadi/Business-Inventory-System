@@ -1,26 +1,44 @@
 import { redirect } from "next/navigation";
 
+import type { PermissionKey } from "@/lib/constants";
 import { NO_ACCESS_PATH } from "@/lib/route-access";
-import { canAccessShop } from "@/server/auth-context";
+import { can, canAccessShop, canAny } from "@/server/auth-context";
 import type { SessionUser } from "@/types";
 
 /**
- * Record-level access checks for pages.
+ * Page-level access checks. These redirect to a page that names the refused
+ * section, rather than throwing — a thrown `ForbiddenError` in a Server
+ * Component surfaces as a generic crash, which looks like the section is
+ * missing rather than restricted.
  *
- * The route guard can tell that someone may view *a* shop, but not whether they
- * belong to the one in the URL — that needs the record. Denials here redirect
- * rather than throw so they read like the rest of the permission system instead
- * of surfacing as an unexpected error.
- *
- * Server actions must keep using `assertShopAccess`, which throws: a mutation
- * has to fail loudly, not navigate.
+ * Server actions must keep using `assertCan` / `assertShopAccess`, which throw:
+ * a mutation has to fail loudly, not navigate.
  */
+
+function bounce(from: string): never {
+  redirect(`${NO_ACCESS_PATH}?from=${encodeURIComponent(from)}`);
+}
+
+export function requireCan(
+  user: SessionUser,
+  permission: PermissionKey,
+  from: string
+): void {
+  if (!can(user, permission)) bounce(from);
+}
+
+export function requireCanAny(
+  user: SessionUser,
+  permissions: PermissionKey[],
+  from: string
+): void {
+  if (!canAny(user, permissions)) bounce(from);
+}
+
 export function requireShopAccess(
   user: SessionUser,
   shopId: string,
   from: string
 ): void {
-  if (!canAccessShop(user, shopId)) {
-    redirect(`${NO_ACCESS_PATH}?from=${encodeURIComponent(from)}`);
-  }
+  if (!canAccessShop(user, shopId)) bounce(from);
 }

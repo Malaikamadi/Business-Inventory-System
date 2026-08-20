@@ -70,14 +70,14 @@ export type RoleName = (typeof ROLES)[keyof typeof ROLES];
 
 // ─── Owner Permissions ───────────────────────────────────────────────
 
-export const OWNER_PERMISSIONS: PermissionKey[] = Object.values(PERMISSIONS);
-
-// ─── Salesperson Permissions ─────────────────────────────────────────
+export const OWNER_PERMISSIONS: PermissionKey[] = Object.values(
+  PERMISSIONS
+).filter((permission) => permission !== PERMISSIONS.SALES_CREATE);
 
 /**
  * What a shop salesperson may do. Every entry is scoped to the branches they
  * are assigned to; none of them grant a business-wide view, and none reveal
- * cost or profit.
+ * cost or profit. Recording a sale belongs here — not on the owner role.
  */
 export const SALESPERSON_PERMISSIONS: PermissionKey[] = [
   PERMISSIONS.DASHBOARD_SHOP_VIEW,

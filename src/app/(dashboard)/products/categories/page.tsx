@@ -1,7 +1,8 @@
 import { Tags } from "lucide-react";
 import { PERMISSIONS } from "@/lib/constants";
 import { formatNumber } from "@/lib/utils";
-import { assertCan, getCurrentUser } from "@/server/auth-context";
+import { getCurrentUser } from "@/server/auth-context";
+import { requireCan } from "@/server/page-guards";
 import { listCategories } from "@/server/services/product.queries";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -12,7 +13,7 @@ export const metadata = { title: "Categories · InvSys" };
 
 export default async function CategoriesPage() {
   const user = await getCurrentUser();
-  assertCan(user, PERMISSIONS.CATEGORIES_MANAGE);
+  requireCan(user, PERMISSIONS.CATEGORIES_MANAGE, "/products/categories");
 
   const categories = await listCategories();
 

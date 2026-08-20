@@ -1,74 +1,150 @@
 "use client";
 
 import { useState } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+import { Loader2, Lock, Store, UserCog } from "lucide-react";
+
+import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/lib/demo-accounts";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Loader2, Lock } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 export default function LoginPage() {
+  const router = useRouter();
+  const { data: session, status } = useSession();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const [loadingEmail, setLoadingEmail] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  const busy = loadingEmail !== null;
+
+  async function signInAs(accountEmail: string, accountPassword: string) {
     setError("");
-    setLoading(true);
+    setLoadingEmail(accountEmail);
 
     try {
+      if (session?.user) {
+        await signOut({ redirect: false });
+      }
+
       const result = await signIn("credentials", {
-        email,
-        password,
+        email: accountEmail,
+        password: accountPassword,
         redirect: false,
       });
 
       if (result?.error) {
-        setError("Invalid email or password. Please try again.");
-      } else {
-        router.push("/dashboard");
-        router.refresh();
+        setError("Could not sign in with that account. Check the email and password.");
+        return;
       }
+
+      router.push("/dashboard");
+      router.refresh();
     } catch {
-      setError("An unexpected error occurred. Please try again.");
+      setError("Something went wrong. Please try again.");
     } finally {
-      setLoading(false);
+      setLoadingEmail(null);
     }
   }
 
+  function handleSubmit(event: React.FormEvent) {
+    event.preventDefault();
+    void signInAs(email, password);
+  }
+
+  const current = session?.user;
+
   return (
-    <div className="w-full max-w-md animate-scale-in">
-      {/* Logo */}
+    <div className="w-full max-w-3xl animate-scale-in">
       <div className="mb-8 text-center">
-        <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-white font-bold text-lg mb-4">
+        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-lg font-bold text-white">
           IS
         </div>
         <h1 className="text-2xl font-bold text-white">InvSys</h1>
-        <p className="text-sm text-white/60 mt-1">
-          Inventory & Sales Management
+        <p className="mt-1 text-sm text-white/60">
+          Choose a role to sign in. Each role opens a different set of pages.
         </p>
       </div>
 
-      <Card className="border-white/10 bg-white/5 backdrop-blur-sm shadow-2xl">
+      {status === "authenticated" && current && (
+        <div className="mb-6 flex flex-col gap-3 rounded-lg border border-white/10 bg-white/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-sm text-white/80">
+            Signed in as{" "}
+            <span className="font-medium text-white">
+              {current.firstName} {current.lastName}
+            </span>
+            <span className="capitalize text-white/50"> · {current.role}</span>
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            size="sm"
+            onClick={() => router.push("/dashboard")}
+          >
+            Continue to dashboard
+          </Button>
+        </div>
+      )}
+
+      {error && (
+        <div className="mb-6 rounded-md border border-danger/20 bg-danger/10 p-3 text-sm text-danger">
+          {error}
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        {DEMO_ACCOUNTS.map((account) => {
+          const Icon = account.role === "Owner" ? UserCog : Store;
+          const loading = loadingEmail === account.email;
+
+          return (
+            <button
+              key={account.email}
+              type="button"
+              disabled={busy}
+              onClick={() => void signInAs(account.email, DEMO_PASSWORD)}
+              className="rounded-xl border border-white/10 bg-white/5 p-5 text-left transition-colors hover:border-accent hover:bg-white/10 disabled:opacity-60"
+            >
+              <div className="mb-3 flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/20 text-accent">
+                  {loading ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Icon className="h-4 w-4" />
+                  )}
+                </div>
+                <div>
+                  <p className="text-xs font-medium uppercase tracking-wide text-accent">
+                    {account.role}
+                  </p>
+                  <p className="text-sm font-semibold text-white">{account.name}</p>
+                </div>
+              </div>
+              <p className="text-sm text-white/70">{account.summary}</p>
+              <p className="mt-2 text-xs text-white/40">{account.shop}</p>
+            </button>
+          );
+        })}
+      </div>
+
+      <Card className="mt-8 border-white/10 bg-white/5 shadow-2xl backdrop-blur-sm">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-xl text-white">Welcome back</CardTitle>
+          <CardTitle className="text-lg text-white">Sign in with email</CardTitle>
           <CardDescription className="text-white/50">
-            Sign in to your account to continue
+            For accounts that are not listed above.
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="rounded-md bg-danger/10 border border-danger/20 p-3 text-sm text-danger animate-fade-in">
-                {error}
-              </div>
-            )}
-
             <div className="space-y-2">
               <Label htmlFor="email" className="text-white/80">
                 Email
@@ -76,12 +152,12 @@ export default function LoginPage() {
               <Input
                 id="email"
                 type="email"
-                placeholder="admin@example.com"
+                placeholder="you@example.com"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(event) => setEmail(event.target.value)}
                 required
                 autoComplete="email"
-                className="bg-white/10 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-accent"
+                className="border-white/10 bg-white/10 text-white placeholder:text-white/30 focus-visible:ring-accent"
               />
             </div>
 
@@ -94,38 +170,29 @@ export default function LoginPage() {
                 type="password"
                 placeholder="••••••••"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                onChange={(event) => setPassword(event.target.value)}
                 required
                 autoComplete="current-password"
-                className="bg-white/10 border-white/10 text-white placeholder:text-white/30 focus-visible:ring-accent"
+                className="border-white/10 bg-white/10 text-white placeholder:text-white/30 focus-visible:ring-accent"
               />
             </div>
 
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={loading}
-              size="lg"
-            >
-              {loading ? (
+            <Button type="submit" className="w-full" disabled={busy} size="lg">
+              {busy && loadingEmail === email ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Signing in...
+                  Signing in…
                 </>
               ) : (
                 <>
                   <Lock className="h-4 w-4" />
-                  Sign In
+                  Sign in
                 </>
               )}
             </Button>
           </form>
         </CardContent>
       </Card>
-
-      <p className="mt-6 text-center text-xs text-white/30">
-        Contact your administrator if you need access.
-      </p>
     </div>
   );
 }

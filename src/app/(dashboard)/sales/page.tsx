@@ -3,12 +3,8 @@ import { Plus, Receipt } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { formatCurrency, formatDateTime, formatNumber } from "@/lib/utils";
-import {
-  assertCanAny,
-  can,
-  getCurrentUser,
-  resolveShopScope,
-} from "@/server/auth-context";
+import { can, getCurrentUser, resolveShopScope } from "@/server/auth-context";
+import { requireCanAny } from "@/server/page-guards";
 import { listSales } from "@/server/services/sales.queries";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -29,10 +25,11 @@ export default async function SalesPage(props: {
   }>;
 }) {
   const user = await getCurrentUser();
-  assertCanAny(user, [
-    PERMISSIONS.SALES_VIEW_ALL,
-    PERMISSIONS.SALES_VIEW_ASSIGNED,
-  ]);
+  requireCanAny(
+    user,
+    [PERMISSIONS.SALES_VIEW_ALL, PERMISSIONS.SALES_VIEW_ASSIGNED],
+    "/sales"
+  );
   const params = await props.searchParams;
 
   // Throws if a salesperson hand-edits the shop parameter to another branch.
@@ -69,8 +66,8 @@ export default async function SalesPage(props: {
         title="Sales"
         description={
           canSeeAllShops
-            ? "Every sale recorded across the business."
-            : "Sales recorded at your shop."
+            ? "Sales recorded by shop staff across the business."
+            : "Sales you have recorded at your shop."
         }
       >
         {can(user, PERMISSIONS.SALES_CREATE) && (

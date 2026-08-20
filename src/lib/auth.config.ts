@@ -47,8 +47,7 @@ export const authConfig = {
 
       if (pathname.startsWith("/api")) return true;
 
-      if (pathname === "/login") {
-        if (user) return Response.redirect(new URL("/dashboard", nextUrl));
+      if (pathname === "/login" || pathname === "/") {
         return true;
       }
 

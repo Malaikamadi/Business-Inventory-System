@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { cn, formatDateTime, formatNumber } from "@/lib/utils";
-import { assertCan, getCurrentUser, resolveShopScope } from "@/server/auth-context";
+import { getCurrentUser, resolveShopScope } from "@/server/auth-context";
+import { requireCan } from "@/server/page-guards";
 import { listMovements } from "@/server/services/inventory.queries";
 import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -11,7 +12,7 @@ export const metadata = { title: "Stock adjustments · InvSys" };
 
 export default async function AdjustmentsPage() {
   const user = await getCurrentUser();
-  assertCan(user, PERMISSIONS.STOCK_ADJUSTMENTS_CREATE);
+  requireCan(user, PERMISSIONS.STOCK_ADJUSTMENTS_CREATE, "/inventory/adjustments");
 
   const shopIds = resolveShopScope(user);
 

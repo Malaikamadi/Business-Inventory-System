@@ -3,12 +3,8 @@ import { ArrowRightLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { MOVEMENT_TYPE_LABELS, PERMISSIONS } from "@/lib/constants";
 import { cn, formatDateTime, formatNumber } from "@/lib/utils";
-import {
-  assertCanAny,
-  can,
-  getCurrentUser,
-  resolveShopScope,
-} from "@/server/auth-context";
+import { can, getCurrentUser, resolveShopScope } from "@/server/auth-context";
+import { requireCanAny } from "@/server/page-guards";
 import { listMovements } from "@/server/services/inventory.queries";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -36,10 +32,14 @@ export default async function MovementsPage(props: {
   }>;
 }) {
   const user = await getCurrentUser();
-  assertCanAny(user, [
-    PERMISSIONS.STOCK_MOVEMENTS_VIEW_ALL,
-    PERMISSIONS.STOCK_MOVEMENTS_VIEW_ASSIGNED,
-  ]);
+  requireCanAny(
+    user,
+    [
+      PERMISSIONS.STOCK_MOVEMENTS_VIEW_ALL,
+      PERMISSIONS.STOCK_MOVEMENTS_VIEW_ASSIGNED,
+    ],
+    "/inventory/movements"
+  );
   const params = await props.searchParams;
 
   const shopIds = resolveShopScope(user, params.shop);

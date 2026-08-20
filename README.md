@@ -56,7 +56,10 @@ npm run dev
 
 ### Seeded accounts
 
-All use the password `password123`. Replace them before any real deployment.
+The app opens on the login page. Pick a role card, or sign in with email.
+All of these use the password `password123`. Replace them before any real
+deployment. Recording a sale is a salesperson action; the owner reviews sales
+but does not use the till.
 
 | Email | Name | Role | Shop |
 | --- | --- | --- | --- |

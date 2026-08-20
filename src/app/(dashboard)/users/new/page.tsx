@@ -2,7 +2,8 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
-import { assertCan, getCurrentUser } from "@/server/auth-context";
+import { getCurrentUser } from "@/server/auth-context";
+import { requireCan } from "@/server/page-guards";
 import { PageHeader } from "@/components/shared/page-header";
 import { UserForm } from "@/components/users/user-form";
 
@@ -10,7 +11,7 @@ export const metadata = { title: "Add user · InvSys" };
 
 export default async function NewUserPage() {
   const user = await getCurrentUser();
-  assertCan(user, PERMISSIONS.USERS_CREATE);
+  requireCan(user, PERMISSIONS.USERS_CREATE, "/users/new");
 
   const [roles, shops] = await Promise.all([
     prisma.role.findMany({

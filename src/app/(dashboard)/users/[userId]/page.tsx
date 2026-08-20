@@ -5,7 +5,8 @@ import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { startOfBusinessMonth } from "@/lib/dates";
 import { formatCurrency, formatDateTime, formatNumber } from "@/lib/utils";
-import { assertCan, can, getCurrentUser } from "@/server/auth-context";
+import { can, getCurrentUser } from "@/server/auth-context";
+import { requireCan } from "@/server/page-guards";
 import { PageHeader } from "@/components/shared/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -19,7 +20,7 @@ export default async function UserDetailPage(props: {
 }) {
   const { userId } = await props.params;
   const actor = await getCurrentUser();
-  assertCan(actor, PERMISSIONS.USERS_VIEW);
+  requireCan(actor, PERMISSIONS.USERS_VIEW, `/users/${userId}`);
 
   const target = await prisma.user.findUnique({
     where: { id: userId },

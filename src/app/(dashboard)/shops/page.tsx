@@ -4,7 +4,8 @@ import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { startOfBusinessMonth } from "@/lib/dates";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import { assertCan, can, getCurrentUser } from "@/server/auth-context";
+import { can, getCurrentUser } from "@/server/auth-context";
+import { requireCanAny } from "@/server/page-guards";
 import { getShopPerformance } from "@/server/services/dashboard.service";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -16,10 +17,19 @@ export const metadata = { title: "Shops · InvSys" };
 
 export default async function ShopsPage() {
   const user = await getCurrentUser();
-  assertCan(user, PERMISSIONS.SHOPS_VIEW_ALL);
+  requireCanAny(
+    user,
+    [PERMISSIONS.SHOPS_VIEW_ALL, PERMISSIONS.SHOPS_VIEW_ASSIGNED],
+    "/shops"
+  );
+
+  const canSeeAll = can(user, PERMISSIONS.SHOPS_VIEW_ALL);
+  const canCreate = can(user, PERMISSIONS.SHOPS_CREATE);
+  const shopIds = canSeeAll ? undefined : user.shopIds;
 
   const [shops, performance, inventory] = await Promise.all([
     prisma.shop.findMany({
+      where: shopIds ? { id: { in: shopIds } } : undefined,
       orderBy: [{ status: "asc" }, { name: "asc" }],
       select: {
         id: true,
@@ -30,9 +40,10 @@ export default async function ShopsPage() {
         _count: { select: { staffAssignments: true } },
       },
     }),
-    getShopPerformance(startOfBusinessMonth()),
+    getShopPerformance(startOfBusinessMonth(), shopIds),
     prisma.shopInventory.groupBy({
       by: ["shopId"],
+      where: shopIds ? { shopId: { in: shopIds } } : undefined,
       _sum: { quantity: true },
     }),
   ]);
@@ -45,10 +56,14 @@ export default async function ShopsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Shops"
-        description="Every branch, its staff, and how it is performing this month."
+        title={canSeeAll ? "Shops" : shops.length === 1 ? shops[0].name : "Your shops"}
+        description={
+          canSeeAll
+            ? "Every branch, its staff, and how it is performing this month."
+            : "The branch you are assigned to. You can view its stock and sales, but not add or edit shops."
+        }
       >
-        {can(user, PERMISSIONS.SHOPS_CREATE) && (
+        {canCreate && (
           <Button asChild>
             <Link href="/shops/new">
               <Plus className="h-4 w-4" />
@@ -61,10 +76,14 @@ export default async function ShopsPage() {
       {shops.length === 0 ? (
         <EmptyState
           icon={Store}
-          title="No shops yet"
-          description="Add your first shop to start tracking inventory and sales."
-          actionLabel="Add shop"
-          actionHref="/shops/new"
+          title={canSeeAll ? "No shops yet" : "No shop assigned"}
+          description={
+            canSeeAll
+              ? "Add your first shop to start tracking inventory and sales."
+              : "Ask the owner to assign you to a shop before you can record sales."
+          }
+          actionLabel={canCreate ? "Add shop" : undefined}
+          actionHref={canCreate ? "/shops/new" : undefined}
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">

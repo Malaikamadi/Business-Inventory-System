@@ -3,7 +3,8 @@ import { Plus, Users } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { formatDate } from "@/lib/utils";
-import { assertCan, can, getCurrentUser } from "@/server/auth-context";
+import { can, getCurrentUser } from "@/server/auth-context";
+import { requireCan } from "@/server/page-guards";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
@@ -14,7 +15,7 @@ export const metadata = { title: "Users · InvSys" };
 
 export default async function UsersPage() {
   const user = await getCurrentUser();
-  assertCan(user, PERMISSIONS.USERS_VIEW);
+  requireCan(user, PERMISSIONS.USERS_VIEW, "/users");
 
   const users = await prisma.user.findMany({
     orderBy: [{ isActive: "desc" }, { firstName: "asc" }],

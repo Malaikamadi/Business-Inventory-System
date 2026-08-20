@@ -43,12 +43,20 @@ const SALES_VIEW = [
 ];
 
 const ALL_NAV_ITEMS: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  {
+    label: "Dashboard",
+    href: "/dashboard",
+    icon: LayoutDashboard,
+    anyOf: [
+      PERMISSIONS.DASHBOARD_GLOBAL_VIEW,
+      PERMISSIONS.DASHBOARD_SHOP_VIEW,
+    ],
+  },
   {
     label: "Shops",
     href: "/shops",
     icon: Store,
-    anyOf: [PERMISSIONS.SHOPS_VIEW_ALL],
+    anyOf: [PERMISSIONS.SHOPS_VIEW_ALL, PERMISSIONS.SHOPS_VIEW_ASSIGNED],
   },
   {
     label: "Record Sale",
@@ -159,13 +167,25 @@ export function navItemsFor(permissions: string[]): NavItem[] {
 
 /** Bottom bar for phones, where salespeople record most sales. */
 export function mobileBarItemsFor(permissions: string[]): NavItem[] {
-  const canSell = permissions.includes(PERMISSIONS.SALES_CREATE);
-  return [
+  const items: NavItem[] = [
     { label: "Home", href: "/dashboard", icon: LayoutDashboard },
-    ...(canSell
-      ? [{ label: "Sell", href: "/sales/new", icon: ShoppingCart }]
-      : []),
-    { label: "Stock", href: "/inventory", icon: Boxes },
-    { label: "Sales", href: "/sales", icon: ClipboardList },
   ];
+
+  if (permissions.includes(PERMISSIONS.SALES_CREATE)) {
+    items.push({ label: "Sell", href: "/sales/new", icon: ShoppingCart });
+  }
+  if (
+    permissions.includes(PERMISSIONS.INVENTORY_VIEW_ALL) ||
+    permissions.includes(PERMISSIONS.INVENTORY_VIEW_ASSIGNED)
+  ) {
+    items.push({ label: "Stock", href: "/inventory", icon: Boxes });
+  }
+  if (
+    permissions.includes(PERMISSIONS.SALES_VIEW_ALL) ||
+    permissions.includes(PERMISSIONS.SALES_VIEW_ASSIGNED)
+  ) {
+    items.push({ label: "Sales", href: "/sales", icon: ClipboardList });
+  }
+
+  return items;
 }

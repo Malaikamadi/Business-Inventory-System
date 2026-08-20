@@ -1,7 +1,8 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { PERMISSIONS } from "@/lib/constants";
-import { assertCan, getCurrentUser } from "@/server/auth-context";
+import { getCurrentUser } from "@/server/auth-context";
+import { requireCan } from "@/server/page-guards";
 import { PageHeader } from "@/components/shared/page-header";
 import { ShopForm } from "@/components/shops/shop-form";
 
@@ -9,7 +10,7 @@ export const metadata = { title: "Add shop · InvSys" };
 
 export default async function NewShopPage() {
   const user = await getCurrentUser();
-  assertCan(user, PERMISSIONS.SHOPS_CREATE);
+  requireCan(user, PERMISSIONS.SHOPS_CREATE, "/shops/new");
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">

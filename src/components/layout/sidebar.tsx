@@ -90,27 +90,40 @@ function SidebarItem({
 }) {
   const hasActiveChild =
     item.children?.some((child) => isActivePath(pathname, child.href)) ?? false;
-  const [open, setOpen] = useState(hasActiveChild);
+  const sectionActive = isActivePath(pathname, item.href);
+  // Children start visible so the sections that belong to this role are on
+  // screen without an extra click. The chevron still lets you tuck them away.
+  const [open, setOpen] = useState(true);
 
   if (item.children && !collapsed) {
     return (
       <div>
-        <button
-          onClick={() => setOpen(!open)}
-          aria-expanded={open}
+        <div
           className={cn(
-            "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm font-medium transition-colors",
-            hasActiveChild
-              ? "bg-sidebar-hover text-white"
-              : "text-white/60 hover:bg-sidebar-hover hover:text-white"
+            "flex items-center rounded-md",
+            (sectionActive || hasActiveChild) && "bg-sidebar-hover"
           )}
         >
-          <item.icon className="h-[18px] w-[18px] shrink-0" />
-          <span className="flex-1 text-left">{item.label}</span>
-          <ChevronRight
-            className={cn("h-4 w-4 transition-transform", open && "rotate-90")}
+          <NavLink
+            href={item.href}
+            icon={item.icon}
+            label={item.label}
+            isActive={sectionActive && !hasActiveChild}
+            collapsed={false}
+            className="flex-1"
           />
-        </button>
+          <button
+            type="button"
+            aria-expanded={open}
+            aria-label={open ? `Hide ${item.label} pages` : `Show ${item.label} pages`}
+            onClick={() => setOpen(!open)}
+            className="mr-1 rounded-md p-1.5 text-white/60 hover:bg-sidebar-hover hover:text-white"
+          >
+            <ChevronRight
+              className={cn("h-4 w-4 transition-transform", open && "rotate-90")}
+            />
+          </button>
+        </div>
         {open && (
           <div className="ml-4 mt-1 space-y-0.5 border-l border-white/10 pl-3">
             {item.children.map((child) => (
@@ -148,6 +161,7 @@ function NavLink({
   isActive,
   collapsed,
   compact,
+  className,
 }: {
   href: string;
   icon: React.ComponentType<{ className?: string }>;
@@ -155,6 +169,7 @@ function NavLink({
   isActive: boolean;
   collapsed: boolean;
   compact?: boolean;
+  className?: string;
 }) {
   return (
     <Link
@@ -166,7 +181,8 @@ function NavLink({
         isActive
           ? "nav-link-active bg-sidebar-active/20 text-white"
           : "text-white/60 hover:bg-sidebar-hover hover:text-white",
-        collapsed && "justify-center px-0"
+        collapsed && "justify-center px-0",
+        className
       )}
       title={collapsed ? label : undefined}
     >

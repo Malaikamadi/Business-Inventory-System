@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
-import { assertCan, can, getCurrentUser } from "@/server/auth-context";
+import { getCurrentUser } from "@/server/auth-context";
+import { requireCan } from "@/server/page-guards";
 import { listSellableProducts } from "@/server/services/inventory.queries";
 import { SaleForm } from "@/components/sales/sale-form";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -12,24 +13,15 @@ export default async function NewSalePage(props: {
   searchParams: Promise<{ shop?: string }>;
 }) {
   const user = await getCurrentUser();
-  assertCan(user, PERMISSIONS.SALES_CREATE);
+  requireCan(user, PERMISSIONS.SALES_CREATE, "/sales/new");
 
   const { shop: requestedShop } = await props.searchParams;
-  const isOwner = can(user, PERMISSIONS.SHOPS_VIEW_ALL);
 
-  // Owners may sell on behalf of any shop but must choose one explicitly;
-  // staff are pinned to the shop they are assigned to.
-  const selectableShops = isOwner
-    ? await prisma.shop.findMany({
-        where: { status: "ACTIVE" },
-        select: { id: true, name: true },
-        orderBy: { name: "asc" },
-      })
-    : await prisma.shop.findMany({
-        where: { id: { in: user.shopIds }, status: "ACTIVE" },
-        select: { id: true, name: true },
-        orderBy: { name: "asc" },
-      });
+  const selectableShops = await prisma.shop.findMany({
+    where: { id: { in: user.shopIds }, status: "ACTIVE" },
+    select: { id: true, name: true },
+    orderBy: { name: "asc" },
+  });
 
   const activeShopId =
     (requestedShop && selectableShops.some((s) => s.id === requestedShop)

@@ -10,12 +10,12 @@ import {
   getStockStatus,
 } from "@/lib/utils";
 import {
-  assertCan,
   can,
   canAny,
   getCurrentUser,
   resolveShopScope,
 } from "@/server/auth-context";
+import { requireCan } from "@/server/page-guards";
 import {
   getProductDetail,
   getProductSalesSummary,
@@ -40,7 +40,7 @@ export default async function ProductDetailPage(props: {
   const { productId } = await props.params;
   const user = await getCurrentUser();
 
-  assertCan(user, PERMISSIONS.PRODUCTS_VIEW);
+  requireCan(user, PERMISSIONS.PRODUCTS_VIEW, `/products/${productId}`);
 
   const product = await getProductDetail(productId);
   if (!product) notFound();
@@ -105,8 +105,10 @@ export default async function ProductDetailPage(props: {
           <CardContent className="p-0">
             {visibleInventory.length === 0 ? (
               <p className="px-6 py-10 text-center text-sm text-text-muted">
-                This product is not stocked at any shop you can see. Record a
-                stock arrival to add it.
+                This product is not stocked at any shop you can see.
+                {can(user, PERMISSIONS.STOCK_ARRIVALS_CREATE)
+                  ? " Record a stock arrival to add it."
+                  : " Ask the owner to record a stock arrival at your shop."}
               </p>
             ) : (
               <div className="data-table-wrapper">

@@ -4,7 +4,7 @@ import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
 
-import { PERMISSIONS, SALESPERSON_PERMISSIONS } from "../src/lib/constants";
+import { OWNER_PERMISSIONS, PERMISSIONS, SALESPERSON_PERMISSIONS } from "../src/lib/constants";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -96,7 +96,11 @@ async function main() {
       description: "Business owner with full system access",
       isSystem: true,
       rolePermissions: {
-        create: permissions.map((p) => ({ permissionId: p.id })),
+        create: permissions
+          .filter((p) =>
+            OWNER_PERMISSIONS.includes(p.key as (typeof OWNER_PERMISSIONS)[number])
+          )
+          .map((p) => ({ permissionId: p.id })),
       },
     },
   });

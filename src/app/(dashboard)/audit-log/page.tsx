@@ -1,7 +1,8 @@
 import { ClipboardList } from "lucide-react";
 import { PERMISSIONS } from "@/lib/constants";
 import { formatDateTime } from "@/lib/utils";
-import { assertCan, getCurrentUser } from "@/server/auth-context";
+import { getCurrentUser } from "@/server/auth-context";
+import { requireCan } from "@/server/page-guards";
 import { listAuditLogs } from "@/server/services/audit.service";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -58,7 +59,7 @@ export default async function AuditLogPage(props: {
   searchParams: Promise<{ action?: string; page?: string }>;
 }) {
   const user = await getCurrentUser();
-  assertCan(user, PERMISSIONS.AUDIT_VIEW);
+  requireCan(user, PERMISSIONS.AUDIT_VIEW, "/audit-log");
 
   const params = await props.searchParams;
   const result = await listAuditLogs({

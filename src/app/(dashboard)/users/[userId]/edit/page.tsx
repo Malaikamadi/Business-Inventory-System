@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
-import { assertCan, getCurrentUser } from "@/server/auth-context";
+import { getCurrentUser } from "@/server/auth-context";
+import { requireCan } from "@/server/page-guards";
 import { PageHeader } from "@/components/shared/page-header";
 import { UserForm } from "@/components/users/user-form";
 
@@ -14,7 +15,7 @@ export default async function EditUserPage(props: {
 }) {
   const { userId } = await props.params;
   const actor = await getCurrentUser();
-  assertCan(actor, PERMISSIONS.USERS_UPDATE);
+  requireCan(actor, PERMISSIONS.USERS_UPDATE, `/users/${userId}/edit`);
 
   const [target, roles, shops] = await Promise.all([
     prisma.user.findUnique({

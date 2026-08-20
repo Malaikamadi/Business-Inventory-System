@@ -93,7 +93,7 @@ const RULES: RouteRule[] = [
   },
   {
     pattern: new RegExp(`^/shops$`),
-    anyOf: [PERMISSIONS.SHOPS_VIEW_ALL],
+    anyOf: [PERMISSIONS.SHOPS_VIEW_ALL, PERMISSIONS.SHOPS_VIEW_ASSIGNED],
     section: "Shops",
   },
 

@@ -10,7 +10,6 @@ import { startOfBusinessMonth } from "@/lib/dates";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 import {
   getOwnerKPIs,
-  getRecentSales,
   getRevenueTrend,
   getShopPerformance,
   getTopProducts,
@@ -20,21 +19,18 @@ import { StatCard } from "@/components/shared/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RevenueChart } from "./revenue-chart";
 import { ShopPerformanceChart } from "./shop-performance-chart";
-import { RecentSalesTable } from "./recent-sales-table";
 import { StockAlerts } from "./stock-alerts";
 
 export async function OwnerDashboard({ firstName }: { firstName: string }) {
   const monthStart = startOfBusinessMonth();
 
-  const [kpis, trend, shops, topProducts, recentSales, inventoryValue] =
-    await Promise.all([
-      getOwnerKPIs(),
-      getRevenueTrend(30),
-      getShopPerformance(monthStart),
-      getTopProducts(monthStart, 5),
-      getRecentSales(8),
-      getInventoryValue(),
-    ]);
+  const [kpis, trend, shops, topProducts, inventoryValue] = await Promise.all([
+    getOwnerKPIs(),
+    getRevenueTrend(30),
+    getShopPerformance(monthStart),
+    getTopProducts(monthStart, 5),
+    getInventoryValue(),
+  ]);
 
   const alertCount = kpis.lowStockCount + kpis.outOfStockCount;
 
@@ -46,7 +42,8 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
         </h1>
         <p className="mt-1 text-sm text-text-secondary">
           Business performance across {kpis.totalShops}{" "}
-          {kpis.totalShops === 1 ? "shop" : "shops"}.
+          {kpis.totalShops === 1 ? "shop" : "shops"}. Sales at the till are
+          recorded by shop staff.
         </p>
       </div>
 
@@ -115,59 +112,42 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
-          <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle>Recent sales</CardTitle>
-            <Link
-              href="/sales"
-              className="text-sm font-medium text-accent hover:underline"
-            >
-              View all
-            </Link>
-          </CardHeader>
-          <CardContent className="p-0">
-            <RecentSalesTable sales={recentSales} showShop />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Best sellers this month</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {topProducts.length === 0 ? (
-              <p className="py-8 text-center text-sm text-text-muted">
-                No products sold this month yet.
-              </p>
-            ) : (
-              <ol className="space-y-3">
-                {topProducts.map((product, index) => (
-                  <li
-                    key={product.productId}
-                    className="flex items-center gap-3"
-                  >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-semibold text-text-secondary">
-                      {index + 1}
-                    </span>
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-text-primary">
-                        {product.productName}
-                      </p>
-                      <p className="text-xs text-text-muted">
-                        {formatNumber(product.totalQuantity)} units
-                      </p>
-                    </div>
-                    <span className="text-sm font-semibold tabular-nums text-text-primary">
-                      {formatCurrency(product.totalRevenue)}
-                    </span>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Best sellers this month</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {topProducts.length === 0 ? (
+            <p className="py-8 text-center text-sm text-text-muted">
+              Shop staff have not recorded sales this month yet.
+            </p>
+          ) : (
+            <ol className="space-y-3">
+              {topProducts.map((product, index) => (
+                <li
+                  key={product.productId}
+                  className="flex items-center gap-3"
+                >
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-semibold text-text-secondary">
+                    {index + 1}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-text-primary">
+                      {product.productName}
+                    </p>
+                    <p className="text-xs text-text-muted">
+                      {formatNumber(product.totalQuantity)} units
+                    </p>
+                  </div>
+                  <span className="text-sm font-semibold tabular-nums text-text-primary">
+                    {formatCurrency(product.totalRevenue)}
+                  </span>
+                </li>
+              ))}
+            </ol>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0">

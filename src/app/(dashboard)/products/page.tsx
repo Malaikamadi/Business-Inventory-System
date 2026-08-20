@@ -3,12 +3,8 @@ import { Package, Plus } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import {
-  assertCan,
-  can,
-  getCurrentUser,
-  resolveShopScope,
-} from "@/server/auth-context";
+import { can, getCurrentUser, resolveShopScope } from "@/server/auth-context";
+import { requireCan } from "@/server/page-guards";
 import { listProducts } from "@/server/services/product.queries";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -30,7 +26,7 @@ export default async function ProductsPage(props: {
   }>;
 }) {
   const user = await getCurrentUser();
-  assertCan(user, PERMISSIONS.PRODUCTS_VIEW);
+  requireCan(user, PERMISSIONS.PRODUCTS_VIEW, "/products");
 
   const params = await props.searchParams;
   const canManage = can(user, PERMISSIONS.PRODUCTS_CREATE);

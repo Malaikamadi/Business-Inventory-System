@@ -2,12 +2,8 @@ import { Boxes } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import {
-  assertCanAny,
-  can,
-  getCurrentUser,
-  resolveShopScope,
-} from "@/server/auth-context";
+import { can, getCurrentUser, resolveShopScope } from "@/server/auth-context";
+import { requireCanAny } from "@/server/page-guards";
 import {
   getInventoryValue,
   listInventory,
@@ -50,10 +46,11 @@ export async function InventoryPage({
   searchParams: InventorySearchParams;
 }) {
   const user = await getCurrentUser();
-  assertCanAny(user, [
-    PERMISSIONS.INVENTORY_VIEW_ALL,
-    PERMISSIONS.INVENTORY_VIEW_ASSIGNED,
-  ]);
+  requireCanAny(
+    user,
+    [PERMISSIONS.INVENTORY_VIEW_ALL, PERMISSIONS.INVENTORY_VIEW_ASSIGNED],
+    basePath
+  );
 
   const shopIds = resolveShopScope(user, searchParams.shop);
   const canSeeAllShops = can(user, PERMISSIONS.INVENTORY_VIEW_ALL);

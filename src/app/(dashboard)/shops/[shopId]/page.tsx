@@ -12,7 +12,7 @@ import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { startOfBusinessMonth } from "@/lib/dates";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import { can, getCurrentUser } from "@/server/auth-context";
+import { can, canAny, getCurrentUser } from "@/server/auth-context";
 import { requireShopAccess } from "@/server/page-guards";
 import {
   getStockAlertCounts,
@@ -41,7 +41,6 @@ export default async function ShopDetailPage(props: {
   // Membership in this particular one is what decides access.
   requireShopAccess(user, shopId, `/shops/${shopId}`);
 
-  const canSeeAllShops = can(user, PERMISSIONS.SHOPS_VIEW_ALL);
   const canSeeCost = can(user, PERMISSIONS.PRODUCTS_VIEW_COST);
 
   const shop = await prisma.shop.findUnique({
@@ -99,7 +98,10 @@ export default async function ShopDetailPage(props: {
 
   return (
     <div className="space-y-6">
-      {canSeeAllShops && (
+      {canAny(user, [
+        PERMISSIONS.SHOPS_VIEW_ALL,
+        PERMISSIONS.SHOPS_VIEW_ASSIGNED,
+      ]) && (
         <Link
           href="/shops"
           className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary"

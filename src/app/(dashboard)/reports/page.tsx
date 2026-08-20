@@ -6,12 +6,8 @@ import {
   startOfBusinessMonth,
 } from "@/lib/dates";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import {
-  assertCanAny,
-  can,
-  getCurrentUser,
-  resolveShopScope,
-} from "@/server/auth-context";
+import { can, getCurrentUser, resolveShopScope } from "@/server/auth-context";
+import { requireCanAny } from "@/server/page-guards";
 import {
   getRevenueTrend,
   getSalespersonPerformance,
@@ -51,7 +47,11 @@ export default async function ReportsPage(props: {
   searchParams: Promise<{ period?: string }>;
 }) {
   const user = await getCurrentUser();
-  assertCanAny(user, [PERMISSIONS.REPORTS_GLOBAL, PERMISSIONS.REPORTS_SHOP]);
+  requireCanAny(
+    user,
+    [PERMISSIONS.REPORTS_GLOBAL, PERMISSIONS.REPORTS_SHOP],
+    "/reports"
+  );
 
   // Everyone sees the same report, over the shops they are entitled to. For a
   // salesperson that is the branch they work at, which makes the by-shop and

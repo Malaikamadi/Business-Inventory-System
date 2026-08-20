@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
-import { assertCan, getCurrentUser } from "@/server/auth-context";
+import { getCurrentUser } from "@/server/auth-context";
+import { requireCan } from "@/server/page-guards";
 import { getProductDetail } from "@/server/services/product.queries";
 import { PageHeader } from "@/components/shared/page-header";
 import { ProductForm } from "@/components/products/product-form";
@@ -15,7 +16,7 @@ export default async function EditProductPage(props: {
 }) {
   const { productId } = await props.params;
   const user = await getCurrentUser();
-  assertCan(user, PERMISSIONS.PRODUCTS_UPDATE);
+  requireCan(user, PERMISSIONS.PRODUCTS_UPDATE, `/products/${productId}/edit`);
 
   const [product, categories] = await Promise.all([
     getProductDetail(productId),

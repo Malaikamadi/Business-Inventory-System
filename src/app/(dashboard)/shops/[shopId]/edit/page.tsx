@@ -3,7 +3,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
-import { assertCan, getCurrentUser } from "@/server/auth-context";
+import { getCurrentUser } from "@/server/auth-context";
+import { requireCan } from "@/server/page-guards";
 import { PageHeader } from "@/components/shared/page-header";
 import { ShopForm } from "@/components/shops/shop-form";
 
@@ -14,7 +15,7 @@ export default async function EditShopPage(props: {
 }) {
   const { shopId } = await props.params;
   const user = await getCurrentUser();
-  assertCan(user, PERMISSIONS.SHOPS_UPDATE);
+  requireCan(user, PERMISSIONS.SHOPS_UPDATE, `/shops/${shopId}/edit`);
 
   const shop = await prisma.shop.findUnique({
     where: { id: shopId },
