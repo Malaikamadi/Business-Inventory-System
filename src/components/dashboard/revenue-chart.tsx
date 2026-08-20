@@ -62,7 +62,7 @@ export function RevenueChart({ data }: { data: SalesDataPoint[] }) {
         <Area
           type="monotone"
           dataKey="revenue"
-          stroke="#121212"
+          stroke="#2563eb"
           strokeWidth={2}
           fill="url(#revenueFill)"
         />

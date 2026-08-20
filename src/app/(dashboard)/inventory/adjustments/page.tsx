@@ -45,7 +45,7 @@ export default async function AdjustmentsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Stock adjustments"
-        description="fix a count that didn't come from a sale or a delivery. always leave a reason."
+        description="Correct stock that changed without a sale or delivery. Every adjustment needs a reason and is attributed to you."
       />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">

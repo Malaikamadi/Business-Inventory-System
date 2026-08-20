@@ -48,7 +48,7 @@ export function SalesFilters({
         <Input
           value={term}
           onChange={(event) => setTerm(event.target.value)}
-          placeholder="sale # or product"
+          placeholder="Search sale number or product"
           className="pl-9"
           aria-label="Search sales"
         />

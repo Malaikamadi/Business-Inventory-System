@@ -21,7 +21,7 @@ export default async function CategoriesPage() {
     <div className="space-y-6">
       <PageHeader
         title="Categories"
-        description="buckets for products. makes searching and reports less of a mess."
+        description="Group products for reporting and easier searching."
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -31,8 +31,8 @@ export default async function CategoriesPage() {
               {categories.length === 0 ? (
                 <EmptyState
                   icon={Tags}
-                  title="no buckets yet"
-                  description="make the first category so the catalog isn't one giant pile."
+                  title="No categories yet"
+                  description="Create your first category to start organising the product catalog."
                 />
               ) : (
                 <div className="data-table-wrapper">

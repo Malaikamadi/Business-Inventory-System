@@ -24,15 +24,15 @@ export default function DashboardError({
 
   return (
     <div className="flex flex-col items-center justify-center py-20 text-center">
-      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl border-2 border-primary bg-accent shadow-[4px_4px_0_0_#121212]">
-        <AlertTriangle className="h-8 w-8 text-primary" />
+      <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-danger-light">
+        <AlertTriangle className="h-8 w-8 text-danger" />
       </div>
-      <h1 className="mb-1 font-display text-2xl font-bold text-text-primary">
-        this page glitched
+      <h1 className="mb-1 text-lg font-semibold text-text-primary">
+        This page could not be loaded
       </h1>
       <p className="mb-6 max-w-md text-sm text-text-secondary">
-        something went sideways loading this. hit try again — if it keeps
-        happening, ping the owner.
+        Something went wrong while loading this page. Try again, and if the
+        problem continues let the business owner know.
       </p>
       {error.digest && (
         <p className="mb-6 font-mono text-xs text-text-muted">
@@ -40,9 +40,9 @@ export default function DashboardError({
         </p>
       )}
       <div className="flex gap-3">
-        <Button onClick={reset}>try again</Button>
+        <Button onClick={reset}>Try again</Button>
         <Button variant="outline" asChild>
-          <Link href="/dashboard">take me home</Link>
+          <Link href="/dashboard">Back to dashboard</Link>
         </Button>
       </div>
     </div>

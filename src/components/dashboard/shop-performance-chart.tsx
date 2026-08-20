@@ -20,12 +20,12 @@ export function ShopPerformanceChart({ data }: { data: ShopPerformance[] }) {
         layout="vertical"
         margin={{ top: 4, right: 16, left: 0, bottom: 0 }}
       >
-        <CartesianGrid strokeDasharray="0" stroke="#121212" strokeOpacity={0.12} horizontal={false} />
+        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" horizontal={false} />
         <XAxis
           type="number"
           tickLine={false}
           axisLine={false}
-          tick={{ fontSize: 12, fill: "#7a7468" }}
+          tick={{ fontSize: 12, fill: "#64748b" }}
           tickFormatter={(value: number) => formatCompactCurrency(value)}
         />
         <YAxis
@@ -34,21 +34,20 @@ export function ShopPerformanceChart({ data }: { data: ShopPerformance[] }) {
           tickLine={false}
           axisLine={false}
           width={110}
-          tick={{ fontSize: 12, fill: "#121212" }}
+          tick={{ fontSize: 12, fill: "#475569" }}
           tickFormatter={(value: string) => truncate(value, 16)}
         />
         <Tooltip
-          cursor={{ fill: "#c8f04d", fillOpacity: 0.25 }}
+          cursor={{ fill: "#f1f5f9" }}
           contentStyle={{
-            borderRadius: 16,
-            border: "2px solid #121212",
-            background: "#fffcf7",
+            borderRadius: 8,
+            border: "1px solid #e2e8f0",
+            background: "#ffffff",
             fontSize: 12,
-            boxShadow: "4px 4px 0 0 #121212",
           }}
-          formatter={(value) => [formatCurrency(Number(value)), "revenue"]}
+          formatter={(value) => [formatCurrency(Number(value)), "Revenue"]}
         />
-        <Bar dataKey="revenue" fill="#c8f04d" stroke="#121212" strokeWidth={2} radius={[0, 8, 8, 0]} barSize={22} />
+        <Bar dataKey="revenue" fill="#2563eb" radius={[0, 4, 4, 0]} barSize={20} />
       </BarChart>
     </ResponsiveContainer>
   );

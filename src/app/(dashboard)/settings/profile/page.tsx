@@ -29,8 +29,8 @@ export default async function ProfilePage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader
-        title="it's you"
-        description="your account, your access, that's it."
+        title="Your profile"
+        description="Your account details and access."
       />
 
       <Card>

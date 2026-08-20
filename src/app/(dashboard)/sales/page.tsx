@@ -66,15 +66,15 @@ export default async function SalesPage(props: {
         title="Sales"
         description={
           canSeeAllShops
-            ? "everything the shops rang up. voided ones still show — they just don't count."
-            : "your till history. voided ones still show — they just don't count."
+            ? "Sales recorded by shop staff across the business."
+            : "Sales you have recorded at your shop."
         }
       >
         {can(user, PERMISSIONS.SALES_CREATE) && (
           <Button asChild>
             <Link href="/sales/new">
               <Plus className="h-4 w-4" />
-              Ring it up
+              Record sale
             </Link>
           </Button>
         )}
@@ -92,11 +92,11 @@ export default async function SalesPage(props: {
           {result.data.length === 0 ? (
             <EmptyState
               icon={Receipt}
-              title="nothing here"
+              title="No sales found"
               description={
                 params.q || params.status || params.shop
-                  ? "those filters are too picky. clear them and try again."
-                  : "once someone rings a sale, it lands here."
+                  ? "No sales match the current filters. Try clearing them."
+                  : "Sales will appear here as soon as they are recorded."
               }
             />
           ) : (

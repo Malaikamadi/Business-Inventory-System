@@ -74,7 +74,7 @@ export default async function AuditLogPage(props: {
     <div className="space-y-6">
       <PageHeader
         title="Audit log"
-        description="who did what, and when. stock qty changes live in the movement ledger."
+        description="Who did what, and when. Stock quantity changes are recorded separately in the movement ledger."
       />
 
       <Card>
@@ -82,8 +82,8 @@ export default async function AuditLogPage(props: {
           {result.data.length === 0 ? (
             <EmptyState
               icon={ClipboardList}
-              title="quiet so far"
-              description="edits, arrivals, voids — they show up here when they happen."
+              title="No audit entries"
+              description="Administrative actions such as product edits, stock adjustments and user changes will appear here."
             />
           ) : (
             <>

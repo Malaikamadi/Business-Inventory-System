@@ -11,11 +11,11 @@ export default async function Page(props: {
   return (
     <InventoryPage
       title="Out of stock"
-      description="sold out. can't ring these up until more arrives."
+      description="Products with no units left. These cannot be sold until stock arrives."
       basePath="/inventory/out-of-stock"
       lockedFilter="out"
-      emptyTitle="nothing's sold out"
-      emptyDescription="every product still has units. keep it that way."
+      emptyTitle="Nothing is out of stock"
+      emptyDescription="Every product still has units available at the shops you can see."
       searchParams={await props.searchParams}
     />
   );

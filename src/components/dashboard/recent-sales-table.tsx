@@ -24,7 +24,7 @@ export function RecentSalesTable({
   if (sales.length === 0) {
     return (
       <p className="py-10 text-center text-sm text-text-muted">
-        crickets. nothing rung up yet.
+        No sales recorded yet.
       </p>
     );
   }

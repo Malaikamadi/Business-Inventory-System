@@ -87,7 +87,7 @@ export function SaleForm({
       if (next > product.quantity) {
         toast({
           variant: "error",
-          title: "not enough stock",
+          title: "Not enough stock",
           description: `Only ${product.quantity} of ${product.name} available.`,
         });
         return current;
@@ -125,7 +125,7 @@ export function SaleForm({
       if (!result.success) {
         toast({
           variant: "error",
-          title: "sale didn't land",
+          title: "Sale not recorded",
           description: result.error,
         });
         return;
@@ -133,7 +133,7 @@ export function SaleForm({
 
       toast({
         variant: "success",
-        title: `locked in · ${result.data!.saleNumber}`,
+        title: `Sale ${result.data!.saleNumber} recorded`,
         description: `${formatCurrency(result.data!.totalAmount)} · stock updated.`,
       });
       setCart([]);
@@ -169,7 +169,7 @@ export function SaleForm({
               ))}
             </select>
             <p className="mt-1.5 text-xs text-text-muted">
-              stock comes off this shop.
+              Stock is deducted from the selected shop.
             </p>
           </div>
         )}
@@ -179,7 +179,7 @@ export function SaleForm({
           <Input
             value={search}
             onChange={(event) => setSearch(event.target.value)}
-            placeholder="name or sku"
+            placeholder="Search by product name or SKU"
             className="pl-9"
             aria-label="Search products"
           />
@@ -187,7 +187,7 @@ export function SaleForm({
 
         {visibleProducts.length === 0 ? (
           <p className="py-12 text-center text-sm text-text-muted">
-            no match for “{search}”. try another name.
+            No products match “{search}”.
           </p>
         ) : (
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -386,11 +386,11 @@ function CartPanel({
   return (
     <Card>
       <CardContent className="space-y-4 p-4">
-        <h2 className="font-display text-base font-bold text-text-primary">this sale</h2>
+        <h2 className="text-sm font-semibold text-text-primary">Current sale</h2>
 
         {cart.length === 0 ? (
           <p className="py-6 text-center text-sm text-text-muted">
-            tap a product. that&apos;s the whole vibe.
+            No items yet. Add products to start a sale.
           </p>
         ) : (
           <ul className="divide-y divide-border">
@@ -464,7 +464,7 @@ function CartPanel({
             id="notes"
             value={notes}
             onChange={(event) => onNotesChange(event.target.value)}
-            placeholder="note for later (optional)"
+            placeholder="Reference or customer detail"
           />
         </div>
 
@@ -482,7 +482,7 @@ function CartPanel({
           disabled={cart.length === 0 || isPending}
           onClick={onSubmit}
         >
-          {isPending ? "locking it in…" : "lock it in"}
+          {isPending ? "Recording…" : "Confirm sale"}
         </Button>
       </CardContent>
     </Card>

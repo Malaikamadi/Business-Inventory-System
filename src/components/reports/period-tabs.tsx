@@ -12,7 +12,7 @@ export function PeriodTabs({
 }) {
   return (
     <div
-      className="inline-flex rounded-full border-2 border-primary bg-surface p-1"
+      className="inline-flex rounded-md border border-border bg-surface p-1"
       role="tablist"
       aria-label="Reporting period"
     >
@@ -23,9 +23,9 @@ export function PeriodTabs({
           role="tab"
           aria-selected={active === period.key}
           className={cn(
-            "rounded-full px-3 py-1.5 text-sm font-semibold transition-colors",
+            "rounded px-3 py-1.5 text-sm font-medium transition-colors",
             active === period.key
-              ? "bg-accent text-primary"
+              ? "bg-accent text-white"
               : "text-text-secondary hover:bg-surface-hover hover:text-text-primary"
           )}
         >

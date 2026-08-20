@@ -84,8 +84,8 @@ export default async function ReportsPage(props: {
         title="Reports"
         description={
           isGlobal
-            ? "who sold what, where. voided sales don't count — they were never the bag."
-            : "how your shop did. voided sales don't count — they were never the bag."
+            ? "Sales performance by shop, product and salesperson. Voided sales are excluded."
+            : "Sales performance for the shop you are assigned to. Voided sales are excluded."
         }
       />
 
@@ -154,7 +154,7 @@ export default async function ReportsPage(props: {
                 formatCurrency(shop.revenue),
               ],
             }))}
-            emptyMessage="quiet stretch. no sales in this window."
+            emptyMessage="No sales in this period."
           />
         )}
 
@@ -172,7 +172,7 @@ export default async function ReportsPage(props: {
               formatCurrency(person.revenue),
             ],
           }))}
-          emptyMessage="quiet stretch. no sales in this window."
+          emptyMessage="No sales in this period."
         />
       </div>
 
@@ -188,7 +188,7 @@ export default async function ReportsPage(props: {
             formatCurrency(product.totalRevenue),
           ],
         }))}
-        emptyMessage="nothing sold in this window. yet."
+        emptyMessage="No products sold in this period."
       />
     </div>
   );

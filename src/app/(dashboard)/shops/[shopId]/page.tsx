@@ -131,13 +131,13 @@ export default async function ShopDetailPage(props: {
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title="this month's bag"
+          title="Revenue this month"
           value={formatCurrency(Number(monthSales._sum.totalAmount ?? 0))}
           subtitle={`${formatNumber(monthSales._count)} sales`}
           icon={Banknote}
         />
         <StatCard
-          title="on the floor"
+          title="Stock on hand"
           value={formatNumber(units._sum.quantity ?? 0)}
           subtitle={
             canSeeCost ? `${formatCurrency(inventoryValue)} at cost` : undefined
@@ -145,7 +145,7 @@ export default async function ShopDetailPage(props: {
           icon={Boxes}
         />
         <StatCard
-          title="almost gone"
+          title="Running low"
           value={formatNumber(alerts.lowStock)}
           icon={AlertTriangle}
           iconClassName={
@@ -155,7 +155,7 @@ export default async function ShopDetailPage(props: {
           }
         />
         <StatCard
-          title="sold out"
+          title="Out of stock"
           value={formatNumber(alerts.outOfStock)}
           icon={PackageX}
           iconClassName={
@@ -167,12 +167,12 @@ export default async function ShopDetailPage(props: {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <Card className="xl:col-span-2">
           <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle>just now</CardTitle>
+            <CardTitle>Recent sales</CardTitle>
             <Link
               href={`/sales?shop=${shop.id}`}
               className="text-sm font-medium text-accent hover:underline"
             >
-              see all
+              View all
             </Link>
           </CardHeader>
           <CardContent className="p-0">
@@ -187,7 +187,7 @@ export default async function ShopDetailPage(props: {
           <CardContent>
             {shop.staffAssignments.length === 0 ? (
               <p className="py-6 text-center text-sm text-text-muted">
-                nobody on this shop yet.
+                No staff assigned to this shop.
               </p>
             ) : (
               <ul className="space-y-3">

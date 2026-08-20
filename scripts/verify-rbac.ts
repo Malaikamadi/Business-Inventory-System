@@ -97,9 +97,9 @@ for (const label of [
 ]) {
   check(`owner menu includes ${label}`, ownerMenu.includes(label));
 }
-check(`owner menu hides Ring it up`, !ownerMenu.includes("Ring it up"));
+check(`owner menu hides Record sale`, !ownerMenu.includes("Record sale"));
 
-for (const label of ["Dashboard", "Shops", "Ring it up", "Products", "Overview", "Sales", "Reports"]) {
+for (const label of ["Dashboard", "Shops", "Record sale", "Products", "Overview", "Sales", "Reports"]) {
   check(`salesperson menu includes ${label}`, staffMenu.includes(label));
 }
 

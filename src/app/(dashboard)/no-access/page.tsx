@@ -6,7 +6,7 @@ import { getCurrentUser } from "@/server/auth-context";
 import { navItemsFor } from "@/components/layout/nav-items";
 import { Card, CardContent } from "@/components/ui/card";
 
-export const metadata = { title: "No access · inv." };
+export const metadata = { title: "No access · InvSys" };
 
 /**
  * Shown when someone opens a page their role does not include.
@@ -31,20 +31,20 @@ export default async function NoAccessPage(props: {
     <div className="mx-auto max-w-2xl space-y-6 py-6">
       <Card>
         <CardContent className="space-y-4 p-8 text-center">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border-2 border-primary bg-accent shadow-[4px_4px_0_0_#121212]">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-muted text-text-muted">
             <Lock className="h-5 w-5" aria-hidden />
           </div>
 
           <div className="space-y-1.5">
-            <h1 className="font-display text-2xl font-bold text-text-primary">
+            <h1 className="text-xl font-semibold text-text-primary">
               {section
-                ? `${section} isn't your lane`
-                : "that page isn't your lane"}
+                ? `${section} is not part of your role`
+                : "That page is not part of your role"}
             </h1>
             <p className="text-sm text-text-secondary">
-              you&apos;re in as {user.firstName} {user.lastName}. this bit is
-              locked to another role — nothing broke. ask the owner if you
-              actually need it.
+              You are signed in as {user.firstName} {user.lastName}, and this
+              section is limited to staff with wider access. Nothing went wrong
+              — ask the owner if you need it opened up.
             </p>
           </div>
 
@@ -52,7 +52,7 @@ export default async function NoAccessPage(props: {
             href="/dashboard"
             className="inline-block text-sm font-medium text-accent hover:underline"
           >
-            take me home
+            Back to dashboard
           </Link>
         </CardContent>
       </Card>
@@ -60,15 +60,15 @@ export default async function NoAccessPage(props: {
       {available.length > 0 && (
         <Card>
           <CardContent className="space-y-3 p-6">
-            <h2 className="font-display text-base font-bold text-text-primary">
-              your spots
+            <h2 className="text-sm font-semibold text-text-primary">
+              What you can open
             </h2>
             <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
               {available.map((item) => (
                 <li key={item.href}>
                   <Link
                     href={item.href}
-                    className="flex items-center gap-2.5 rounded-2xl border-2 border-primary px-3 py-2.5 text-sm font-semibold text-text-primary shadow-[3px_3px_0_0_#121212] transition-all hover:-translate-y-0.5 hover:bg-accent"
+                    className="flex items-center gap-2.5 rounded-md border border-border px-3 py-2.5 text-sm text-text-secondary transition-colors hover:border-accent hover:text-text-primary"
                   >
                     <item.icon className="h-4 w-4 shrink-0" />
                     {item.label}

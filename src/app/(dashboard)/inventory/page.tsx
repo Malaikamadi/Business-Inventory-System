@@ -11,10 +11,10 @@ export default async function Page(props: {
   return (
     <InventoryPage
       title="Inventory"
-      description="what's actually on the floor. numbers come from the ledger — no editing by vibes."
+      description="Stock on hand per shop. Quantities come from the movement ledger and cannot be edited directly."
       basePath="/inventory"
-      emptyTitle="nothing on the floor"
-      emptyDescription="no stock matches those filters. clear them, or log an arrival."
+      emptyTitle="No inventory found"
+      emptyDescription="No stock lines match the current filters. Try clearing them or record a stock arrival."
       searchParams={await props.searchParams}
     />
   );

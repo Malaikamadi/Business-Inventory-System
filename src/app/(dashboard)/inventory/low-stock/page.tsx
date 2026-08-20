@@ -11,11 +11,11 @@ export default async function Page(props: {
   return (
     <InventoryPage
       title="Low stock"
-      description="the almost-gone list. ordered by who needs a restock first."
+      description="Products at or below their low-stock threshold. Ordered by the fewest units remaining."
       basePath="/inventory/low-stock"
       lockedFilter="low"
-      emptyTitle="you're good"
-      emptyDescription="nothing's running low at the shops you can see. enjoy it while it lasts."
+      emptyTitle="Nothing is running low"
+      emptyDescription="Every product is above its low-stock threshold at the shops you can see."
       searchParams={await props.searchParams}
     />
   );

@@ -58,7 +58,7 @@ export default async function ProductsPage(props: {
     <div className="space-y-6">
       <PageHeader
         title="Products"
-        description="the catalog is shared. stock lives at each shop."
+        description="The product catalog is business-wide. Stock quantities belong to individual shops."
       >
         {canManage && (
           <Button asChild>
@@ -82,11 +82,11 @@ export default async function ProductsPage(props: {
           {result.data.length === 0 ? (
             <EmptyState
               icon={Package}
-              title="no products yet"
+              title="No products found"
               description={
                 params.q || params.category
-                  ? "those filters are doing too much. clear them."
-                  : "add the first product and shops can start stocking it."
+                  ? "No products match the current filters. Try clearing them."
+                  : "Add your first product to start tracking stock across shops."
               }
               actionLabel={canManage ? "Add product" : undefined}
               actionHref={canManage ? "/products/new" : undefined}

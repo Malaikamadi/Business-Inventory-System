@@ -45,7 +45,7 @@ export default async function ArrivalsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Stock arrivals"
-        description="stock showed up. log it and the shop count goes up."
+        description="Record incoming deliveries. Each arrival is written to the ledger and increases the shop's stock."
       />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
