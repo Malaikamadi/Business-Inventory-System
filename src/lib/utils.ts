@@ -93,20 +93,6 @@ export function getStockStatusLabel(status: StockStatus): string {
 }
 
 /**
- * Generate a sale number in format SL-YYYYMMDD-XXXX
- */
-export function generateSaleNumber(sequenceNumber: number): string {
-  const now = new Date();
-  const dateStr = [
-    now.getFullYear(),
-    String(now.getMonth() + 1).padStart(2, "0"),
-    String(now.getDate()).padStart(2, "0"),
-  ].join("");
-  const seq = String(sequenceNumber).padStart(4, "0");
-  return `SL-${dateStr}-${seq}`;
-}
-
-/**
  * Get initials from a name.
  */
 export function getInitials(firstName: string, lastName: string): string {

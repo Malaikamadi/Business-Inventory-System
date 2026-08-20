@@ -3,8 +3,6 @@ import {
   AlertTriangle,
   Boxes,
   DollarSign,
-  PackageX,
-  Receipt,
   Store,
   TrendingUp,
 } from "lucide-react";

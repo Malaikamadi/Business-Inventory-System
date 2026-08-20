@@ -14,7 +14,7 @@ const PROTECTED_ROUTES: { prefix: string; permission: PermissionKey }[] = [
   { prefix: "/shops", permission: PERMISSIONS.SHOPS_VIEW_ALL },
   { prefix: "/users", permission: PERMISSIONS.USERS_VIEW },
   { prefix: "/audit-log", permission: PERMISSIONS.AUDIT_VIEW },
-  { prefix: "/reports", permission: PERMISSIONS.REPORTS_SHOP },
+  { prefix: "/reports", permission: PERMISSIONS.REPORTS_GLOBAL },
 ];
 
 export function requiredPermissionForPath(pathname: string): PermissionKey | null {
