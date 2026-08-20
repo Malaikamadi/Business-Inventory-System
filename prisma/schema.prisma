@@ -1,0 +1,293 @@
+// Prisma Schema for Multi-Branch Inventory & Sales Management System
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── ROLES & PERMISSIONS ──────────────────────────────────────────────
+
+model Role {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique @db.VarChar(50)
+  description String?  @db.Text
+  isSystem    Boolean  @default(false) @map("is_system")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  users           User[]
+  rolePermissions RolePermission[]
+
+  @@map("roles")
+}
+
+model Permission {
+  id          String @id @default(uuid()) @db.Uuid
+  key         String @unique @db.VarChar(100)
+  description String? @db.Text
+  resource    String @db.VarChar(50)
+  action      String @db.VarChar(50)
+
+  rolePermissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
+
+  role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+
+  @@id([roleId, permissionId])
+  @@map("role_permissions")
+}
+
+// ─── USERS ────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(uuid()) @db.Uuid
+  email        String    @unique @db.VarChar(255)
+  passwordHash String    @map("password_hash") @db.VarChar(255)
+  firstName    String    @map("first_name") @db.VarChar(100)
+  lastName     String    @map("last_name") @db.VarChar(100)
+  phone        String?   @db.VarChar(20)
+  roleId       String    @map("role_id") @db.Uuid
+  isActive     Boolean   @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at") @db.Timestamptz()
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt    DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  role            Role                @relation(fields: [roleId], references: [id])
+  shopAssignments UserShopAssignment[]
+  sales           Sale[]              @relation("SalespersonSales")
+  stockMovements  StockMovement[]
+  auditLogs       AuditLog[]
+  voidedSales     Sale[]              @relation("VoidedBySales")
+
+  @@map("users")
+}
+
+model UserShopAssignment {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
+  shopId     String   @map("shop_id") @db.Uuid
+  assignedAt DateTime @default(now()) @map("assigned_at") @db.Timestamptz()
+  isPrimary  Boolean  @default(true) @map("is_primary")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shop Shop @relation(fields: [shopId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, shopId])
+  @@index([userId])
+  @@map("user_shop_assignments")
+}
+
+// ─── SHOPS ────────────────────────────────────────────────────────────
+
+enum ShopStatus {
+  ACTIVE   @map("active")
+  INACTIVE @map("inactive")
+
+  @@map("shop_status")
+}
+
+model Shop {
+  id        String     @id @default(uuid()) @db.Uuid
+  name      String     @db.VarChar(150)
+  location  String?    @db.VarChar(200)
+  address   String?    @db.Text
+  phone     String?    @db.VarChar(20)
+  email     String?    @db.VarChar(255)
+  status    ShopStatus @default(ACTIVE)
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime   @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  staffAssignments UserShopAssignment[]
+  inventory        ShopInventory[]
+  sales            Sale[]
+  stockMovements   StockMovement[]
+  auditLogs        AuditLog[]
+
+  @@map("shops")
+}
+
+// ─── PRODUCTS & CATEGORIES ───────────────────────────────────────────
+
+model Category {
+  id          String   @id @default(uuid()) @db.Uuid
+  name        String   @unique @db.VarChar(100)
+  description String?  @db.Text
+  parentId    String?  @map("parent_id") @db.Uuid
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  parent   Category?  @relation("CategoryChildren", fields: [parentId], references: [id])
+  children Category[] @relation("CategoryChildren")
+  products Product[]
+
+  @@map("categories")
+}
+
+enum ProductStatus {
+  ACTIVE       @map("active")
+  DISCONTINUED @map("discontinued")
+
+  @@map("product_status")
+}
+
+model Product {
+  id                String        @id @default(uuid()) @db.Uuid
+  name              String        @db.VarChar(200)
+  sku               String        @unique @db.VarChar(100)
+  categoryId        String?       @map("category_id") @db.Uuid
+  description       String?       @db.Text
+  costPrice         Decimal       @map("cost_price") @db.Decimal(12, 2)
+  sellingPrice      Decimal       @map("selling_price") @db.Decimal(12, 2)
+  lowStockThreshold Int           @default(10) @map("low_stock_threshold")
+  imageUrl          String?       @map("image_url") @db.Text
+  status            ProductStatus @default(ACTIVE)
+  createdAt         DateTime      @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt         DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  category       Category?       @relation(fields: [categoryId], references: [id])
+  shopInventory  ShopInventory[]
+  saleItems      SaleItem[]
+  stockMovements StockMovement[]
+
+  @@map("products")
+}
+
+// ─── INVENTORY ────────────────────────────────────────────────────────
+
+model ShopInventory {
+  id        String   @id @default(uuid()) @db.Uuid
+  shopId    String   @map("shop_id") @db.Uuid
+  productId String   @map("product_id") @db.Uuid
+  quantity  Int      @default(0)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz()
+
+  shop    Shop    @relation(fields: [shopId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([shopId, productId])
+  @@index([shopId, productId])
+  @@map("shop_inventory")
+}
+
+// ─── STOCK MOVEMENTS ─────────────────────────────────────────────────
+
+enum MovementType {
+  OPENING      @map("OPENING")
+  ARRIVAL      @map("ARRIVAL")
+  SALE         @map("SALE")
+  ADJUSTMENT   @map("ADJUSTMENT")
+  RETURN       @map("RETURN")
+  TRANSFER_IN  @map("TRANSFER_IN")
+  TRANSFER_OUT @map("TRANSFER_OUT")
+
+  @@map("movement_type")
+}
+
+model StockMovement {
+  id             String       @id @default(uuid()) @db.Uuid
+  shopId         String       @map("shop_id") @db.Uuid
+  productId      String       @map("product_id") @db.Uuid
+  movementType   MovementType @map("movement_type")
+  quantityChange Int          @map("quantity_change")
+  quantityBefore Int          @map("quantity_before")
+  quantityAfter  Int          @map("quantity_after")
+  referenceType  String?      @map("reference_type") @db.VarChar(30)
+  referenceId    String?      @map("reference_id") @db.Uuid
+  reason         String?      @db.Text
+  performedBy    String       @map("performed_by") @db.Uuid
+  createdAt      DateTime     @default(now()) @map("created_at") @db.Timestamptz()
+
+  shop    Shop    @relation(fields: [shopId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  user    User    @relation(fields: [performedBy], references: [id])
+
+  @@index([shopId, productId, createdAt])
+  @@map("stock_movements")
+}
+
+// ─── SALES ────────────────────────────────────────────────────────────
+
+enum SaleStatus {
+  COMPLETED @map("completed")
+  VOIDED    @map("voided")
+
+  @@map("sale_status")
+}
+
+model Sale {
+  id            String     @id @default(uuid()) @db.Uuid
+  saleNumber    String     @unique @map("sale_number") @db.VarChar(50)
+  shopId        String     @map("shop_id") @db.Uuid
+  salespersonId String     @map("salesperson_id") @db.Uuid
+  totalAmount   Decimal    @map("total_amount") @db.Decimal(12, 2)
+  totalCost     Decimal    @map("total_cost") @db.Decimal(12, 2)
+  itemsCount    Int        @map("items_count")
+  status        SaleStatus @default(COMPLETED)
+  voidedAt      DateTime?  @map("voided_at") @db.Timestamptz()
+  voidedBy      String?    @map("voided_by") @db.Uuid
+  voidReason    String?    @map("void_reason") @db.Text
+  notes         String?    @db.Text
+  createdAt     DateTime   @default(now()) @map("created_at") @db.Timestamptz()
+
+  shop        Shop      @relation(fields: [shopId], references: [id])
+  salesperson User      @relation("SalespersonSales", fields: [salespersonId], references: [id])
+  voidedByUser User?    @relation("VoidedBySales", fields: [voidedBy], references: [id])
+  items       SaleItem[]
+
+  @@index([shopId, createdAt])
+  @@index([salespersonId, createdAt])
+  @@map("sales")
+}
+
+model SaleItem {
+  id          String  @id @default(uuid()) @db.Uuid
+  saleId      String  @map("sale_id") @db.Uuid
+  productId   String  @map("product_id") @db.Uuid
+  productName String  @map("product_name") @db.VarChar(200)
+  quantity    Int
+  unitPrice   Decimal @map("unit_price") @db.Decimal(12, 2)
+  unitCost    Decimal @map("unit_cost") @db.Decimal(12, 2)
+  lineTotal   Decimal @map("line_total") @db.Decimal(12, 2)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  sale    Sale    @relation(fields: [saleId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([saleId])
+  @@index([productId])
+  @@map("sale_items")
+}
+
+// ─── AUDIT LOGS ──────────────────────────────────────────────────────
+
+model AuditLog {
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String?  @map("user_id") @db.Uuid
+  action     String   @db.VarChar(50)
+  entityType String   @map("entity_type") @db.VarChar(50)
+  entityId   String?  @map("entity_id") @db.Uuid
+  shopId     String?  @map("shop_id") @db.Uuid
+  details    Json?    @db.JsonB
+  ipAddress  String?  @map("ip_address") @db.VarChar(45)
+  userAgent  String?  @map("user_agent") @db.Text
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz()
+
+  user User? @relation(fields: [userId], references: [id])
+  shop Shop? @relation(fields: [shopId], references: [id])
+
+  @@index([entityType, entityId])
+  @@index([userId, createdAt])
+  @@map("audit_logs")
+}
