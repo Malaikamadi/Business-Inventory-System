@@ -18,6 +18,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ProductThumbnail } from "@/components/products/product-thumbnail";
 
 export const metadata = { title: "Product · InvSys" };
 
@@ -151,6 +152,19 @@ export default async function ProductDetailPage(props: {
         </Card>
 
         <div className="space-y-6">
+          {product.imageUrl && (
+            <Card className="overflow-hidden">
+              <div className="relative aspect-square w-full">
+                <ProductThumbnail
+                  src={product.imageUrl}
+                  alt={product.name}
+                  size="xl"
+                  className="rounded-none border-0"
+                />
+              </div>
+            </Card>
+          )}
+
           <Card>
             <CardHeader>
               <CardTitle>Pricing</CardTitle>

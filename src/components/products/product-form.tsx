@@ -2,12 +2,14 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { CURRENCY_SYMBOL } from "@/lib/currency";
 import { formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
+import { ProductImageInput } from "@/components/products/product-image-input";
 import {
   createProductAction,
   updateProductAction,
@@ -164,6 +166,14 @@ export function ProductForm({
                 placeholder="Optional"
               />
             </div>
+
+            <div className="sm:col-span-2">
+              <ProductImageInput
+                value={values.imageUrl}
+                onChange={(imageUrl) => set("imageUrl", imageUrl)}
+                productName={values.name}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -176,7 +186,7 @@ export function ProductForm({
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-3">
             <div className="space-y-1.5">
-              <Label htmlFor="costPrice">Cost price</Label>
+              <Label htmlFor="costPrice">Cost price ({CURRENCY_SYMBOL})</Label>
               <Input
                 id="costPrice"
                 type="number"
@@ -191,7 +201,9 @@ export function ProductForm({
             </div>
 
             <div className="space-y-1.5">
-              <Label htmlFor="sellingPrice">Selling price</Label>
+              <Label htmlFor="sellingPrice">
+                Selling price ({CURRENCY_SYMBOL})
+              </Label>
               <Input
                 id="sellingPrice"
                 type="number"

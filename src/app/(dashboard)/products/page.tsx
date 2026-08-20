@@ -12,6 +12,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProductFilters } from "@/components/products/product-filters";
+import { ProductThumbnail } from "@/components/products/product-thumbnail";
 
 export const metadata = { title: "Products · InvSys" };
 
@@ -119,15 +120,23 @@ export default async function ProductsPage(props: {
                       return (
                         <tr key={product.id} className="hover:bg-surface-hover">
                           <td className="px-4 py-3">
-                            <Link
-                              href={`/products/${product.id}`}
-                              className="font-medium text-text-primary hover:text-accent"
-                            >
-                              {product.name}
-                            </Link>
-                            <p className="text-xs text-text-muted">
-                              {product.sku}
-                            </p>
+                            <div className="flex items-center gap-3">
+                              <ProductThumbnail
+                                src={product.imageUrl}
+                                alt={product.name}
+                              />
+                              <div className="min-w-0">
+                                <Link
+                                  href={`/products/${product.id}`}
+                                  className="font-medium text-text-primary hover:text-accent"
+                                >
+                                  {product.name}
+                                </Link>
+                                <p className="text-xs text-text-muted">
+                                  {product.sku}
+                                </p>
+                              </div>
+                            </div>
                           </td>
                           <td className="hidden px-4 py-3 text-text-secondary md:table-cell">
                             {product.category?.name ?? "—"}

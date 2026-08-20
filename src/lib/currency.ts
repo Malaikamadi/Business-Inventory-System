@@ -11,3 +11,12 @@
 
 export const CURRENCY_CODE = process.env.NEXT_PUBLIC_CURRENCY ?? "SLE";
 export const CURRENCY_LOCALE = process.env.NEXT_PUBLIC_CURRENCY_LOCALE ?? "en-SL";
+
+/** The symbol on its own ("Le"), for form labels and input prefixes. */
+export const CURRENCY_SYMBOL =
+  new Intl.NumberFormat(CURRENCY_LOCALE, {
+    style: "currency",
+    currency: CURRENCY_CODE,
+  })
+    .formatToParts(1)
+    .find((part) => part.type === "currency")?.value ?? CURRENCY_CODE;

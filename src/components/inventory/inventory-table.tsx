@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { formatCurrency, formatNumber, getStockStatus } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
+import { ProductThumbnail } from "@/components/products/product-thumbnail";
 import type { InventoryRow } from "@/server/services/inventory.queries";
 
 const STATUS_BADGE = {
@@ -47,13 +48,21 @@ export function InventoryTable({
                 className="hover:bg-surface-hover"
               >
                 <td className="px-4 py-3">
-                  <Link
-                    href={`/products/${row.productId}`}
-                    className="font-medium text-text-primary hover:text-accent"
-                  >
-                    {row.productName}
-                  </Link>
-                  <p className="text-xs text-text-muted">{row.sku}</p>
+                  <div className="flex items-center gap-3">
+                    <ProductThumbnail
+                      src={row.imageUrl}
+                      alt={row.productName}
+                    />
+                    <div className="min-w-0">
+                      <Link
+                        href={`/products/${row.productId}`}
+                        className="font-medium text-text-primary hover:text-accent"
+                      >
+                        {row.productName}
+                      </Link>
+                      <p className="text-xs text-text-muted">{row.sku}</p>
+                    </div>
+                  </div>
                 </td>
                 {showShop && (
                   <td className="px-4 py-3 text-text-secondary">

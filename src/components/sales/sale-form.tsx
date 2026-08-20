@@ -9,6 +9,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/toast";
+import { ProductThumbnail } from "@/components/products/product-thumbnail";
 import { createSaleAction } from "@/server/actions/sales.actions";
 
 export interface SellableProduct {
@@ -19,6 +20,7 @@ export interface SellableProduct {
   sellingPrice: string;
   quantity: number;
   lowStockThreshold: number;
+  imageUrl: string | null;
 }
 
 interface CartLine {
@@ -203,13 +205,20 @@ export function SaleForm({
                     )}
                   >
                     <CardContent className="flex h-full flex-col gap-3 p-4">
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium text-text-primary">
-                          {product.name}
-                        </p>
-                        <p className="mt-0.5 text-xs text-text-muted">
-                          {product.sku}
-                        </p>
+                      <div className="flex min-w-0 items-center gap-3">
+                        <ProductThumbnail
+                          src={product.imageUrl}
+                          alt={product.name}
+                          size="md"
+                        />
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-text-primary">
+                            {product.name}
+                          </p>
+                          <p className="mt-0.5 text-xs text-text-muted">
+                            {product.sku}
+                          </p>
+                        </div>
                       </div>
 
                       <div className="flex items-center justify-between gap-2">
@@ -392,6 +401,7 @@ function CartPanel({
 
               return (
                 <li key={line.productId} className="flex gap-3 py-3">
+                  <ProductThumbnail src={product.imageUrl} alt={product.name} />
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium text-text-primary">
                       {product.name}

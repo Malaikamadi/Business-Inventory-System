@@ -22,6 +22,7 @@ export interface InventoryRow {
   sellingPrice: string;
   stockValue: string;
   updatedAt: Date;
+  imageUrl: string | null;
 }
 
 export interface InventoryQuery {
@@ -84,7 +85,8 @@ export async function listInventory(
         p.low_stock_threshold   AS "lowStockThreshold",
         p.selling_price::text   AS "sellingPrice",
         (si.quantity * p.cost_price)::text AS "stockValue",
-        si.updated_at           AS "updatedAt"
+        si.updated_at           AS "updatedAt",
+        p.image_url             AS "imageUrl"
       FROM shop_inventory si
       JOIN products p ON p.id = si.product_id
       JOIN shops s ON s.id = si.shop_id
@@ -195,6 +197,7 @@ export async function listSellableProducts(shopId: string, search?: string) {
       sellingPrice: string;
       quantity: number;
       lowStockThreshold: number;
+      imageUrl: string | null;
     }[]
   >`
     SELECT
@@ -204,7 +207,8 @@ export async function listSellableProducts(shopId: string, search?: string) {
       c.name                AS "categoryName",
       p.selling_price::text AS "sellingPrice",
       COALESCE(si.quantity, 0) AS "quantity",
-      p.low_stock_threshold AS "lowStockThreshold"
+      p.low_stock_threshold AS "lowStockThreshold",
+      p.image_url           AS "imageUrl"
     FROM products p
     LEFT JOIN shop_inventory si
       ON si.product_id = p.id AND si.shop_id = ${shopId}::uuid
