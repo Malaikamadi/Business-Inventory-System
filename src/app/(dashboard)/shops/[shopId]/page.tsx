@@ -12,11 +12,8 @@ import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { startOfBusinessMonth } from "@/lib/dates";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import {
-  assertShopAccess,
-  can,
-  getCurrentUser,
-} from "@/server/auth-context";
+import { can, getCurrentUser } from "@/server/auth-context";
+import { requireShopAccess } from "@/server/page-guards";
 import {
   getStockAlertCounts,
   getRecentSales,
@@ -42,7 +39,7 @@ export default async function ShopDetailPage(props: {
   const user = await getCurrentUser();
   // The route guard only established that this user may view *some* shop.
   // Membership in this particular one is what decides access.
-  assertShopAccess(user, shopId);
+  requireShopAccess(user, shopId, `/shops/${shopId}`);
 
   const canSeeAllShops = can(user, PERMISSIONS.SHOPS_VIEW_ALL);
   const canSeeCost = can(user, PERMISSIONS.PRODUCTS_VIEW_COST);

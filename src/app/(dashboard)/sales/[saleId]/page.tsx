@@ -3,11 +3,8 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { PERMISSIONS } from "@/lib/constants";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
-import {
-  assertShopAccess,
-  can,
-  getCurrentUser,
-} from "@/server/auth-context";
+import { can, getCurrentUser } from "@/server/auth-context";
+import { requireShopAccess } from "@/server/page-guards";
 import { getSaleDetail } from "@/server/services/sales.queries";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -25,7 +22,7 @@ export default async function SaleDetailPage(props: {
   if (!sale) notFound();
 
   // A sale belongs to a shop, so shop access is what governs visibility.
-  assertShopAccess(user, sale.shopId);
+  requireShopAccess(user, sale.shopId, `/sales/${saleId}`);
 
   const margin = Number(sale.totalAmount) - Number(sale.totalCost);
   const canVoid = can(user, PERMISSIONS.SALES_VOID) && sale.status !== "VOIDED";
