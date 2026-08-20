@@ -66,6 +66,7 @@ async function main() {
 
   // ─── Clean existing data ──────────────────────────────────────────
   await prisma.auditLog.deleteMany();
+  await prisma.saleCounter.deleteMany();
   await prisma.stockMovement.deleteMany();
   await prisma.saleItem.deleteMany();
   await prisma.sale.deleteMany();
@@ -271,35 +272,135 @@ async function main() {
   ]);
   console.log(`  ✓ Created ${products.length} products`);
 
-  // ─── Inventory & Stock Movements ──────────────────────────────────
+  // ─── Sales history ────────────────────────────────────────────────
+  // Sales are planned before any stock is written so that opening balances can
+  // be sized to end at the target levels below. Seeding stock and then selling
+  // from it independently is what lets a ledger drift from its balances.
   const shops = [shopA, shopB, shopC];
-  const inventoryLevels = [
-    // [shopA, shopB, shopC] quantities per product
-    [45, 30, 60],  // Coca-Cola
-    [35, 25, 40],  // Pepsi
-    [80, 50, 70],  // Spring Water
-    [20, 15, 25],  // Orange Juice
-    [18, 12, 22],  // Lay's
-    [10, 8, 14],   // Pringles
-    [30, 20, 35],  // Snickers
-    [12, 8, 15],   // USB-C Cable
-    [6, 4, 7],     // Wireless Earbuds
-    [15, 10, 12],  // Phone Case
-    [5, 8, 10],    // T-Shirt Black (low in shopA)
-    [3, 6, 12],    // T-Shirt White (low in shopA)
-    [14, 10, 18],  // Hand Sanitizer
-    [4, 2, 6],     // Face Masks (low in shopB)
-    [0, 8, 12],    // Toothpaste (out of stock in shopA)
+  const closingLevels = [
+    // Target [shopA, shopB, shopC] quantity per product after all sales.
+    [45, 30, 60], // Coca-Cola
+    [35, 25, 40], // Pepsi
+    [80, 50, 70], // Spring Water
+    [20, 15, 25], // Orange Juice
+    [18, 12, 22], // Lay's
+    [10, 8, 14], // Pringles
+    [30, 20, 35], // Snickers
+    [12, 8, 15], // USB-C Cable
+    [6, 4, 7], // Wireless Earbuds
+    [15, 10, 12], // Phone Case
+    [5, 8, 10], // T-Shirt Black (low at Downtown)
+    [3, 6, 12], // T-Shirt White (low at Downtown)
+    [14, 10, 18], // Hand Sanitizer
+    [4, 2, 6], // Face Masks (low at Westside)
+    [0, 8, 12], // Toothpaste (out of stock at Downtown)
   ];
+
+  const salespersons = [
+    { user: sp1, shop: shopA },
+    { user: sp2, shop: shopB },
+    { user: sp3, shop: shopC },
+  ];
+
+  interface PlannedItem {
+    productId: string;
+    productName: string;
+    quantity: number;
+    unitPrice: number;
+    unitCost: number;
+    lineTotal: number;
+  }
+  interface PlannedSale {
+    shopId: string;
+    salespersonId: string;
+    at: Date;
+    items: PlannedItem[];
+    totalAmount: number;
+    totalCost: number;
+  }
+
+  const plannedSales: PlannedSale[] = [];
+  const now = new Date();
+
+  for (let dayOffset = 6; dayOffset >= 0; dayOffset--) {
+    const day = new Date(now);
+    day.setDate(day.getDate() - dayOffset);
+
+    for (const { user: sp, shop } of salespersons) {
+      const numSales = 2 + Math.floor(Math.random() * 3);
+
+      for (let s = 0; s < numSales; s++) {
+        const at = new Date(day);
+        at.setHours(
+          9 + Math.floor(Math.random() * 9),
+          Math.floor(Math.random() * 60),
+          0,
+          0
+        );
+
+        const chosen = [...products]
+          .sort(() => Math.random() - 0.5)
+          .slice(0, 1 + Math.floor(Math.random() * 3));
+
+        let totalAmount = 0;
+        let totalCost = 0;
+        const items: PlannedItem[] = chosen.map((product) => {
+          const quantity = 1 + Math.floor(Math.random() * 3);
+          const unitPrice = Number(product.sellingPrice);
+          const unitCost = Number(product.costPrice);
+          const lineTotal = unitPrice * quantity;
+          totalAmount += lineTotal;
+          totalCost += unitCost * quantity;
+          return {
+            productId: product.id,
+            productName: product.name,
+            quantity,
+            unitPrice,
+            unitCost,
+            lineTotal,
+          };
+        });
+
+        plannedSales.push({
+          shopId: shop.id,
+          salespersonId: sp.id,
+          at,
+          items,
+          totalAmount,
+          totalCost,
+        });
+      }
+    }
+  }
+
+  plannedSales.sort((a, b) => a.at.getTime() - b.at.getTime());
+
+  // ─── Opening stock ────────────────────────────────────────────────
+  const key = (shopId: string, productId: string) => `${shopId}:${productId}`;
+  const soldTotals = new Map<string, number>();
+  for (const sale of plannedSales) {
+    for (const item of sale.items) {
+      const k = key(sale.shopId, item.productId);
+      soldTotals.set(k, (soldTotals.get(k) ?? 0) + item.quantity);
+    }
+  }
+
+  const balances = new Map<string, number>();
+  const openingAt = new Date(now);
+  openingAt.setDate(openingAt.getDate() - 7);
 
   for (let pIdx = 0; pIdx < products.length; pIdx++) {
     for (let sIdx = 0; sIdx < shops.length; sIdx++) {
-      const quantity = inventoryLevels[pIdx][sIdx];
+      const k = key(shops[sIdx].id, products[pIdx].id);
+      const opening = closingLevels[pIdx][sIdx] + (soldTotals.get(k) ?? 0);
+      balances.set(k, opening);
+
       await prisma.shopInventory.create({
         data: {
           shopId: shops[sIdx].id,
           productId: products[pIdx].id,
-          quantity,
+          quantity: opening,
+          updatedAt: openingAt,
         },
       });
       await prisma.stockMovement.create({
@@ -307,100 +408,95 @@ async function main() {
           shopId: shops[sIdx].id,
           productId: products[pIdx].id,
           movementType: "OPENING",
-          quantityChange: quantity,
+          quantityChange: opening,
           quantityBefore: 0,
-          quantityAfter: quantity,
+          quantityAfter: opening,
           referenceType: "seed",
           reason: "Initial stock setup",
           performedBy: admin.id,
+          createdAt: openingAt,
         },
       });
     }
   }
-  console.log("  ✓ Created inventory for all shops");
+  console.log("  ✓ Created opening stock for all shops");
 
-  // ─── Sample Sales ─────────────────────────────────────────────────
-  const salespersons = [
-    { user: sp1, shop: shopA },
-    { user: sp2, shop: shopB },
-    { user: sp3, shop: shopC },
-  ];
+  // ─── Apply sales through the ledger ───────────────────────────────
+  const dailyCounters = new Map<string, number>();
 
-  let saleCounter = 0;
-  const now = new Date();
+  for (const sale of plannedSales) {
+    const dateStr = [
+      sale.at.getFullYear(),
+      String(sale.at.getMonth() + 1).padStart(2, "0"),
+      String(sale.at.getDate()).padStart(2, "0"),
+    ].join("");
 
-  for (let dayOffset = 6; dayOffset >= 0; dayOffset--) {
-    const saleDate = new Date(now);
-    saleDate.setDate(saleDate.getDate() - dayOffset);
-    saleDate.setHours(10, 0, 0, 0);
+    const sequence = (dailyCounters.get(dateStr) ?? 0) + 1;
+    dailyCounters.set(dateStr, sequence);
 
-    for (const { user: sp, shop } of salespersons) {
-      // 2-4 sales per day per shop
-      const numSales = 2 + Math.floor(Math.random() * 3);
-      for (let s = 0; s < numSales; s++) {
-        saleCounter++;
-        const saleTime = new Date(saleDate);
-        saleTime.setHours(9 + Math.floor(Math.random() * 9), Math.floor(Math.random() * 60));
+    const created = await prisma.sale.create({
+      data: {
+        saleNumber: `SL-${dateStr}-${String(sequence).padStart(4, "0")}`,
+        shopId: sale.shopId,
+        salespersonId: sale.salespersonId,
+        totalAmount: sale.totalAmount,
+        totalCost: sale.totalCost,
+        itemsCount: sale.items.length,
+        createdAt: sale.at,
+        items: {
+          create: sale.items.map((item) => ({ ...item, createdAt: sale.at })),
+        },
+      },
+      select: { id: true },
+    });
 
-        // Pick 1-3 random products
-        const numItems = 1 + Math.floor(Math.random() * 3);
-        const selectedProducts = [...products]
-          .sort(() => Math.random() - 0.5)
-          .slice(0, numItems);
+    for (const item of sale.items) {
+      const k = key(sale.shopId, item.productId);
+      const before = balances.get(k)!;
+      const after = before - item.quantity;
+      balances.set(k, after);
 
-        let totalAmount = 0;
-        let totalCost = 0;
-        const items: { productId: string; productName: string; quantity: number; unitPrice: number; unitCost: number; lineTotal: number }[] = [];
-
-        for (const product of selectedProducts) {
-          const qty = 1 + Math.floor(Math.random() * 3);
-          const unitPrice = Number(product.sellingPrice);
-          const unitCost = Number(product.costPrice);
-          const lineTotal = unitPrice * qty;
-          totalAmount += lineTotal;
-          totalCost += unitCost * qty;
-          items.push({
-            productId: product.id,
-            productName: product.name,
-            quantity: qty,
-            unitPrice,
-            unitCost,
-            lineTotal,
-          });
-        }
-
-        const dateStr = [
-          saleTime.getFullYear(),
-          String(saleTime.getMonth() + 1).padStart(2, "0"),
-          String(saleTime.getDate()).padStart(2, "0"),
-        ].join("");
-
-        await prisma.sale.create({
-          data: {
-            saleNumber: `SL-${dateStr}-${String(saleCounter).padStart(4, "0")}`,
-            shopId: shop.id,
-            salespersonId: sp.id,
-            totalAmount,
-            totalCost,
-            itemsCount: items.length,
-            createdAt: saleTime,
-            items: {
-              create: items.map((item) => ({
-                productId: item.productId,
-                productName: item.productName,
-                quantity: item.quantity,
-                unitPrice: item.unitPrice,
-                unitCost: item.unitCost,
-                lineTotal: item.lineTotal,
-                createdAt: saleTime,
-              })),
-            },
-          },
-        });
-      }
+      await prisma.stockMovement.create({
+        data: {
+          shopId: sale.shopId,
+          productId: item.productId,
+          movementType: "SALE",
+          quantityChange: -item.quantity,
+          quantityBefore: before,
+          quantityAfter: after,
+          referenceType: "sale",
+          referenceId: created.id,
+          performedBy: sale.salespersonId,
+          createdAt: sale.at,
+        },
+      });
     }
   }
-  console.log(`  ✓ Created ${saleCounter} sample sales (7 days of data)`);
+
+  // Balances now reflect every movement that was written.
+  for (const [k, quantity] of balances) {
+    const [shopId, productId] = k.split(":");
+    await prisma.shopInventory.update({
+      where: { shopId_productId: { shopId, productId } },
+      data: { quantity },
+    });
+  }
+
+  await prisma.saleCounter.deleteMany();
+  for (const [dateStr, lastNumber] of dailyCounters) {
+    await prisma.saleCounter.create({
+      data: {
+        businessDate: new Date(
+          `${dateStr.slice(0, 4)}-${dateStr.slice(4, 6)}-${dateStr.slice(6, 8)}T00:00:00Z`
+        ),
+        lastNumber,
+      },
+    });
+  }
+
+  console.log(
+    `  ✓ Created ${plannedSales.length} sales with matching stock movements`
+  );
 
   // ─── Summary ──────────────────────────────────────────────────────
   console.log("\n✅ Seeding complete!\n");

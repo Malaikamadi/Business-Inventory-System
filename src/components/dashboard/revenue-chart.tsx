@@ -52,9 +52,9 @@ export function RevenueChart({ data }: { data: SalesDataPoint[] }) {
             border: "1px solid hsl(220 13% 91%)",
             fontSize: 12,
           }}
-          formatter={(value: number) => [formatCurrency(value), "Revenue"]}
-          labelFormatter={(label: string) =>
-            new Date(`${label}T00:00:00`).toLocaleDateString("en-US", {
+          formatter={(value) => [formatCurrency(Number(value)), "Revenue"]}
+          labelFormatter={(label) =>
+            new Date(`${String(label)}T00:00:00`).toLocaleDateString("en-US", {
               month: "long",
               day: "numeric",
             })

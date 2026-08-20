@@ -46,7 +46,7 @@ export function ShopPerformanceChart({ data }: { data: ShopPerformance[] }) {
             border: "1px solid hsl(220 13% 91%)",
             fontSize: 12,
           }}
-          formatter={(value: number) => [formatCurrency(value), "Revenue"]}
+          formatter={(value) => [formatCurrency(Number(value)), "Revenue"]}
         />
         <Bar dataKey="revenue" fill="hsl(217 91% 60%)" radius={[0, 4, 4, 0]} barSize={20} />
       </BarChart>
