@@ -1,4 +1,5 @@
 import type { NextAuthConfig } from "next-auth";
+import { canAccessPath } from "@/lib/route-access";
 
 export const authConfig = {
   session: {
@@ -26,9 +27,9 @@ export const authConfig = {
     },
     async session({ session, token }) {
       session.user = {
+        ...session.user,
         id: token.id,
         email: token.email,
-        emailVerified: null,
         firstName: token.firstName,
         lastName: token.lastName,
         role: token.role,
@@ -37,23 +38,28 @@ export const authConfig = {
         shopIds: token.shopIds,
         primaryShopId: token.primaryShopId,
         isOwner: token.isOwner,
-      } as any;
+      };
       return session;
     },
     async authorized({ auth, request: { nextUrl } }) {
-      const isLoggedIn = !!auth?.user;
-      const isOnLogin = nextUrl.pathname === "/login";
-      const isOnApi = nextUrl.pathname.startsWith("/api");
+      const user = auth?.user;
+      const { pathname } = nextUrl;
 
-      if (isOnLogin) {
-        if (isLoggedIn) {
-          return Response.redirect(new URL("/dashboard", nextUrl));
-        }
+      if (pathname.startsWith("/api")) return true;
+
+      if (pathname === "/login") {
+        if (user) return Response.redirect(new URL("/dashboard", nextUrl));
         return true;
       }
 
-      if (!isOnApi && !isLoggedIn) {
-        return Response.redirect(new URL("/login", nextUrl));
+      if (!user) {
+        const loginUrl = new URL("/login", nextUrl);
+        if (pathname !== "/") loginUrl.searchParams.set("callbackUrl", pathname);
+        return Response.redirect(loginUrl);
+      }
+
+      if (!canAccessPath(pathname, user.permissions ?? [])) {
+        return Response.redirect(new URL("/dashboard", nextUrl));
       }
 
       return true;
