@@ -1,0 +1,183 @@
+import Link from "next/link";
+import { ArrowRightLeft } from "lucide-react";
+import { prisma } from "@/lib/db";
+import { MOVEMENT_TYPE_LABELS, PERMISSIONS } from "@/lib/constants";
+import { cn, formatDateTime, formatNumber } from "@/lib/utils";
+import { can, getCurrentUser, resolveShopScope } from "@/server/auth-context";
+import { listMovements } from "@/server/services/inventory.queries";
+import { PageHeader } from "@/components/shared/page-header";
+import { EmptyState } from "@/components/shared/empty-state";
+import { Pagination } from "@/components/shared/pagination";
+import { Card, CardContent } from "@/components/ui/card";
+import { MovementFilters } from "@/components/inventory/movement-filters";
+
+export const metadata = { title: "Stock movements · InvSys" };
+
+/** Links a movement back to the document that caused it, where one exists. */
+function referenceHref(referenceType: string | null, referenceId: string | null) {
+  if (!referenceId) return null;
+  if (referenceType === "sale" || referenceType === "sale_void") {
+    return `/sales/${referenceId}`;
+  }
+  return null;
+}
+
+export default async function MovementsPage(props: {
+  searchParams: Promise<{ shop?: string; type?: string; page?: string }>;
+}) {
+  const user = await getCurrentUser();
+  const params = await props.searchParams;
+
+  const shopIds = resolveShopScope(user, params.shop);
+  const canSeeAllShops = can(user, PERMISSIONS.STOCK_MOVEMENTS_VIEW_ALL);
+
+  const [result, shops] = await Promise.all([
+    listMovements({
+      shopIds,
+      movementType: params.type,
+      page: Number(params.page) || 1,
+    }),
+    canSeeAllShops
+      ? prisma.shop.findMany({
+          select: { id: true, name: true },
+          orderBy: { name: "asc" },
+        })
+      : Promise.resolve([]),
+  ]);
+
+  const query = new URLSearchParams();
+  if (params.shop) query.set("shop", params.shop);
+  if (params.type) query.set("type", params.type);
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="Stock movements"
+        description="Every change to stock, in order. This ledger is append-only and is what current quantities are derived from."
+      />
+
+      <MovementFilters
+        shops={shops}
+        selectedShop={params.shop ?? ""}
+        selectedType={params.type ?? ""}
+      />
+
+      <Card>
+        <CardContent className="p-0">
+          {result.data.length === 0 ? (
+            <EmptyState
+              icon={ArrowRightLeft}
+              title="No movements found"
+              description="Stock arrivals, sales, adjustments and transfers will all appear here."
+            />
+          ) : (
+            <>
+              <div className="data-table-wrapper">
+                <table className="w-full text-sm">
+                  <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-text-muted">
+                    <tr>
+                      <th className="px-4 py-3 font-medium">When</th>
+                      <th className="px-4 py-3 font-medium">Product</th>
+                      {canSeeAllShops && (
+                        <th className="hidden px-4 py-3 font-medium md:table-cell">
+                          Shop
+                        </th>
+                      )}
+                      <th className="px-4 py-3 font-medium">Type</th>
+                      <th className="px-4 py-3 text-right font-medium">
+                        Change
+                      </th>
+                      <th className="hidden px-4 py-3 text-right font-medium sm:table-cell">
+                        Balance after
+                      </th>
+                      <th className="hidden px-4 py-3 font-medium lg:table-cell">
+                        By
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border">
+                    {result.data.map((movement) => {
+                      const href = referenceHref(
+                        movement.referenceType,
+                        movement.referenceId
+                      );
+                      const increase = movement.quantityChange > 0;
+
+                      return (
+                        <tr key={movement.id} className="hover:bg-surface-hover">
+                          <td className="whitespace-nowrap px-4 py-3 text-text-secondary">
+                            {formatDateTime(movement.createdAt)}
+                          </td>
+                          <td className="px-4 py-3">
+                            <Link
+                              href={`/products/${movement.product.id}`}
+                              className="font-medium text-text-primary hover:text-accent"
+                            >
+                              {movement.product.name}
+                            </Link>
+                            <p className="text-xs text-text-muted">
+                              {movement.product.sku}
+                            </p>
+                          </td>
+                          {canSeeAllShops && (
+                            <td className="hidden px-4 py-3 text-text-secondary md:table-cell">
+                              {movement.shop.name}
+                            </td>
+                          )}
+                          <td className="px-4 py-3">
+                            {href ? (
+                              <Link
+                                href={href}
+                                className="text-text-secondary hover:text-accent"
+                              >
+                                {MOVEMENT_TYPE_LABELS[movement.movementType] ??
+                                  movement.movementType}
+                              </Link>
+                            ) : (
+                              <span className="text-text-secondary">
+                                {MOVEMENT_TYPE_LABELS[movement.movementType] ??
+                                  movement.movementType}
+                              </span>
+                            )}
+                            {movement.reason && (
+                              <p className="max-w-[220px] truncate text-xs text-text-muted">
+                                {movement.reason}
+                              </p>
+                            )}
+                          </td>
+                          <td
+                            className={cn(
+                              "px-4 py-3 text-right font-semibold tabular-nums",
+                              increase ? "text-success" : "text-danger"
+                            )}
+                          >
+                            {increase ? "+" : ""}
+                            {formatNumber(movement.quantityChange)}
+                          </td>
+                          <td className="hidden px-4 py-3 text-right tabular-nums text-text-secondary sm:table-cell">
+                            {formatNumber(movement.quantityAfter)}
+                          </td>
+                          <td className="hidden px-4 py-3 text-text-secondary lg:table-cell">
+                            {movement.user.firstName} {movement.user.lastName}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <Pagination
+                page={result.page}
+                totalPages={result.totalPages}
+                total={result.total}
+                baseParams={query}
+                basePath="/inventory/movements"
+              />
+            </>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
