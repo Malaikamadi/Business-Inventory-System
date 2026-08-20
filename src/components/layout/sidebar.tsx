@@ -22,18 +22,18 @@ export function Sidebar({ permissions }: { permissions: string[] }) {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 hidden h-screen flex-col border-r-2 border-white/10 bg-sidebar text-white transition-[width] duration-200 lg:flex",
+        "fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-white/10 bg-sidebar text-white transition-[width] duration-200 lg:flex",
         collapsed ? "w-[68px]" : "w-[260px]"
       )}
     >
       <div className="flex h-16 items-center border-b border-white/10 px-4">
         <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-accent font-display text-sm font-bold text-primary">
-            i.
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-accent text-xs font-semibold text-white">
+            IS
           </div>
           {!collapsed && (
-            <span className="font-display text-lg font-bold tracking-tight">
-              inv.
+            <span className="text-lg font-semibold tracking-tight">
+              InvSys
             </span>
           )}
         </Link>

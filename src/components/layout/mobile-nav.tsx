@@ -46,10 +46,10 @@ export function MobileNav({
       >
         <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent font-display text-sm font-bold text-primary">
-              i.
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-accent text-xs font-semibold text-white">
+              IS
             </div>
-            <span className="font-display text-base font-bold">inv.</span>
+            <span className="text-base font-semibold">InvSys</span>
           </div>
           <Button
             variant="ghost"
@@ -103,7 +103,7 @@ export function MobileTabBar({ permissions }: { permissions: string[] }) {
   const items = mobileBarItemsFor(permissions);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-primary bg-surface/95 backdrop-blur-sm lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 backdrop-blur-sm lg:hidden">
       <div className="mx-auto flex max-w-lg">
         {items.map((item) => {
           const active =
@@ -117,7 +117,7 @@ export function MobileTabBar({ permissions }: { permissions: string[] }) {
               aria-current={active ? "page" : undefined}
               className={cn(
                 "flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors",
-                active ? "bg-accent text-primary" : "text-text-muted hover:text-text-primary"
+                active ? "bg-accent text-white" : "text-text-muted hover:text-text-primary"
               )}
             >
               <item.icon className="h-5 w-5" />

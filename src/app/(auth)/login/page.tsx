@@ -43,14 +43,14 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError("that combo didn't hit. try again.");
+        setError("Those details did not match. Please try again.");
         return;
       }
 
       router.push("/dashboard");
       router.refresh();
     } catch {
-      setError("something glitched. one more time?");
+      setError("Something went wrong. Please try again.");
     } finally {
       setLoadingEmail(null);
     }
@@ -66,22 +66,22 @@ export default function LoginPage() {
   return (
     <div className="mx-auto w-full max-w-3xl animate-scale-in">
       <div className="mb-8 text-center">
-        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent font-display text-xl font-bold text-primary shadow-[4px_4px_0_0_#c8f04d]">
-          i.
+        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-lg bg-accent text-lg font-semibold text-white">
+          IS
         </div>
-        <h1 className="font-display text-4xl font-bold tracking-tight text-white">
-          inv.
+        <h1 className="text-3xl font-semibold tracking-tight text-white">
+          InvSys
         </h1>
         <p className="mt-2 text-base text-white/70">
-          who&apos;s clocking in?
+          Sign in to manage shops, stock, and sales
         </p>
       </div>
 
       {status === "authenticated" && current && (
-        <div className="mb-6 flex flex-col gap-3 rounded-2xl border-2 border-accent bg-white/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-6 flex flex-col gap-3 rounded-lg border border-white/15 bg-white/5 p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-white/80">
-            you&apos;re already in as{" "}
-            <span className="font-semibold text-accent">
+            Signed in as{" "}
+            <span className="font-semibold text-white">
               {current.firstName} {current.lastName}
             </span>
             <span className="capitalize text-white/50"> · {current.role}</span>
@@ -91,13 +91,13 @@ export default function LoginPage() {
             size="sm"
             onClick={() => router.push("/dashboard")}
           >
-            keep going
+            Continue to dashboard
           </Button>
         </div>
       )}
 
       {error && (
-        <div className="mb-6 rounded-2xl border-2 border-danger bg-danger/15 p-3 text-sm text-white">
+        <div className="mb-6 rounded-lg border border-danger/40 bg-danger/15 p-3 text-sm text-white">
           {error}
         </div>
       )}
@@ -113,10 +113,10 @@ export default function LoginPage() {
               type="button"
               disabled={busy}
               onClick={() => void signInAs(account.email, DEMO_PASSWORD)}
-              className="rounded-2xl border-2 border-white/20 bg-white/5 p-5 text-left transition-all hover:-translate-y-0.5 hover:border-accent hover:bg-white/10 disabled:opacity-60"
+              className="rounded-xl border border-white/15 bg-white/5 p-5 text-left transition-colors hover:border-accent hover:bg-white/10 disabled:opacity-60"
             >
               <div className="mb-3 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-white">
                   {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -124,10 +124,10 @@ export default function LoginPage() {
                   )}
                 </div>
                 <div>
-                  <p className="text-[11px] font-semibold uppercase tracking-widest text-accent">
+                  <p className="text-[11px] font-semibold uppercase tracking-widest text-blue-200">
                     {account.role}
                   </p>
-                  <p className="font-display text-base font-bold text-white">
+                  <p className="text-base font-semibold text-white">
                     {account.name}
                   </p>
                 </div>
@@ -141,11 +141,11 @@ export default function LoginPage() {
         })}
       </div>
 
-      <Card className="mt-8 border-white/20 bg-white/5 text-white shadow-none">
+      <Card className="mt-8 border-white/15 bg-white/5 text-white shadow-none">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-white">got an email instead?</CardTitle>
+          <CardTitle className="text-white">Sign in with email</CardTitle>
           <CardDescription className="text-white/50">
-            old school login. still valid.
+            Use your staff email and password.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -186,12 +186,12 @@ export default function LoginPage() {
               {busy && loadingEmail === email ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  pulling up…
+                  Signing in…
                 </>
               ) : (
                 <>
                   <Lock className="h-4 w-4" />
-                  let me in
+                  Sign in
                 </>
               )}
             </Button>
