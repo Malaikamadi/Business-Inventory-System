@@ -13,6 +13,7 @@
     "db:studio": "prisma studio",
     "verify:rules": "tsx scripts/verify-business-rules.ts",
     "verify:routes": "./scripts/smoke.sh",
+    "verify:images": "tsx scripts/verify-image-storage.ts",
     "images:prune": "tsx scripts/prune-images.ts"
   },
   "dependencies": {

@@ -12,9 +12,7 @@
 import { readdir, stat, unlink } from "node:fs/promises";
 import path from "node:path";
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../src/lib/db";
 
 const UPLOAD_ROOT =
   process.env.UPLOAD_DIR ?? path.join(process.cwd(), "storage", "uploads");

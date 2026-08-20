@@ -74,7 +74,10 @@ export async function readStoredImage(filename: string) {
   if (!resolved) return null;
 
   try {
-    const body = await readFile(resolved.absolutePath);
+    // The upload directory is runtime state, not build input. Without this the
+    // bundler traces the entire project into the deploy output on the
+    // assumption that the path could reach any file.
+    const body = await readFile(/* turbopackIgnore: true */ resolved.absolutePath);
     return { body, mime: resolved.mime };
   } catch {
     return null;
@@ -104,8 +107,13 @@ export async function storeProductImage(file: File): Promise<string> {
   const digest = createHash("sha256").update(bytes).digest("hex");
   const name = `${digest}.${kind.ext}`;
 
-  await mkdir(PRODUCT_IMAGE_DIR, { recursive: true });
-  await writeFile(path.join(PRODUCT_IMAGE_DIR, name), bytes);
+  await mkdir(/* turbopackIgnore: true */ PRODUCT_IMAGE_DIR, {
+    recursive: true,
+  });
+  await writeFile(
+    /* turbopackIgnore: true */ path.join(PRODUCT_IMAGE_DIR, name),
+    bytes
+  );
 
   return `/api/images/products/${name}`;
 }

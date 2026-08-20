@@ -50,17 +50,20 @@ npm run dev
 | `AUTH_SECRET` | Session signing key — generate with `openssl rand -base64 32` |
 | `AUTH_URL` | Canonical app URL |
 | `NEXT_PUBLIC_BUSINESS_TIMEZONE` | Business calendar for "today" and "this month" (defaults to `UTC`) |
+| `NEXT_PUBLIC_CURRENCY` | ISO currency code for display (defaults to `SLE`) |
+| `NEXT_PUBLIC_CURRENCY_LOCALE` | Locale used to format amounts (defaults to `en-SL`) |
+| `UPLOAD_DIR` | Where product photos are written (defaults to `./storage/uploads`) |
 
 ### Seeded accounts
 
 All use the password `password123`. Replace them before any real deployment.
 
-| Email | Role | Shop |
-| --- | --- | --- |
-| `admin@invsys.com` | Owner | All shops |
-| `james@invsys.com` | Salesperson | Downtown Store |
-| `sarah@invsys.com` | Salesperson | Westside Mall |
-| `michael@invsys.com` | Salesperson | Harbor Point |
+| Email | Name | Role | Shop |
+| --- | --- | --- | --- |
+| `admin@invsys.com` | Ram Jalloh | Owner | All shops |
+| `fatmata@invsys.com` | Fatmata Kamara | Salesperson | Freetown Central |
+| `mohamed@invsys.com` | Mohamed Sesay | Salesperson | Lumley Branch |
+| `aminata@invsys.com` | Aminata Bangura | Salesperson | Bo Town Branch |
 
 ## Scripts
 
@@ -74,6 +77,8 @@ All use the password `password123`. Replace them before any real deployment.
 | `npm run db:seed` | Reset and seed sample data |
 | `npm run verify:rules` | Assert inventory and sales invariants against the database |
 | `npm run verify:routes` | Sign in as a seeded user and check every route's status |
+| `npm run verify:images` | Assert the image pipeline accepts and rejects the right files |
+| `npm run images:prune` | Report unreferenced product photos (`-- --delete` to remove) |
 
 `verify:rules` creates and removes its own shops and products, but it writes to
 the configured database — point it at a development database, not production.
@@ -120,6 +125,37 @@ product later does not rewrite history.
 Timestamps are stored in UTC. "Today" and "this month" are resolved against
 `NEXT_PUBLIC_BUSINESS_TIMEZONE`, so a shop's trading day does not depend on
 where the server happens to run.
+
+## Money
+
+Amounts are stored as `DECIMAL(12,2)` and formatted only for display, so
+changing the display currency never rewrites stored data. The default is the
+Sierra Leonean leone: `SLE`, the redenominated new leone, rather than the old
+`SLL`, which formats without a symbol and denotes amounts a thousand times
+larger.
+
+There is no multi-currency support. Every amount in the database is assumed to
+be in one currency; if the business ever trades in a second one, prices and
+sale lines will need their own currency column rather than a change here.
+
+## Product photos
+
+Photos are downscaled in the browser before upload, because a phone camera
+produces several megabytes and the staff taking the picture pay for that data.
+The server re-validates independently: it identifies the file from its leading
+bytes rather than trusting the declared type or extension, rejects SVG since it
+can carry script that would run on our own origin, and names the stored file
+after the SHA-256 of its contents.
+
+Content-addressed names mean an image URL always returns the same bytes, so
+responses are marked immutable, and uploading the same photo twice costs one
+file. Files live in `UPLOAD_DIR` rather than `public/`, which keeps them out of
+the build and lets a deployment mount them on a volume that survives redeploys.
+Products may only reference paths produced by this uploader, so nobody with
+catalogue access can point the app at a third-party host.
+
+Uploads happen before the product form is submitted, so an abandoned form
+leaves an unreferenced file behind; `npm run images:prune` reclaims those.
 
 ## Known gaps
 
