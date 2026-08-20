@@ -59,7 +59,7 @@ const ALL_NAV_ITEMS: NavItem[] = [
     anyOf: [PERMISSIONS.SHOPS_VIEW_ALL, PERMISSIONS.SHOPS_VIEW_ASSIGNED],
   },
   {
-    label: "Record Sale",
+    label: "Ring it up",
     href: "/sales/new",
     icon: ShoppingCart,
     anyOf: [PERMISSIONS.SALES_CREATE],
@@ -172,7 +172,7 @@ export function mobileBarItemsFor(permissions: string[]): NavItem[] {
   ];
 
   if (permissions.includes(PERMISSIONS.SALES_CREATE)) {
-    items.push({ label: "Sell", href: "/sales/new", icon: ShoppingCart });
+    items.push({ label: "Ring", href: "/sales/new", icon: ShoppingCart });
   }
   if (
     permissions.includes(PERMISSIONS.INVENTORY_VIEW_ALL) ||

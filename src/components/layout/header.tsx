@@ -31,7 +31,7 @@ export function Header({ user, shopName, onMenuClick }: HeaderProps) {
   const initials = getInitials(user.firstName, user.lastName);
 
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-surface/80 px-4 backdrop-blur-sm lg:px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b-2 border-primary bg-surface/90 px-4 backdrop-blur-sm lg:px-6">
       <div className="flex items-center gap-3">
         <Button
           variant="ghost"
@@ -44,18 +44,16 @@ export function Header({ user, shopName, onMenuClick }: HeaderProps) {
         </Button>
 
         <Link href="/dashboard" className="flex items-center gap-2 lg:hidden">
-          <div className="flex h-7 w-7 items-center justify-center rounded-md bg-accent text-xs font-bold text-white">
-            IS
+          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-accent font-display text-xs font-bold text-primary">
+            i.
           </div>
-          <span className="text-sm font-semibold">InvSys</span>
+          <span className="font-display text-sm font-bold">inv.</span>
         </Link>
 
         {shopName && (
-          <div className="hidden items-center gap-2 lg:flex">
-            <Store className="h-4 w-4 text-text-muted" />
-            <span className="text-sm font-medium text-text-secondary">
-              {shopName}
-            </span>
+          <div className="hidden items-center gap-2 rounded-full border-2 border-primary bg-accent px-3 py-1 lg:flex">
+            <Store className="h-3.5 w-3.5 text-primary" />
+            <span className="text-xs font-semibold text-primary">{shopName}</span>
           </div>
         )}
       </div>
@@ -106,7 +104,7 @@ export function Header({ user, shopName, onMenuClick }: HeaderProps) {
               onClick={() => signOut({ callbackUrl: "/login" })}
             >
               <LogOut className="mr-2 h-4 w-4" />
-              Sign Out
+              I&apos;m out
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

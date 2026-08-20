@@ -30,7 +30,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { InventoryTable } from "@/components/inventory/inventory-table";
 import { RecentSalesTable } from "@/components/dashboard/recent-sales-table";
 
-export const metadata = { title: "Shop · InvSys" };
+export const metadata = { title: "Shop · inv." };
 
 export default async function ShopDetailPage(props: {
   params: Promise<{ shopId: string }>;
@@ -131,13 +131,13 @@ export default async function ShopDetailPage(props: {
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard
-          title="Revenue this month"
+          title="this month's bag"
           value={formatCurrency(Number(monthSales._sum.totalAmount ?? 0))}
           subtitle={`${formatNumber(monthSales._count)} sales`}
           icon={Banknote}
         />
         <StatCard
-          title="Stock on hand"
+          title="on the floor"
           value={formatNumber(units._sum.quantity ?? 0)}
           subtitle={
             canSeeCost ? `${formatCurrency(inventoryValue)} at cost` : undefined
@@ -145,7 +145,7 @@ export default async function ShopDetailPage(props: {
           icon={Boxes}
         />
         <StatCard
-          title="Running low"
+          title="almost gone"
           value={formatNumber(alerts.lowStock)}
           icon={AlertTriangle}
           iconClassName={
@@ -155,7 +155,7 @@ export default async function ShopDetailPage(props: {
           }
         />
         <StatCard
-          title="Out of stock"
+          title="sold out"
           value={formatNumber(alerts.outOfStock)}
           icon={PackageX}
           iconClassName={
@@ -167,12 +167,12 @@ export default async function ShopDetailPage(props: {
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
         <Card className="xl:col-span-2">
           <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle>Recent sales</CardTitle>
+            <CardTitle>just now</CardTitle>
             <Link
               href={`/sales?shop=${shop.id}`}
               className="text-sm font-medium text-accent hover:underline"
             >
-              View all
+              see all
             </Link>
           </CardHeader>
           <CardContent className="p-0">
@@ -187,7 +187,7 @@ export default async function ShopDetailPage(props: {
           <CardContent>
             {shop.staffAssignments.length === 0 ? (
               <p className="py-6 text-center text-sm text-text-muted">
-                No staff assigned to this shop.
+                nobody on this shop yet.
               </p>
             ) : (
               <ul className="space-y-3">

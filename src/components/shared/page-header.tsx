@@ -32,11 +32,11 @@ export function PageHeader({
       )}
     >
       <div>
-        <h1 className="text-2xl font-bold tracking-tight text-text-primary">
+        <h1 className="text-2xl font-semibold tracking-tight text-text-primary sm:text-3xl">
           {title}
         </h1>
         {description && (
-          <p className="mt-1 text-sm text-text-secondary">{description}</p>
+          <p className="mt-1.5 max-w-xl text-sm text-text-secondary">{description}</p>
         )}
       </div>
       <div className="flex items-center gap-3">

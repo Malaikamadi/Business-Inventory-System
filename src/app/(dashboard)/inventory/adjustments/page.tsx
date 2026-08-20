@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StockEntryForm } from "@/components/inventory/stock-entry-form";
 
-export const metadata = { title: "Stock adjustments · InvSys" };
+export const metadata = { title: "Stock adjustments · inv." };
 
 export default async function AdjustmentsPage() {
   const user = await getCurrentUser();
@@ -45,7 +45,7 @@ export default async function AdjustmentsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Stock adjustments"
-        description="Correct stock that changed without a sale or delivery. Every adjustment needs a reason and is attributed to you."
+        description="fix a count that didn't come from a sale or a delivery. always leave a reason."
       />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">

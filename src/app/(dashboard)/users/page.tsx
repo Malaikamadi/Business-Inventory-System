@@ -11,7 +11,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export const metadata = { title: "Users · InvSys" };
+export const metadata = { title: "Users · inv." };
 
 export default async function UsersPage() {
   const user = await getCurrentUser();
@@ -37,7 +37,7 @@ export default async function UsersPage() {
     <div className="space-y-6">
       <PageHeader
         title="Users"
-        description="Staff accounts, their role, and the shops they can access."
+        description="who's on the team, their role, and which shops they can touch."
       >
         {can(user, PERMISSIONS.USERS_CREATE) && (
           <Button asChild>
@@ -54,8 +54,8 @@ export default async function UsersPage() {
           {users.length === 0 ? (
             <EmptyState
               icon={Users}
-              title="No users yet"
-              description="Add staff accounts so they can record sales at their shop."
+              title="nobody here yet"
+              description="add staff so someone can actually ring up sales."
             />
           ) : (
             <div className="data-table-wrapper">

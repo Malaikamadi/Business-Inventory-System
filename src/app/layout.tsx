@@ -1,11 +1,17 @@
 import type { Metadata } from "next";
+import { Inter } from "next/font/google";
 import { Providers } from "@/components/providers";
 import "./globals.css";
 
+const inter = Inter({
+  subsets: ["latin"],
+  variable: "--font-inter",
+});
+
 export const metadata: Metadata = {
-  title: "InvSys — Inventory & Sales Management",
+  title: "InvSys — inventory and sales",
   description:
-    "Multi-branch inventory and sales management system for business owners.",
+    "Inventory and sales management for multi-shop businesses.",
 };
 
 export default function RootLayout({
@@ -15,7 +21,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className="min-h-screen bg-background antialiased">
+      <body className={`${inter.variable} min-h-screen bg-background antialiased`}>
         <Providers>{children}</Providers>
       </body>
     </html>

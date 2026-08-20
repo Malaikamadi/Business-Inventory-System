@@ -198,7 +198,7 @@ export function UserForm({
               id="role"
               value={values.roleId}
               onChange={(event) => set("roleId", event.target.value)}
-              className="h-10 w-full rounded-md border border-input bg-surface px-3 text-sm sm:max-w-xs"
+              className="field-select w-full sm:max-w-xs"
               required
             >
               {roles.map((role) => (

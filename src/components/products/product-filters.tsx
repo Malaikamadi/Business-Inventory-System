@@ -55,7 +55,7 @@ export function ProductFilters({
         value={selectedCategory}
         onChange={(event) => apply("category", event.target.value)}
         aria-label="Filter by category"
-        className="h-10 rounded-md border border-input bg-surface px-3 text-sm"
+        className="field-select"
       >
         <option value="">All categories</option>
         {categories.map((category) => (
@@ -69,7 +69,7 @@ export function ProductFilters({
         value={selectedStatus}
         onChange={(event) => apply("status", event.target.value)}
         aria-label="Filter by status"
-        className="h-10 rounded-md border border-input bg-surface px-3 text-sm"
+        className="field-select"
       >
         <option value="">Active</option>
         <option value="DISCONTINUED">Discontinued</option>

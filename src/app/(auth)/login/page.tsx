@@ -43,14 +43,14 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError("Could not sign in with that account. Check the email and password.");
+        setError("that combo didn't hit. try again.");
         return;
       }
 
       router.push("/dashboard");
       router.refresh();
     } catch {
-      setError("Something went wrong. Please try again.");
+      setError("something glitched. one more time?");
     } finally {
       setLoadingEmail(null);
     }
@@ -64,39 +64,40 @@ export default function LoginPage() {
   const current = session?.user;
 
   return (
-    <div className="w-full max-w-3xl animate-scale-in">
+    <div className="mx-auto w-full max-w-3xl animate-scale-in">
       <div className="mb-8 text-center">
-        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl bg-accent text-lg font-bold text-white">
-          IS
+        <div className="mb-4 inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-accent font-display text-xl font-bold text-primary shadow-[4px_4px_0_0_#c8f04d]">
+          i.
         </div>
-        <h1 className="text-2xl font-bold text-white">InvSys</h1>
-        <p className="mt-1 text-sm text-white/60">
-          Choose a role to sign in. Each role opens a different set of pages.
+        <h1 className="font-display text-4xl font-bold tracking-tight text-white">
+          inv.
+        </h1>
+        <p className="mt-2 text-base text-white/70">
+          who&apos;s clocking in?
         </p>
       </div>
 
       {status === "authenticated" && current && (
-        <div className="mb-6 flex flex-col gap-3 rounded-lg border border-white/10 bg-white/5 p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="mb-6 flex flex-col gap-3 rounded-2xl border-2 border-accent bg-white/5 p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-white/80">
-            Signed in as{" "}
-            <span className="font-medium text-white">
+            you&apos;re already in as{" "}
+            <span className="font-semibold text-accent">
               {current.firstName} {current.lastName}
             </span>
             <span className="capitalize text-white/50"> · {current.role}</span>
           </p>
           <Button
             type="button"
-            variant="secondary"
             size="sm"
             onClick={() => router.push("/dashboard")}
           >
-            Continue to dashboard
+            keep going
           </Button>
         </div>
       )}
 
       {error && (
-        <div className="mb-6 rounded-md border border-danger/20 bg-danger/10 p-3 text-sm text-danger">
+        <div className="mb-6 rounded-2xl border-2 border-danger bg-danger/15 p-3 text-sm text-white">
           {error}
         </div>
       )}
@@ -112,10 +113,10 @@ export default function LoginPage() {
               type="button"
               disabled={busy}
               onClick={() => void signInAs(account.email, DEMO_PASSWORD)}
-              className="rounded-xl border border-white/10 bg-white/5 p-5 text-left transition-colors hover:border-accent hover:bg-white/10 disabled:opacity-60"
+              className="rounded-2xl border-2 border-white/20 bg-white/5 p-5 text-left transition-all hover:-translate-y-0.5 hover:border-accent hover:bg-white/10 disabled:opacity-60"
             >
               <div className="mb-3 flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent/20 text-accent">
+                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-accent text-primary">
                   {loading ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
@@ -123,24 +124,28 @@ export default function LoginPage() {
                   )}
                 </div>
                 <div>
-                  <p className="text-xs font-medium uppercase tracking-wide text-accent">
+                  <p className="text-[11px] font-semibold uppercase tracking-widest text-accent">
                     {account.role}
                   </p>
-                  <p className="text-sm font-semibold text-white">{account.name}</p>
+                  <p className="font-display text-base font-bold text-white">
+                    {account.name}
+                  </p>
                 </div>
               </div>
               <p className="text-sm text-white/70">{account.summary}</p>
-              <p className="mt-2 text-xs text-white/40">{account.shop}</p>
+              <p className="mt-2 text-xs font-medium text-white/40">
+                {account.shop}
+              </p>
             </button>
           );
         })}
       </div>
 
-      <Card className="mt-8 border-white/10 bg-white/5 shadow-2xl backdrop-blur-sm">
+      <Card className="mt-8 border-white/20 bg-white/5 text-white shadow-none">
         <CardHeader className="space-y-1 text-center">
-          <CardTitle className="text-lg text-white">Sign in with email</CardTitle>
+          <CardTitle className="text-white">got an email instead?</CardTitle>
           <CardDescription className="text-white/50">
-            For accounts that are not listed above.
+            old school login. still valid.
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -157,7 +162,7 @@ export default function LoginPage() {
                 onChange={(event) => setEmail(event.target.value)}
                 required
                 autoComplete="email"
-                className="border-white/10 bg-white/10 text-white placeholder:text-white/30 focus-visible:ring-accent"
+                className="border-white/30 bg-white/10 text-white placeholder:text-white/30"
               />
             </div>
 
@@ -173,7 +178,7 @@ export default function LoginPage() {
                 onChange={(event) => setPassword(event.target.value)}
                 required
                 autoComplete="current-password"
-                className="border-white/10 bg-white/10 text-white placeholder:text-white/30 focus-visible:ring-accent"
+                className="border-white/30 bg-white/10 text-white placeholder:text-white/30"
               />
             </div>
 
@@ -181,12 +186,12 @@ export default function LoginPage() {
               {busy && loadingEmail === email ? (
                 <>
                   <Loader2 className="h-4 w-4 animate-spin" />
-                  Signing in…
+                  pulling up…
                 </>
               ) : (
                 <>
                   <Lock className="h-4 w-4" />
-                  Sign in
+                  let me in
                 </>
               )}
             </Button>

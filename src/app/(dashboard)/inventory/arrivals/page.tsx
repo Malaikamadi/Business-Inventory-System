@@ -8,7 +8,7 @@ import { PageHeader } from "@/components/shared/page-header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { StockEntryForm } from "@/components/inventory/stock-entry-form";
 
-export const metadata = { title: "Stock arrivals · InvSys" };
+export const metadata = { title: "Stock arrivals · inv." };
 
 export default async function ArrivalsPage() {
   const user = await getCurrentUser();
@@ -45,7 +45,7 @@ export default async function ArrivalsPage() {
     <div className="space-y-6">
       <PageHeader
         title="Stock arrivals"
-        description="Record incoming deliveries. Each arrival is written to the ledger and increases the shop's stock."
+        description="stock showed up. log it and the shop count goes up."
       />
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">

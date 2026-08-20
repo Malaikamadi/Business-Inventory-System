@@ -9,7 +9,7 @@ import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
 import { CategoryForm } from "@/components/products/category-form";
 
-export const metadata = { title: "Categories · InvSys" };
+export const metadata = { title: "Categories · inv." };
 
 export default async function CategoriesPage() {
   const user = await getCurrentUser();
@@ -21,7 +21,7 @@ export default async function CategoriesPage() {
     <div className="space-y-6">
       <PageHeader
         title="Categories"
-        description="Group products for reporting and easier searching."
+        description="buckets for products. makes searching and reports less of a mess."
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -31,8 +31,8 @@ export default async function CategoriesPage() {
               {categories.length === 0 ? (
                 <EmptyState
                   icon={Tags}
-                  title="No categories yet"
-                  description="Create your first category to start organising the product catalog."
+                  title="no buckets yet"
+                  description="make the first category so the catalog isn't one giant pile."
                 />
               ) : (
                 <div className="data-table-wrapper">

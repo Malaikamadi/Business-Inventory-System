@@ -12,7 +12,7 @@ import { Pagination } from "@/components/shared/pagination";
 import { Card, CardContent } from "@/components/ui/card";
 import { MovementFilters } from "@/components/inventory/movement-filters";
 
-export const metadata = { title: "Stock movements · InvSys" };
+export const metadata = { title: "Stock movements · inv." };
 
 /** Links a movement back to the document that caused it, where one exists. */
 function referenceHref(referenceType: string | null, referenceId: string | null) {
@@ -78,12 +78,12 @@ export default async function MovementsPage(props: {
         description={
           product
             ? `Every change to ${product.name}, in order.`
-            : "Every change to stock, in order. This ledger is append-only and is what current quantities are derived from."
+            : "every stock change, in order. this ledger is the source of truth — no editing history."
         }
       />
 
       {product && (
-        <div className="flex items-center gap-3 rounded-md border border-border bg-muted/50 px-4 py-2.5 text-sm">
+        <div className="flex items-center gap-3 rounded-2xl border-2 border-primary bg-accent/40 px-4 py-2.5 text-sm">
           <span className="text-text-secondary">
             Filtered to <strong className="text-text-primary">{product.name}</strong>
           </span>
@@ -91,7 +91,7 @@ export default async function MovementsPage(props: {
             href="/inventory/movements"
             className="font-medium text-accent hover:underline"
           >
-            Show all products
+            show everything
           </Link>
         </div>
       )}

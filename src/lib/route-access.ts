@@ -100,7 +100,7 @@ const RULES: RouteRule[] = [
   {
     pattern: new RegExp(`^/sales/new$`),
     anyOf: [PERMISSIONS.SALES_CREATE],
-    section: "Record sale",
+    section: "Ring it up",
   },
   {
     pattern: new RegExp(`^/sales(?:/|$)`),

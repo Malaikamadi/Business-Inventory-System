@@ -48,7 +48,7 @@ export function SalesFilters({
         <Input
           value={term}
           onChange={(event) => setTerm(event.target.value)}
-          placeholder="Search sale number or product"
+          placeholder="sale # or product"
           className="pl-9"
           aria-label="Search sales"
         />
@@ -59,7 +59,7 @@ export function SalesFilters({
           value={selectedShop}
           onChange={(event) => apply("shop", event.target.value)}
           aria-label="Filter by shop"
-          className="h-10 rounded-md border border-input bg-surface px-3 text-sm"
+          className="field-select"
         >
           <option value="">All shops</option>
           {shops.map((shop) => (
@@ -74,7 +74,7 @@ export function SalesFilters({
         value={selectedStatus}
         onChange={(event) => apply("status", event.target.value)}
         aria-label="Filter by status"
-        className="h-10 rounded-md border border-input bg-surface px-3 text-sm"
+        className="field-select"
       >
         <option value="">All statuses</option>
         <option value="COMPLETED">Completed</option>

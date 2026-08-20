@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChangePasswordForm } from "@/components/settings/change-password-form";
 
-export const metadata = { title: "Profile · InvSys" };
+export const metadata = { title: "Profile · inv." };
 
 export default async function ProfilePage() {
   const user = await getCurrentUser();
@@ -29,8 +29,8 @@ export default async function ProfilePage() {
   return (
     <div className="mx-auto max-w-3xl space-y-6">
       <PageHeader
-        title="Your profile"
-        description="Your account details and access."
+        title="it's you"
+        description="your account, your access, that's it."
       />
 
       <Card>

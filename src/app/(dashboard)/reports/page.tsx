@@ -19,7 +19,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { PeriodTabs } from "@/components/reports/period-tabs";
 
-export const metadata = { title: "Reports · InvSys" };
+export const metadata = { title: "Reports · inv." };
 
 const PERIODS = {
   today: { label: "Today", days: 1 },
@@ -84,8 +84,8 @@ export default async function ReportsPage(props: {
         title="Reports"
         description={
           isGlobal
-            ? "Sales performance by shop, product and salesperson. Voided sales are excluded."
-            : "Sales performance for the shop you are assigned to. Voided sales are excluded."
+            ? "who sold what, where. voided sales don't count — they were never the bag."
+            : "how your shop did. voided sales don't count — they were never the bag."
         }
       />
 
@@ -154,7 +154,7 @@ export default async function ReportsPage(props: {
                 formatCurrency(shop.revenue),
               ],
             }))}
-            emptyMessage="No sales in this period."
+            emptyMessage="quiet stretch. no sales in this window."
           />
         )}
 
@@ -172,7 +172,7 @@ export default async function ReportsPage(props: {
               formatCurrency(person.revenue),
             ],
           }))}
-          emptyMessage="No sales in this period."
+          emptyMessage="quiet stretch. no sales in this window."
         />
       </div>
 
@@ -188,7 +188,7 @@ export default async function ReportsPage(props: {
             formatCurrency(product.totalRevenue),
           ],
         }))}
-        emptyMessage="No products sold in this period."
+        emptyMessage="nothing sold in this window. yet."
       />
     </div>
   );

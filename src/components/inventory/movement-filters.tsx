@@ -35,7 +35,7 @@ export function MovementFilters({
           value={selectedShop}
           onChange={(event) => apply("shop", event.target.value)}
           aria-label="Filter by shop"
-          className="h-10 rounded-md border border-input bg-surface px-3 text-sm"
+          className="field-select"
         >
           <option value="">All shops</option>
           {shops.map((shop) => (
@@ -50,7 +50,7 @@ export function MovementFilters({
         value={selectedType}
         onChange={(event) => apply("type", event.target.value)}
         aria-label="Filter by movement type"
-        className="h-10 rounded-md border border-input bg-surface px-3 text-sm"
+        className="field-select"
       >
         <option value="">All movement types</option>
         {Object.entries(MOVEMENT_TYPE_LABELS).map(([value, label]) => (

@@ -26,13 +26,15 @@ export function StatCard({
   return (
     <div
       className={cn(
-        "kpi-card rounded-lg border border-border bg-surface p-6",
+        "kpi-card rounded-xl border border-border bg-surface p-5 shadow-sm",
         className
       )}
     >
       <div className="flex items-start justify-between">
         <div className="space-y-1">
-          <p className="text-sm font-medium text-text-secondary">{title}</p>
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-text-muted">
+            {title}
+          </p>
           <p className="text-2xl font-semibold tracking-tight text-text-primary">
             {value}
           </p>

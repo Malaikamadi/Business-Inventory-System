@@ -46,10 +46,10 @@ export function MobileNav({
       >
         <div className="flex h-16 items-center justify-between border-b border-white/10 px-4">
           <div className="flex items-center gap-3">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-sm font-bold text-white">
-              IS
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-accent font-display text-sm font-bold text-primary">
+              i.
             </div>
-            <span className="text-base font-semibold">InvSys</span>
+            <span className="font-display text-base font-bold">inv.</span>
           </div>
           <Button
             variant="ghost"
@@ -69,10 +69,10 @@ export function MobileNav({
               href={item.href}
               onClick={onClose}
               className={cn(
-                "flex items-center gap-3 rounded-md px-3 py-3 text-sm font-medium transition-colors",
+                "flex items-center gap-3 rounded-xl px-3 py-3 text-sm font-medium transition-colors",
                 pathname === item.href
-                  ? "bg-sidebar-active/20 text-white"
-                  : "text-white/60 hover:bg-sidebar-hover hover:text-white"
+                  ? "nav-link-active font-semibold"
+                  : "text-white/65 hover:bg-sidebar-hover hover:text-white"
               )}
             >
               <item.icon className="h-[18px] w-[18px] shrink-0" />
@@ -103,7 +103,7 @@ export function MobileTabBar({ permissions }: { permissions: string[] }) {
   const items = mobileBarItemsFor(permissions);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 backdrop-blur-sm lg:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t-2 border-primary bg-surface/95 backdrop-blur-sm lg:hidden">
       <div className="mx-auto flex max-w-lg">
         {items.map((item) => {
           const active =
@@ -116,8 +116,8 @@ export function MobileTabBar({ permissions }: { permissions: string[] }) {
               href={item.href}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 text-[11px] font-medium transition-colors",
-                active ? "text-accent" : "text-text-muted hover:text-text-secondary"
+                "flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 text-[11px] font-semibold transition-colors",
+                active ? "bg-accent text-primary" : "text-text-muted hover:text-text-primary"
               )}
             >
               <item.icon className="h-5 w-5" />

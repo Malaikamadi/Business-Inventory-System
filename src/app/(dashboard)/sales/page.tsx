@@ -14,7 +14,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SalesFilters } from "@/components/sales/sales-filters";
 
-export const metadata = { title: "Sales · InvSys" };
+export const metadata = { title: "Sales · inv." };
 
 export default async function SalesPage(props: {
   searchParams: Promise<{
@@ -66,15 +66,15 @@ export default async function SalesPage(props: {
         title="Sales"
         description={
           canSeeAllShops
-            ? "Sales recorded by shop staff across the business."
-            : "Sales you have recorded at your shop."
+            ? "everything the shops rang up. voided ones still show — they just don't count."
+            : "your till history. voided ones still show — they just don't count."
         }
       >
         {can(user, PERMISSIONS.SALES_CREATE) && (
           <Button asChild>
             <Link href="/sales/new">
               <Plus className="h-4 w-4" />
-              Record sale
+              Ring it up
             </Link>
           </Button>
         )}
@@ -92,11 +92,11 @@ export default async function SalesPage(props: {
           {result.data.length === 0 ? (
             <EmptyState
               icon={Receipt}
-              title="No sales found"
+              title="nothing here"
               description={
                 params.q || params.status || params.shop
-                  ? "No sales match the current filters. Try clearing them."
-                  : "Sales will appear here as soon as they are recorded."
+                  ? "those filters are too picky. clear them and try again."
+                  : "once someone rings a sale, it lands here."
               }
             />
           ) : (

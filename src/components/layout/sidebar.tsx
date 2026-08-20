@@ -22,17 +22,19 @@ export function Sidebar({ permissions }: { permissions: string[] }) {
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 hidden h-screen flex-col border-r border-white/5 bg-sidebar text-white transition-[width] duration-200 lg:flex",
+        "fixed left-0 top-0 z-40 hidden h-screen flex-col border-r-2 border-white/10 bg-sidebar text-white transition-[width] duration-200 lg:flex",
         collapsed ? "w-[68px]" : "w-[260px]"
       )}
     >
       <div className="flex h-16 items-center border-b border-white/10 px-4">
         <Link href="/dashboard" className="flex items-center gap-3">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-accent text-sm font-bold text-white">
-            IS
+          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-accent font-display text-sm font-bold text-primary">
+            i.
           </div>
           {!collapsed && (
-            <span className="text-base font-semibold tracking-tight">InvSys</span>
+            <span className="font-display text-lg font-bold tracking-tight">
+              inv.
+            </span>
           )}
         </Link>
       </div>
@@ -100,7 +102,7 @@ function SidebarItem({
       <div>
         <div
           className={cn(
-            "flex items-center rounded-md",
+            "flex items-center rounded-xl",
             (sectionActive || hasActiveChild) && "bg-sidebar-hover"
           )}
         >
@@ -176,11 +178,11 @@ function NavLink({
       href={href}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "relative flex items-center gap-3 rounded-md text-sm font-medium transition-colors",
+        "relative flex items-center gap-3 rounded-xl text-sm font-medium transition-colors",
         compact ? "px-3 py-2" : "px-3 py-2.5",
         isActive
-          ? "nav-link-active bg-sidebar-active/20 text-white"
-          : "text-white/60 hover:bg-sidebar-hover hover:text-white",
+          ? "nav-link-active font-semibold"
+          : "text-white/65 hover:bg-sidebar-hover hover:text-white",
         collapsed && "justify-center px-0",
         className
       )}

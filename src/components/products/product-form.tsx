@@ -146,7 +146,7 @@ export function ProductForm({
                 id="category"
                 value={values.categoryId}
                 onChange={(event) => set("categoryId", event.target.value)}
-                className="h-10 w-full rounded-md border border-input bg-surface px-3 text-sm"
+                className="field-select w-full"
               >
                 <option value="">Uncategorised</option>
                 {categories.map((category) => (

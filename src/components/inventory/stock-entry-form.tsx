@@ -127,7 +127,7 @@ export function StockEntryForm({
                 id="shop"
                 value={shopId}
                 onChange={(event) => setShopId(event.target.value)}
-                className="h-10 w-full rounded-md border border-input bg-surface px-3 text-sm"
+                className="field-select w-full"
                 required
               >
                 {shops.map((shop) => (
@@ -145,7 +145,7 @@ export function StockEntryForm({
               id="product"
               value={productId}
               onChange={(event) => setProductId(event.target.value)}
-              className="h-10 w-full rounded-md border border-input bg-surface px-3 text-sm"
+              className="field-select w-full"
               required
             >
               <option value="">Select a product</option>

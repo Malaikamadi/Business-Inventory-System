@@ -68,7 +68,7 @@ export function InventoryFilters({
           value={selectedShop}
           onChange={(event) => apply("shop", event.target.value)}
           aria-label="Filter by shop"
-          className="h-10 rounded-md border border-input bg-surface px-3 text-sm"
+          className="field-select"
         >
           <option value="">All shops</option>
           {shops.map((shop) => (
@@ -83,7 +83,7 @@ export function InventoryFilters({
         value={selectedCategory}
         onChange={(event) => apply("category", event.target.value)}
         aria-label="Filter by category"
-        className="h-10 rounded-md border border-input bg-surface px-3 text-sm"
+        className="field-select"
       >
         <option value="">All categories</option>
         {categories.map((category) => (
@@ -98,7 +98,7 @@ export function InventoryFilters({
           value={selectedStatus}
           onChange={(event) => apply("status", event.target.value)}
           aria-label="Filter by stock status"
-          className="h-10 rounded-md border border-input bg-surface px-3 text-sm"
+          className="field-select"
         >
           <option value="">All stock levels</option>
           <option value="in">In stock</option>

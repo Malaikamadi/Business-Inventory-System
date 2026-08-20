@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 
-export const metadata = { title: "Shops · InvSys" };
+export const metadata = { title: "Shops · inv." };
 
 export default async function ShopsPage() {
   const user = await getCurrentUser();
@@ -59,8 +59,8 @@ export default async function ShopsPage() {
         title={canSeeAll ? "Shops" : shops.length === 1 ? shops[0].name : "Your shops"}
         description={
           canSeeAll
-            ? "Every branch, its staff, and how it is performing this month."
-            : "The branch you are assigned to. You can view its stock and sales, but not add or edit shops."
+            ? "every branch, who's on it, and how the month's going."
+            : "your shop. you can look around — adding or editing shops is an owner thing."
         }
       >
         {canCreate && (
@@ -76,11 +76,11 @@ export default async function ShopsPage() {
       {shops.length === 0 ? (
         <EmptyState
           icon={Store}
-          title={canSeeAll ? "No shops yet" : "No shop assigned"}
+          title={canSeeAll ? "no shops yet" : "no shop assigned"}
           description={
             canSeeAll
-              ? "Add your first shop to start tracking inventory and sales."
-              : "Ask the owner to assign you to a shop before you can record sales."
+              ? "drop in the first branch and we can start tracking the bag."
+              : "ask the owner to put you on a shop so you can ring stuff up."
           }
           actionLabel={canCreate ? "Add shop" : undefined}
           actionHref={canCreate ? "/shops/new" : undefined}

@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import { ProductFilters } from "@/components/products/product-filters";
 import { ProductThumbnail } from "@/components/products/product-thumbnail";
 
-export const metadata = { title: "Products · InvSys" };
+export const metadata = { title: "Products · inv." };
 
 export default async function ProductsPage(props: {
   searchParams: Promise<{
@@ -58,7 +58,7 @@ export default async function ProductsPage(props: {
     <div className="space-y-6">
       <PageHeader
         title="Products"
-        description="The product catalog is business-wide. Stock quantities belong to individual shops."
+        description="the catalog is shared. stock lives at each shop."
       >
         {canManage && (
           <Button asChild>
@@ -82,11 +82,11 @@ export default async function ProductsPage(props: {
           {result.data.length === 0 ? (
             <EmptyState
               icon={Package}
-              title="No products found"
+              title="no products yet"
               description={
                 params.q || params.category
-                  ? "No products match the current filters. Try clearing them."
-                  : "Add your first product to start tracking stock across shops."
+                  ? "those filters are doing too much. clear them."
+                  : "add the first product and shops can start stocking it."
               }
               actionLabel={canManage ? "Add product" : undefined}
               actionHref={canManage ? "/products/new" : undefined}

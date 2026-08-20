@@ -139,7 +139,7 @@ export function ShopForm({
                   onChange={(event) =>
                     set("status", event.target.value as "ACTIVE" | "INACTIVE")
                   }
-                  className="h-10 w-full rounded-md border border-input bg-surface px-3 text-sm"
+                  className="field-select w-full"
                 >
                   <option value="ACTIVE">Active</option>
                   <option value="INACTIVE">Inactive</option>

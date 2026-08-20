@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ToggleUserActive } from "@/components/users/toggle-user-active";
 
-export const metadata = { title: "User · InvSys" };
+export const metadata = { title: "User · inv." };
 
 export default async function UserDetailPage(props: {
   params: Promise<{ userId: string }>;

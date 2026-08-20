@@ -23,13 +23,13 @@ export async function StockAlerts({ shopIds }: { shopIds?: string[] } = {}) {
           <CardHeader className="flex-row items-center justify-between space-y-0">
             <CardTitle className="flex items-center gap-2 text-danger">
               <PackageX className="h-4 w-4" />
-              Out of stock ({formatNumber(outOfStock.total)})
+              sold out ({formatNumber(outOfStock.total)})
             </CardTitle>
             <Link
               href="/inventory/out-of-stock"
               className="text-sm font-medium text-accent hover:underline"
             >
-              View all
+              see all
             </Link>
           </CardHeader>
           <CardContent>
@@ -57,13 +57,13 @@ export async function StockAlerts({ shopIds }: { shopIds?: string[] } = {}) {
           <CardHeader className="flex-row items-center justify-between space-y-0">
             <CardTitle className="flex items-center gap-2 text-warning-foreground">
               <AlertTriangle className="h-4 w-4" />
-              Running low ({formatNumber(lowStock.total)})
+              almost gone ({formatNumber(lowStock.total)})
             </CardTitle>
             <Link
               href="/inventory/low-stock"
               className="text-sm font-medium text-accent hover:underline"
             >
-              View all
+              see all
             </Link>
           </CardHeader>
           <CardContent>

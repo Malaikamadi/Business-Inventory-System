@@ -7,7 +7,7 @@ import { SaleForm } from "@/components/sales/sale-form";
 import { EmptyState } from "@/components/shared/empty-state";
 import { PageHeader } from "@/components/shared/page-header";
 
-export const metadata = { title: "Record sale · InvSys" };
+export const metadata = { title: "ring it up · inv." };
 
 export default async function NewSalePage(props: {
   searchParams: Promise<{ shop?: string }>;
@@ -37,8 +37,8 @@ export default async function NewSalePage(props: {
   if (!activeShopId) {
     return (
       <EmptyState
-        title="No shop available"
-        description="You are not assigned to an active shop, so sales cannot be recorded. Ask the business owner to assign you to one."
+        title="no shop available"
+        description="you're not on an active shop, so you can't ring anything up. ask the owner to assign you."
       />
     );
   }
@@ -48,8 +48,8 @@ export default async function NewSalePage(props: {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Record sale"
-        description="Add products, confirm the quantities, and the stock is updated automatically."
+        title="ring it up"
+        description="add the stuff, hit lock it in, stock updates itself. easy."
       />
       <SaleForm
         shops={selectableShops}
