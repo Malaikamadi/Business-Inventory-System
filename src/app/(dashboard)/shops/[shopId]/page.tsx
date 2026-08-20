@@ -4,7 +4,7 @@ import {
   AlertTriangle,
   ArrowLeft,
   Boxes,
-  DollarSign,
+  Banknote,
   PackageX,
   Pencil,
 } from "lucide-react";
@@ -128,7 +128,7 @@ export default async function ShopDetailPage(props: {
           title="Revenue this month"
           value={formatCurrency(Number(monthSales._sum.totalAmount ?? 0))}
           subtitle={`${formatNumber(monthSales._count)} sales`}
-          icon={DollarSign}
+          icon={Banknote}
         />
         <StatCard
           title="Stock on hand"

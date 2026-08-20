@@ -1,18 +1,22 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
+import { CURRENCY_CODE, CURRENCY_LOCALE } from "@/lib/currency";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
 /**
- * Format a number as currency (USD by default).
- * Easily changeable for different currencies.
+ * Format an amount in the business currency, e.g. `Le 1,234.50`.
+ *
+ * Accepts a string so `Prisma.Decimal` values can be passed through with
+ * `.toString()` without a lossy float conversion on the way.
  */
 export function formatCurrency(
   amount: number | string,
-  currency = "USD",
-  locale = "en-US"
+  currency = CURRENCY_CODE,
+  locale = CURRENCY_LOCALE
 ): string {
   const num = typeof amount === "string" ? parseFloat(amount) : amount;
   return new Intl.NumberFormat(locale, {
@@ -20,15 +24,32 @@ export function formatCurrency(
     currency,
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
-  }).format(num);
+  }).format(Number.isFinite(num) ? num : 0);
 }
 
 /**
- * Format a number with commas.
+ * Shortened form for chart axes, where full precision does not fit.
+ */
+export function formatCompactCurrency(
+  amount: number,
+  currency = CURRENCY_CODE,
+  locale = CURRENCY_LOCALE
+): string {
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    notation: "compact",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 1,
+  }).format(Number.isFinite(amount) ? amount : 0);
+}
+
+/**
+ * Format a number with thousands separators.
  */
 export function formatNumber(num: number | string, locale = "en-US"): string {
   const n = typeof num === "string" ? parseFloat(num) : num;
-  return new Intl.NumberFormat(locale).format(n);
+  return new Intl.NumberFormat(locale).format(Number.isFinite(n) ? n : 0);
 }
 
 /**

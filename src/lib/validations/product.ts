@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { isStoredImagePath } from "@/lib/images";
+
 export const productSchema = z.object({
   name: z.string().min(1, "Product name is required").max(200),
   sku: z.string().min(1, "SKU is required").max(100),
@@ -18,7 +20,14 @@ export const productSchema = z.object({
     .int("Threshold must be a whole number")
     .min(0, "Threshold must be non-negative")
     .default(10),
-  imageUrl: z.string().url().optional().or(z.literal("")),
+  // Restricted to paths produced by our own uploader. Accepting arbitrary URLs
+  // here would let anyone who can edit a product point the catalogue at a
+  // third-party host, which leaks page views and breaks when that host does.
+  imageUrl: z
+    .string()
+    .refine(isStoredImagePath, "That image is not a valid upload.")
+    .optional()
+    .or(z.literal("")),
 });
 
 export type ProductFormData = z.infer<typeof productSchema>;

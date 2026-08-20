@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   AlertTriangle,
-  DollarSign,
+  Banknote,
   PackageX,
   Plus,
   Receipt,
@@ -72,7 +72,7 @@ export async function ShopDashboard({ user }: { user: SessionUser }) {
         <StatCard
           title="Revenue today"
           value={formatCurrency(kpis.todayRevenue)}
-          icon={DollarSign}
+          icon={Banknote}
         />
         <StatCard
           title="Sales today"

@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { formatCurrency } from "@/lib/utils";
+import { formatCompactCurrency, formatCurrency } from "@/lib/utils";
 import type { SalesDataPoint } from "@/types";
 
 function shortDate(iso: string) {
@@ -40,10 +40,8 @@ export function RevenueChart({ data }: { data: SalesDataPoint[] }) {
           tickLine={false}
           axisLine={false}
           tick={{ fontSize: 12, fill: "hsl(215 14% 65%)" }}
-          width={64}
-          tickFormatter={(value: number) =>
-            value >= 1000 ? `${(value / 1000).toFixed(1)}k` : String(value)
-          }
+          width={72}
+          tickFormatter={(value: number) => formatCompactCurrency(value)}
         />
         <Tooltip
           cursor={{ stroke: "hsl(220 13% 91%)" }}

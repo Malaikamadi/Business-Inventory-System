@@ -9,7 +9,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { formatCurrency, truncate } from "@/lib/utils";
+import { formatCompactCurrency, formatCurrency, truncate } from "@/lib/utils";
 import type { ShopPerformance } from "@/types";
 
 export function ShopPerformanceChart({ data }: { data: ShopPerformance[] }) {
@@ -26,9 +26,7 @@ export function ShopPerformanceChart({ data }: { data: ShopPerformance[] }) {
           tickLine={false}
           axisLine={false}
           tick={{ fontSize: 12, fill: "hsl(215 14% 65%)" }}
-          tickFormatter={(value: number) =>
-            value >= 1000 ? `${(value / 1000).toFixed(1)}k` : String(value)
-          }
+          tickFormatter={(value: number) => formatCompactCurrency(value)}
         />
         <YAxis
           type="category"

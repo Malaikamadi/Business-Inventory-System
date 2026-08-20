@@ -2,7 +2,7 @@ import Link from "next/link";
 import {
   AlertTriangle,
   Boxes,
-  DollarSign,
+  Banknote,
   Store,
   TrendingUp,
 } from "lucide-react";
@@ -58,7 +58,7 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
           title="Revenue today"
           value={formatCurrency(kpis.totalRevenue)}
           subtitle={`${formatNumber(kpis.totalSales)} ${kpis.totalSales === 1 ? "sale" : "sales"}`}
-          icon={DollarSign}
+          icon={Banknote}
         />
         <StatCard
           title="Revenue this month"
