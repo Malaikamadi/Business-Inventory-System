@@ -118,31 +118,31 @@ async function main() {
   // ─── Shops ────────────────────────────────────────────────────────
   const shopA = await prisma.shop.create({
     data: {
-      name: "Downtown Store",
-      location: "City Center",
-      address: "123 Main Street, Downtown, NY 10001",
-      phone: "+1-555-0101",
-      email: "downtown@invsys.com",
+      name: "Freetown Central",
+      location: "Central Freetown",
+      address: "24 Siaka Stevens Street, Freetown",
+      phone: "+232 76 100 101",
+      email: "central@invsys.com",
     },
   });
 
   const shopB = await prisma.shop.create({
     data: {
-      name: "Westside Mall",
-      location: "West District",
-      address: "456 Commerce Blvd, Mall Level 2, NY 10023",
-      phone: "+1-555-0102",
-      email: "westside@invsys.com",
+      name: "Lumley Branch",
+      location: "Lumley, Freetown",
+      address: "8 Lumley Beach Road, Lumley, Freetown",
+      phone: "+232 76 100 102",
+      email: "lumley@invsys.com",
     },
   });
 
   const shopC = await prisma.shop.create({
     data: {
-      name: "Harbor Point",
-      location: "East Harbor",
-      address: "789 Harbor Drive, Suite 4, NY 10038",
-      phone: "+1-555-0103",
-      email: "harbor@invsys.com",
+      name: "Bo Town Branch",
+      location: "Bo, Southern Province",
+      address: "15 Fenton Road, Bo",
+      phone: "+232 76 100 103",
+      email: "bo@invsys.com",
     },
   });
   console.log("  ✓ Created 3 shops");
@@ -154,20 +154,20 @@ async function main() {
     data: {
       email: "admin@invsys.com",
       passwordHash,
-      firstName: "Alex",
-      lastName: "Morgan",
-      phone: "+1-555-0001",
+      firstName: "Ram",
+      lastName: "Jalloh",
+      phone: "+232 76 100 001",
       roleId: ownerRole.id,
     },
   });
 
   const sp1 = await prisma.user.create({
     data: {
-      email: "james@invsys.com",
+      email: "fatmata@invsys.com",
       passwordHash,
-      firstName: "James",
-      lastName: "Wilson",
-      phone: "+1-555-0002",
+      firstName: "Fatmata",
+      lastName: "Kamara",
+      phone: "+232 76 100 002",
       roleId: salespersonRole.id,
       shopAssignments: {
         create: { shopId: shopA.id, isPrimary: true },
@@ -177,11 +177,11 @@ async function main() {
 
   const sp2 = await prisma.user.create({
     data: {
-      email: "sarah@invsys.com",
+      email: "mohamed@invsys.com",
       passwordHash,
-      firstName: "Sarah",
-      lastName: "Chen",
-      phone: "+1-555-0003",
+      firstName: "Mohamed",
+      lastName: "Sesay",
+      phone: "+232 76 100 003",
       roleId: salespersonRole.id,
       shopAssignments: {
         create: { shopId: shopB.id, isPrimary: true },
@@ -191,11 +191,11 @@ async function main() {
 
   const sp3 = await prisma.user.create({
     data: {
-      email: "michael@invsys.com",
+      email: "aminata@invsys.com",
       passwordHash,
-      firstName: "Michael",
-      lastName: "Brown",
-      phone: "+1-555-0004",
+      firstName: "Aminata",
+      lastName: "Bangura",
+      phone: "+232 76 100 004",
       roleId: salespersonRole.id,
       shopAssignments: {
         create: { shopId: shopC.id, isPrimary: true },
@@ -223,51 +223,54 @@ async function main() {
   console.log("  ✓ Created 5 categories");
 
   // ─── Products ─────────────────────────────────────────────────────
+  // Prices are in new leones (SLE) at roughly Freetown retail levels, so the
+  // dashboards and reports read like real trading figures rather than the
+  // single-digit amounts a dollar price list would produce.
   const products = await Promise.all([
     prisma.product.create({
-      data: { name: "Coca-Cola 500ml", sku: "BEV-CC-500", categoryId: beverages.id, costPrice: 0.75, sellingPrice: 1.50, lowStockThreshold: 20, description: "Classic Coca-Cola in 500ml PET bottle" },
+      data: { name: "Coca-Cola 500ml", sku: "BEV-CC-500", categoryId: beverages.id, costPrice: 8.00, sellingPrice: 13.00, lowStockThreshold: 20, description: "Classic Coca-Cola in 500ml PET bottle" },
     }),
     prisma.product.create({
-      data: { name: "Pepsi 500ml", sku: "BEV-PP-500", categoryId: beverages.id, costPrice: 0.70, sellingPrice: 1.50, lowStockThreshold: 20, description: "Pepsi cola in 500ml PET bottle" },
+      data: { name: "Pepsi 500ml", sku: "BEV-PP-500", categoryId: beverages.id, costPrice: 8.00, sellingPrice: 13.00, lowStockThreshold: 20, description: "Pepsi cola in 500ml PET bottle" },
     }),
     prisma.product.create({
-      data: { name: "Spring Water 1L", sku: "BEV-SW-1L", categoryId: beverages.id, costPrice: 0.30, sellingPrice: 1.00, lowStockThreshold: 30, description: "Natural spring water, 1 liter" },
+      data: { name: "Spring Water 1L", sku: "BEV-SW-1L", categoryId: beverages.id, costPrice: 3.50, sellingPrice: 6.00, lowStockThreshold: 30, description: "Natural spring water, 1 liter" },
     }),
     prisma.product.create({
-      data: { name: "Orange Juice 330ml", sku: "BEV-OJ-330", categoryId: beverages.id, costPrice: 0.90, sellingPrice: 2.00, lowStockThreshold: 15, description: "Fresh orange juice, 330ml carton" },
+      data: { name: "Orange Juice 330ml", sku: "BEV-OJ-330", categoryId: beverages.id, costPrice: 11.00, sellingPrice: 18.00, lowStockThreshold: 15, description: "Fresh orange juice, 330ml carton" },
     }),
     prisma.product.create({
-      data: { name: "Lay's Classic Chips", sku: "SNK-LC-150", categoryId: snacks.id, costPrice: 1.00, sellingPrice: 2.50, lowStockThreshold: 15, description: "Lay's classic potato chips, 150g bag" },
+      data: { name: "Lay's Classic Chips", sku: "SNK-LC-150", categoryId: snacks.id, costPrice: 13.00, sellingPrice: 22.00, lowStockThreshold: 15, description: "Lay's classic potato chips, 150g bag" },
     }),
     prisma.product.create({
-      data: { name: "Pringles Original", sku: "SNK-PR-165", categoryId: snacks.id, costPrice: 1.50, sellingPrice: 3.50, lowStockThreshold: 10, description: "Pringles original flavor, 165g can" },
+      data: { name: "Pringles Original", sku: "SNK-PR-165", categoryId: snacks.id, costPrice: 32.00, sellingPrice: 55.00, lowStockThreshold: 10, description: "Pringles original flavor, 165g can" },
     }),
     prisma.product.create({
-      data: { name: "Snickers Bar", sku: "SNK-SN-52", categoryId: snacks.id, costPrice: 0.60, sellingPrice: 1.25, lowStockThreshold: 25, description: "Snickers chocolate bar, 52g" },
+      data: { name: "Snickers Bar", sku: "SNK-SN-52", categoryId: snacks.id, costPrice: 7.50, sellingPrice: 13.00, lowStockThreshold: 25, description: "Snickers chocolate bar, 52g" },
     }),
     prisma.product.create({
-      data: { name: "USB-C Cable 1m", sku: "ELC-UC-1M", categoryId: electronics.id, costPrice: 3.00, sellingPrice: 8.99, lowStockThreshold: 10, description: "USB-C charging cable, 1 meter" },
+      data: { name: "USB-C Cable 1m", sku: "ELC-UC-1M", categoryId: electronics.id, costPrice: 28.00, sellingPrice: 55.00, lowStockThreshold: 10, description: "USB-C charging cable, 1 meter" },
     }),
     prisma.product.create({
-      data: { name: "Wireless Earbuds", sku: "ELC-WE-BT", categoryId: electronics.id, costPrice: 15.00, sellingPrice: 39.99, lowStockThreshold: 5, description: "Bluetooth wireless earbuds with case" },
+      data: { name: "Wireless Earbuds", sku: "ELC-WE-BT", categoryId: electronics.id, costPrice: 240.00, sellingPrice: 430.00, lowStockThreshold: 5, description: "Bluetooth wireless earbuds with case" },
     }),
     prisma.product.create({
-      data: { name: "Phone Case Universal", sku: "ELC-PC-UNI", categoryId: electronics.id, costPrice: 2.50, sellingPrice: 7.99, lowStockThreshold: 10, description: "Universal silicone phone case" },
+      data: { name: "Phone Case Universal", sku: "ELC-PC-UNI", categoryId: electronics.id, costPrice: 22.00, sellingPrice: 45.00, lowStockThreshold: 10, description: "Universal silicone phone case" },
     }),
     prisma.product.create({
-      data: { name: "Cotton T-Shirt Black", sku: "CLT-TS-BLK", categoryId: clothing.id, costPrice: 5.00, sellingPrice: 14.99, lowStockThreshold: 8, description: "100% cotton t-shirt, black, unisex" },
+      data: { name: "Cotton T-Shirt Black", sku: "CLT-TS-BLK", categoryId: clothing.id, costPrice: 65.00, sellingPrice: 130.00, lowStockThreshold: 8, description: "100% cotton t-shirt, black, unisex" },
     }),
     prisma.product.create({
-      data: { name: "Cotton T-Shirt White", sku: "CLT-TS-WHT", categoryId: clothing.id, costPrice: 5.00, sellingPrice: 14.99, lowStockThreshold: 8, description: "100% cotton t-shirt, white, unisex" },
+      data: { name: "Cotton T-Shirt White", sku: "CLT-TS-WHT", categoryId: clothing.id, costPrice: 65.00, sellingPrice: 130.00, lowStockThreshold: 8, description: "100% cotton t-shirt, white, unisex" },
     }),
     prisma.product.create({
-      data: { name: "Hand Sanitizer 250ml", sku: "PC-HS-250", categoryId: personalCare.id, costPrice: 1.50, sellingPrice: 3.99, lowStockThreshold: 12, description: "Antibacterial hand sanitizer, 250ml" },
+      data: { name: "Hand Sanitizer 250ml", sku: "PC-HS-250", categoryId: personalCare.id, costPrice: 18.00, sellingPrice: 34.00, lowStockThreshold: 12, description: "Antibacterial hand sanitizer, 250ml" },
     }),
     prisma.product.create({
-      data: { name: "Face Mask Box (50pc)", sku: "PC-FM-50", categoryId: personalCare.id, costPrice: 4.00, sellingPrice: 9.99, lowStockThreshold: 5, description: "Disposable face masks, box of 50" },
+      data: { name: "Face Mask Box (50pc)", sku: "PC-FM-50", categoryId: personalCare.id, costPrice: 42.00, sellingPrice: 78.00, lowStockThreshold: 5, description: "Disposable face masks, box of 50" },
     }),
     prisma.product.create({
-      data: { name: "Toothpaste Mint 100ml", sku: "PC-TP-100", categoryId: personalCare.id, costPrice: 1.20, sellingPrice: 2.99, lowStockThreshold: 10, description: "Mint toothpaste, 100ml tube" },
+      data: { name: "Toothpaste Mint 100ml", sku: "PC-TP-100", categoryId: personalCare.id, costPrice: 16.00, sellingPrice: 29.00, lowStockThreshold: 10, description: "Mint toothpaste, 100ml tube" },
     }),
   ]);
   console.log(`  ✓ Created ${products.length} products`);
@@ -289,11 +292,11 @@ async function main() {
     [12, 8, 15], // USB-C Cable
     [6, 4, 7], // Wireless Earbuds
     [15, 10, 12], // Phone Case
-    [5, 8, 10], // T-Shirt Black (low at Downtown)
-    [3, 6, 12], // T-Shirt White (low at Downtown)
+    [5, 8, 10], // T-Shirt Black (low at Freetown Central)
+    [3, 6, 12], // T-Shirt White (low at Freetown Central)
     [14, 10, 18], // Hand Sanitizer
-    [4, 2, 6], // Face Masks (low at Westside)
-    [0, 8, 12], // Toothpaste (out of stock at Downtown)
+    [4, 2, 6], // Face Masks (low at Lumley)
+    [0, 8, 12], // Toothpaste (out of stock at Freetown Central)
   ];
 
   const salespersons = [
@@ -502,10 +505,10 @@ async function main() {
   console.log("\n✅ Seeding complete!\n");
   console.log("  Login Credentials:");
   console.log("  ──────────────────────────────────────");
-  console.log("  Owner:        admin@invsys.com / password123");
-  console.log("  Salesperson:  james@invsys.com / password123  (Downtown Store)");
-  console.log("  Salesperson:  sarah@invsys.com / password123  (Westside Mall)");
-  console.log("  Salesperson:  michael@invsys.com / password123 (Harbor Point)");
+  console.log("  Owner (Ram Jalloh):  admin@invsys.com / password123");
+  console.log("  Fatmata Kamara:      fatmata@invsys.com / password123  (Freetown Central)");
+  console.log("  Mohamed Sesay:       mohamed@invsys.com / password123  (Lumley Branch)");
+  console.log("  Aminata Bangura:     aminata@invsys.com / password123  (Bo Town Branch)");
   console.log("");
 }
 

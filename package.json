@@ -12,7 +12,8 @@
     "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
     "verify:rules": "tsx scripts/verify-business-rules.ts",
-    "verify:routes": "./scripts/smoke.sh"
+    "verify:routes": "./scripts/smoke.sh",
+    "images:prune": "tsx scripts/prune-images.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.1",
