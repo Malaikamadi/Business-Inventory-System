@@ -1,0 +1,83 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useToast } from "@/components/ui/toast";
+import { createCategoryAction } from "@/server/actions/product.actions";
+
+export function CategoryForm() {
+  const router = useRouter();
+  const { toast } = useToast();
+  const [isPending, startTransition] = useTransition();
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+
+  function submit(event: React.FormEvent) {
+    event.preventDefault();
+
+    startTransition(async () => {
+      const result = await createCategoryAction({ name, description });
+
+      if (!result.success) {
+        toast({
+          variant: "error",
+          title: "Could not create category",
+          description: result.error,
+        });
+        return;
+      }
+
+      toast({ variant: "success", title: `${name} created` });
+      setName("");
+      setDescription("");
+      router.refresh();
+    });
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>New category</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={submit} className="space-y-4">
+          <div className="space-y-1.5">
+            <Label htmlFor="category-name">Name</Label>
+            <Input
+              id="category-name"
+              value={name}
+              onChange={(event) => setName(event.target.value)}
+              placeholder="e.g. Beverages"
+              required
+              maxLength={100}
+            />
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="category-description">Description</Label>
+            <Input
+              id="category-description"
+              value={description}
+              onChange={(event) => setDescription(event.target.value)}
+              placeholder="Optional"
+            />
+          </div>
+
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={isPending || !name.trim()}
+          >
+            <Plus className="h-4 w-4" />
+            {isPending ? "Creating…" : "Create category"}
+          </Button>
+        </form>
+      </CardContent>
+    </Card>
+  );
+}
