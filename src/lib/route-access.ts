@@ -125,6 +125,11 @@ const RULES: RouteRule[] = [
   },
 
   {
+    pattern: new RegExp(`^/reviews(?:/|$)`),
+    anyOf: [PERMISSIONS.AUDIT_VIEW],
+    section: "Reviews",
+  },
+  {
     pattern: new RegExp(`^/audit-log(?:/|$)`),
     anyOf: [PERMISSIONS.AUDIT_VIEW],
     section: "Audit log",

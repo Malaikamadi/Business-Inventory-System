@@ -4,7 +4,7 @@ import { Package } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SIZES = {
-  sm: { box: "h-10 w-10 rounded-md", icon: "h-4 w-4", px: 40 },
+  sm: { box: "h-12 w-12 rounded-md", icon: "h-4 w-4", px: 48 },
   md: { box: "h-14 w-14 rounded-lg", icon: "h-5 w-5", px: 56 },
   lg: { box: "h-24 w-24 rounded-lg", icon: "h-7 w-7", px: 96 },
   xl: { box: "h-full w-full rounded-xl", icon: "h-10 w-10", px: 512 },

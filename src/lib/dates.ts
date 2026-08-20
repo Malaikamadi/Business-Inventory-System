@@ -69,3 +69,28 @@ export function startOfBusinessDaysAgo(
     timeZone
   );
 }
+
+/** Hour of day (0–23) in the business timezone. */
+export function businessHour(
+  date: Date,
+  timeZone: string = BUSINESS_TIMEZONE
+): number {
+  const formatted = new Intl.DateTimeFormat("en-GB", {
+    timeZone,
+    hour: "2-digit",
+    hourCycle: "h23",
+  }).format(date);
+  return Number(formatted);
+}
+
+/**
+ * Stock and sales after close are unusual for this business. 22:00–06:00
+ * local is treated as outside normal hours.
+ */
+export function isOutsideBusinessHours(
+  date: Date,
+  timeZone: string = BUSINESS_TIMEZONE
+): boolean {
+  const hour = businessHour(date, timeZone);
+  return hour >= 22 || hour < 6;
+}

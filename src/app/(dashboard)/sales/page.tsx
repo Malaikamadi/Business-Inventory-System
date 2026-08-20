@@ -2,10 +2,18 @@ import Link from "next/link";
 import { Plus, Receipt } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
-import { formatCurrency, formatDateTime, formatNumber } from "@/lib/utils";
+import {
+  formatCurrency,
+  formatNumber,
+  formatRelativeTime,
+  isFreshTimestamp,
+} from "@/lib/utils";
 import { can, getCurrentUser, resolveShopScope } from "@/server/auth-context";
 import { requireCanAny } from "@/server/page-guards";
 import { listSales } from "@/server/services/sales.queries";
+import { voidCountsLastWindow } from "@/server/services/review.service";
+import { isQuickVoid } from "@/lib/review-rules";
+import { REVIEW } from "@/lib/constants";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Pagination } from "@/components/shared/pagination";
@@ -13,8 +21,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { SalesFilters } from "@/components/sales/sales-filters";
+import { ReviewBadge } from "@/components/review/review-badge";
+import { LiveRefresh } from "@/components/shared/live-refresh";
 
 export const metadata = { title: "Sales · InvSys" };
+export const dynamic = "force-dynamic";
 
 export default async function SalesPage(props: {
   searchParams: Promise<{
@@ -55,6 +66,13 @@ export default async function SalesPage(props: {
     page: Number(params.page) || 1,
   });
 
+  const canReview = can(user, PERMISSIONS.AUDIT_VIEW);
+  const voidCounts = canReview
+    ? await voidCountsLastWindow(
+        result.data.map((sale) => sale.salesperson.id)
+      )
+    : new Map<string, number>();
+
   const query = new URLSearchParams();
   if (params.shop) query.set("shop", params.shop);
   if (params.status) query.set("status", params.status);
@@ -62,6 +80,7 @@ export default async function SalesPage(props: {
 
   return (
     <div className="space-y-6">
+      <LiveRefresh />
       <PageHeader
         title="Sales"
         description={
@@ -136,17 +155,32 @@ export default async function SalesPage(props: {
                     {result.data.map((sale) => (
                       <tr key={sale.id} className="hover:bg-surface-hover">
                         <td className="px-4 py-3">
-                          <Link
-                            href={`/sales/${sale.id}`}
-                            className="font-medium text-text-primary hover:text-accent"
-                          >
-                            {sale.saleNumber}
-                          </Link>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Link
+                              href={`/sales/${sale.id}`}
+                              className="font-medium text-text-primary hover:text-accent"
+                            >
+                              {sale.saleNumber}
+                            </Link>
+                            {isFreshTimestamp(sale.createdAt) && (
+                              <Badge variant="success">New</Badge>
+                            )}
+                          </div>
                           <p className="text-xs text-text-muted">
-                            {formatDateTime(sale.createdAt)} ·{" "}
+                            {formatRelativeTime(sale.createdAt)} ·{" "}
                             {sale.itemsCount}{" "}
                             {sale.itemsCount === 1 ? "item" : "items"}
                           </p>
+                          {canReview &&
+                          sale.status === "VOIDED" &&
+                          ((voidCounts.get(sale.salesperson.id) ?? 0) >=
+                            REVIEW.REPEAT_VOID_COUNT ||
+                            (sale.voidedAt != null &&
+                              isQuickVoid(sale.createdAt, sale.voidedAt))) ? (
+                            <div className="mt-1">
+                              <ReviewBadge />
+                            </div>
+                          ) : null}
                         </td>
                         {canSeeAllShops && (
                           <td className="hidden px-4 py-3 text-text-secondary md:table-cell">

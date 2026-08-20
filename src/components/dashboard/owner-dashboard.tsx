@@ -10,32 +10,41 @@ import { startOfBusinessMonth } from "@/lib/dates";
 import { formatCurrency, formatNumber } from "@/lib/utils";
 import {
   getOwnerKPIs,
+  getRecentSales,
   getRevenueTrend,
   getShopPerformance,
   getTopProducts,
 } from "@/server/services/dashboard.service";
 import { getInventoryValue } from "@/server/services/inventory.queries";
 import { StatCard } from "@/components/shared/stat-card";
+import { LiveRefresh } from "@/components/shared/live-refresh";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RevenueChart } from "./revenue-chart";
 import { ShopPerformanceChart } from "./shop-performance-chart";
 import { StockAlerts } from "./stock-alerts";
+import { RecentSalesTable } from "./recent-sales-table";
+import { ReviewQueue } from "@/components/review/review-queue";
+import { listActivityReviews } from "@/server/services/review.service";
 
 export async function OwnerDashboard({ firstName }: { firstName: string }) {
   const monthStart = startOfBusinessMonth();
 
-  const [kpis, trend, shops, topProducts, inventoryValue] = await Promise.all([
-    getOwnerKPIs(),
-    getRevenueTrend(30),
-    getShopPerformance(monthStart),
-    getTopProducts(monthStart, 5),
-    getInventoryValue(),
-  ]);
+  const [kpis, trend, shops, topProducts, inventoryValue, reviews, recentSales] =
+    await Promise.all([
+      getOwnerKPIs(),
+      getRevenueTrend(30),
+      getShopPerformance(monthStart),
+      getTopProducts(monthStart, 5),
+      getInventoryValue(),
+      listActivityReviews({ limit: 6 }),
+      getRecentSales(10),
+    ]);
 
   const alertCount = kpis.lowStockCount + kpis.outOfStockCount;
 
   return (
     <div className="space-y-6">
+      <LiveRefresh />
       <div>
         <h1 className="text-2xl font-semibold tracking-tight text-text-primary sm:text-3xl">
           Welcome, {firstName}
@@ -82,6 +91,38 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
           }
         />
       </section>
+
+      <Card>
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <CardTitle>Latest sales</CardTitle>
+          <Link
+            href="/sales"
+            className="text-sm font-medium text-accent hover:underline"
+          >
+            View all
+          </Link>
+        </CardHeader>
+        <CardContent className="p-0">
+          {recentSales.length === 0 ? (
+            <p className="px-6 py-10 text-center text-sm text-text-muted">
+              When shop staff record a sale, it appears here straight away.
+            </p>
+          ) : (
+            <RecentSalesTable sales={recentSales} showShop />
+          )}
+        </CardContent>
+      </Card>
+
+      {reviews.length > 0 && (
+        <div>
+          <ReviewQueue items={reviews} />
+          <p className="mt-2 text-right text-sm">
+            <Link href="/reviews" className="font-medium text-accent hover:underline">
+              Open full review list
+            </Link>
+          </p>
+        </div>
+      )}
 
       {alertCount > 0 && <StockAlerts />}
 

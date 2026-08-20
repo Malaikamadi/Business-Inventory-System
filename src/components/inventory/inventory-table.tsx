@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { formatCurrency, formatNumber, getStockStatus } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import { ProductThumbnail } from "@/components/products/product-thumbnail";
+import { ProductIdentity } from "@/components/products/product-identity";
 import type { InventoryRow } from "@/server/services/inventory.queries";
 
 const STATUS_BADGE = {
@@ -33,6 +33,9 @@ export function InventoryTable({
             </th>
             <th className="px-4 py-3 text-right font-medium">On hand</th>
             <th className="hidden px-4 py-3 text-right font-medium sm:table-cell">
+              Price
+            </th>
+            <th className="hidden px-4 py-3 text-right font-medium sm:table-cell">
               Threshold
             </th>
             {showValue && (
@@ -54,21 +57,12 @@ export function InventoryTable({
                 className="hover:bg-surface-hover"
               >
                 <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    <ProductThumbnail
-                      src={row.imageUrl}
-                      alt={row.productName}
-                    />
-                    <div className="min-w-0">
-                      <Link
-                        href={`/products/${row.productId}`}
-                        className="font-medium text-text-primary hover:text-accent"
-                      >
-                        {row.productName}
-                      </Link>
-                      <p className="text-xs text-text-muted">{row.sku}</p>
-                    </div>
-                  </div>
+                  <ProductIdentity
+                    href={`/products/${row.productId}`}
+                    name={row.productName}
+                    sku={row.sku}
+                    imageUrl={row.imageUrl}
+                  />
                 </td>
                 {showShop && (
                   <td className="px-4 py-3 text-text-secondary">
@@ -85,6 +79,9 @@ export function InventoryTable({
                 </td>
                 <td className="px-4 py-3 text-right font-semibold tabular-nums">
                   {formatNumber(row.quantity)}
+                </td>
+                <td className="hidden px-4 py-3 text-right tabular-nums text-text-secondary sm:table-cell">
+                  {formatCurrency(row.sellingPrice)}
                 </td>
                 <td className="hidden px-4 py-3 text-right tabular-nums text-text-muted sm:table-cell">
                   {formatNumber(row.lowStockThreshold)}

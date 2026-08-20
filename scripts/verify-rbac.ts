@@ -36,6 +36,7 @@ const OWNER_ONLY = [
   "/shops/new",
   "/users",
   "/users/new",
+  "/reviews",
   "/audit-log",
 ];
 
@@ -93,6 +94,7 @@ for (const label of [
   "Adjustments",
   "Sales",
   "Users",
+  "Reviews",
   "Audit Log",
 ]) {
   check(`owner menu includes ${label}`, ownerMenu.includes(label));
@@ -103,7 +105,7 @@ for (const label of ["Dashboard", "Shops", "Record sale", "Products", "Overview"
   check(`salesperson menu includes ${label}`, staffMenu.includes(label));
 }
 
-for (const label of ["Categories", "Stock Arrivals", "Adjustments", "Users", "Audit Log"]) {
+for (const label of ["Categories", "Stock Arrivals", "Adjustments", "Users", "Reviews", "Audit Log"]) {
   check(`salesperson menu hides ${label}`, !staffMenu.includes(label));
 }
 

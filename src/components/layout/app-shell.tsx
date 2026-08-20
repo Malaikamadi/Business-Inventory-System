@@ -27,27 +27,35 @@ export function AppShell({ user, shopName, children }: AppShellProps) {
 
   return (
     <div className="min-h-screen bg-background">
-      <Sidebar permissions={user.permissions} />
+      <div className="print:hidden">
+        <Sidebar permissions={user.permissions} />
+      </div>
 
-      <MobileNav
-        isOpen={mobileNavOpen}
-        onClose={() => setMobileNavOpen(false)}
-        permissions={user.permissions}
-      />
-
-      <div className="lg:pl-[260px] flex min-h-screen flex-col">
-        <Header
-          user={user}
-          shopName={shopName}
-          onMenuClick={() => setMobileNavOpen(true)}
+      <div className="print:hidden">
+        <MobileNav
+          isOpen={mobileNavOpen}
+          onClose={() => setMobileNavOpen(false)}
+          permissions={user.permissions}
         />
+      </div>
 
-        <main className="flex-1 p-4 pb-24 lg:p-6 lg:pb-6 xl:p-8">
+      <div className="flex min-h-screen flex-col lg:pl-[260px] print:pl-0">
+        <div className="print:hidden">
+          <Header
+            user={user}
+            shopName={shopName}
+            onMenuClick={() => setMobileNavOpen(true)}
+          />
+        </div>
+
+        <main className="flex-1 p-4 pb-24 lg:p-6 lg:pb-6 xl:p-8 print:p-0">
           {children}
         </main>
       </div>
 
-      <MobileTabBar permissions={user.permissions} />
+      <div className="print:hidden">
+        <MobileTabBar permissions={user.permissions} />
+      </div>
     </div>
   );
 }

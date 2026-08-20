@@ -5,6 +5,7 @@ import { OwnerDashboard } from "@/components/dashboard/owner-dashboard";
 import { ShopDashboard } from "@/components/dashboard/shop-dashboard";
 
 export const metadata = { title: "Dashboard · InvSys" };
+export const dynamic = "force-dynamic";
 
 /**
  * One route, two very different jobs: an owner needs a business overview while

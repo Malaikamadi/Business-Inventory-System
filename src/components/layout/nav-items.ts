@@ -4,6 +4,7 @@ import {
   BarChart3,
   Boxes,
   ClipboardList,
+  ShieldAlert,
   LayoutDashboard,
   Package,
   PackageX,
@@ -138,6 +139,12 @@ const ALL_NAV_ITEMS: NavItem[] = [
     href: "/users",
     icon: Users,
     anyOf: [PERMISSIONS.USERS_VIEW],
+  },
+  {
+    label: "Reviews",
+    href: "/reviews",
+    icon: ShieldAlert,
+    anyOf: [PERMISSIONS.AUDIT_VIEW],
   },
   {
     label: "Audit Log",

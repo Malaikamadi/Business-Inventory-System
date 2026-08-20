@@ -20,6 +20,7 @@ import {
   getShopKPIs,
 } from "@/server/services/dashboard.service";
 import { StatCard } from "@/components/shared/stat-card";
+import { LiveRefresh } from "@/components/shared/live-refresh";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
@@ -54,6 +55,7 @@ export async function ShopDashboard({ user }: { user: SessionUser }) {
 
   return (
     <div className="space-y-6">
+      <LiveRefresh />
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight text-text-primary sm:text-3xl">

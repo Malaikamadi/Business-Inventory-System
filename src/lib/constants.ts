@@ -106,6 +106,24 @@ export const MOVEMENT_TYPE_LABELS: Record<string, string> = {
 
 export const DEFAULT_LOW_STOCK_THRESHOLD = 10;
 
+/**
+ * Heuristics for the owner review queue. These are signals, not proof of
+ * fraud — a flagged row still needs a person to look at it.
+ */
+export const REVIEW = {
+  VOID_WINDOW_DAYS: 7,
+  REPEAT_VOID_COUNT: 3,
+  QUICK_VOID_MINUTES: 120,
+  LARGE_ADJUSTMENT_UNITS: 50,
+  LARGE_ADJUSTMENT_SHARE: 0.5,
+  LARGE_AFTER_HOURS_UNITS: 20,
+  LOW_SALES_LOOKBACK_DAYS: 14,
+  LOW_SALES_RATIO: 0.4,
+  LOW_SALES_MIN_DAYS: 5,
+  /** Only compare today's sales once the trading day is well underway. */
+  LOW_SALES_AFTER_HOUR: 16,
+} as const;
+
 // ─── Pagination ──────────────────────────────────────────────────────
 
 export const DEFAULT_PAGE_SIZE = 20;

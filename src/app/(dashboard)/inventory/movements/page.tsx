@@ -6,11 +6,14 @@ import { cn, formatDateTime, formatNumber } from "@/lib/utils";
 import { can, getCurrentUser, resolveShopScope } from "@/server/auth-context";
 import { requireCanAny } from "@/server/page-guards";
 import { listMovements } from "@/server/services/inventory.queries";
+import { movementReviewLabel } from "@/server/services/review.service";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Pagination } from "@/components/shared/pagination";
 import { Card, CardContent } from "@/components/ui/card";
 import { MovementFilters } from "@/components/inventory/movement-filters";
+import { ProductIdentity } from "@/components/products/product-identity";
+import { ReviewBadge } from "@/components/review/review-badge";
 
 export const metadata = { title: "Stock movements · InvSys" };
 
@@ -142,6 +145,9 @@ export default async function MovementsPage(props: {
                         movement.referenceId
                       );
                       const increase = movement.quantityChange > 0;
+                      const reviewLabel = can(user, PERMISSIONS.AUDIT_VIEW)
+                        ? movementReviewLabel(movement)
+                        : null;
 
                       return (
                         <tr key={movement.id} className="hover:bg-surface-hover">
@@ -149,15 +155,12 @@ export default async function MovementsPage(props: {
                             {formatDateTime(movement.createdAt)}
                           </td>
                           <td className="px-4 py-3">
-                            <Link
+                            <ProductIdentity
                               href={`/products/${movement.product.id}`}
-                              className="font-medium text-text-primary hover:text-accent"
-                            >
-                              {movement.product.name}
-                            </Link>
-                            <p className="text-xs text-text-muted">
-                              {movement.product.sku}
-                            </p>
+                              name={movement.product.name}
+                              sku={movement.product.sku}
+                              imageUrl={movement.product.imageUrl}
+                            />
                           </td>
                           {canSeeAllShops && (
                             <td className="hidden px-4 py-3 text-text-secondary md:table-cell">
@@ -183,6 +186,11 @@ export default async function MovementsPage(props: {
                               <p className="max-w-[220px] truncate text-xs text-text-muted">
                                 {movement.reason}
                               </p>
+                            )}
+                            {reviewLabel && (
+                              <div className="mt-1">
+                                <ReviewBadge label={reviewLabel} />
+                              </div>
                             )}
                           </td>
                           <td

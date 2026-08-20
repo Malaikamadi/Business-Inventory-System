@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ProductFilters } from "@/components/products/product-filters";
-import { ProductThumbnail } from "@/components/products/product-thumbnail";
+import { ProductIdentity } from "@/components/products/product-identity";
 
 export const metadata = { title: "Products · InvSys" };
 
@@ -110,6 +110,7 @@ export default async function ProductsPage(props: {
                       <th className="px-4 py-3 text-right font-medium">
                         {canSeeAllShops ? "Total stock" : "Your stock"}
                       </th>
+                      <th className="px-4 py-3 font-medium">Status</th>
                       <th className="px-4 py-3 text-right font-medium">
                         Restock
                       </th>
@@ -127,23 +128,13 @@ export default async function ProductsPage(props: {
                       return (
                         <tr key={product.id} className="hover:bg-surface-hover">
                           <td className="px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <ProductThumbnail
-                                src={product.imageUrl}
-                                alt={product.name}
-                              />
-                              <div className="min-w-0">
-                                <Link
-                                  href={`/products/${product.id}`}
-                                  className="font-medium text-text-primary hover:text-accent"
-                                >
-                                  {product.name}
-                                </Link>
-                                <p className="text-xs text-text-muted">
-                                  {product.sku}
-                                </p>
-                              </div>
-                            </div>
+                            <ProductIdentity
+                              href={`/products/${product.id}`}
+                              name={product.name}
+                              sku={product.sku}
+                              imageUrl={product.imageUrl}
+                              size="md"
+                            />
                           </td>
                           <td className="hidden px-4 py-3 text-text-secondary md:table-cell">
                             {product.category?.name ?? "—"}
@@ -169,6 +160,17 @@ export default async function ProductsPage(props: {
                               across {product.shopCount}{" "}
                               {product.shopCount === 1 ? "shop" : "shops"}
                             </p>
+                          </td>
+                          <td className="px-4 py-3">
+                            {product.status === "DISCONTINUED" ? (
+                              <Badge variant="secondary">Discontinued</Badge>
+                            ) : product.totalStock <= 0 ? (
+                              <Badge variant="danger">Out of stock</Badge>
+                            ) : product.shopsNeedingStock > 0 ? (
+                              <Badge variant="warning">Low stock</Badge>
+                            ) : (
+                              <Badge variant="success">Active</Badge>
+                            )}
                           </td>
                           <td className="px-4 py-3 text-right">
                             {product.shopsNeedingStock > 0 ? (

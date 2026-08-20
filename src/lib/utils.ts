@@ -85,6 +85,27 @@ export function formatDateTime(date: Date | string, locale = "en-US"): string {
   );
 }
 
+/** Short label for live lists so a sale just recorded stands out from older rows. */
+export function formatRelativeTime(date: Date | string): string {
+  const d = typeof date === "string" ? new Date(date) : date;
+  const diffMs = Date.now() - d.getTime();
+  if (diffMs < 45_000) return "Just now";
+  if (diffMs < 60_000) return "1 min ago";
+  if (diffMs < 60 * 60_000) {
+    return `${Math.floor(diffMs / 60_000)} min ago`;
+  }
+  if (diffMs < 24 * 60 * 60_000) {
+    const hours = Math.floor(diffMs / (60 * 60_000));
+    return hours === 1 ? "1 hour ago" : `${hours} hours ago`;
+  }
+  return formatDateTime(d);
+}
+
+export function isFreshTimestamp(date: Date | string, withinMs = 2 * 60_000) {
+  const d = typeof date === "string" ? new Date(date) : date;
+  return Date.now() - d.getTime() < withinMs;
+}
+
 /**
  * Calculate stock status based on quantity and threshold.
  */

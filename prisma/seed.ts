@@ -5,6 +5,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
 
 import { OWNER_PERMISSIONS, PERMISSIONS, SALESPERSON_PERMISSIONS } from "../src/lib/constants";
+import { seedImageUrlForSku } from "../src/lib/seed-product-images";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
@@ -230,51 +231,54 @@ async function main() {
   // Prices are in new leones (SLE) at roughly Freetown retail levels, so the
   // dashboards and reports read like real trading figures rather than the
   // single-digit amounts a dollar price list would produce.
+  const productImage = async (sku: string) =>
+    (await seedImageUrlForSku(sku)) ?? undefined;
+
   const products = await Promise.all([
     prisma.product.create({
-      data: { name: "Coca-Cola 500ml", sku: "BEV-CC-500", categoryId: beverages.id, costPrice: 8.00, sellingPrice: 13.00, lowStockThreshold: 20, description: "Classic Coca-Cola in 500ml PET bottle" },
+      data: { name: "Coca-Cola 500ml", sku: "BEV-CC-500", categoryId: beverages.id, costPrice: 8.00, sellingPrice: 13.00, lowStockThreshold: 20, description: "Classic Coca-Cola in 500ml PET bottle", imageUrl: await productImage("BEV-CC-500") },
     }),
     prisma.product.create({
-      data: { name: "Pepsi 500ml", sku: "BEV-PP-500", categoryId: beverages.id, costPrice: 8.00, sellingPrice: 13.00, lowStockThreshold: 20, description: "Pepsi cola in 500ml PET bottle" },
+      data: { name: "Pepsi 500ml", sku: "BEV-PP-500", categoryId: beverages.id, costPrice: 8.00, sellingPrice: 13.00, lowStockThreshold: 20, description: "Pepsi cola in 500ml PET bottle", imageUrl: await productImage("BEV-PP-500") },
     }),
     prisma.product.create({
-      data: { name: "Spring Water 1L", sku: "BEV-SW-1L", categoryId: beverages.id, costPrice: 3.50, sellingPrice: 6.00, lowStockThreshold: 30, description: "Natural spring water, 1 liter" },
+      data: { name: "Spring Water 1L", sku: "BEV-SW-1L", categoryId: beverages.id, costPrice: 3.50, sellingPrice: 6.00, lowStockThreshold: 30, description: "Natural spring water, 1 liter", imageUrl: await productImage("BEV-SW-1L") },
     }),
     prisma.product.create({
-      data: { name: "Orange Juice 330ml", sku: "BEV-OJ-330", categoryId: beverages.id, costPrice: 11.00, sellingPrice: 18.00, lowStockThreshold: 15, description: "Fresh orange juice, 330ml carton" },
+      data: { name: "Orange Juice 330ml", sku: "BEV-OJ-330", categoryId: beverages.id, costPrice: 11.00, sellingPrice: 18.00, lowStockThreshold: 15, description: "Fresh orange juice, 330ml carton", imageUrl: await productImage("BEV-OJ-330") },
     }),
     prisma.product.create({
-      data: { name: "Lay's Classic Chips", sku: "SNK-LC-150", categoryId: snacks.id, costPrice: 13.00, sellingPrice: 22.00, lowStockThreshold: 15, description: "Lay's classic potato chips, 150g bag" },
+      data: { name: "Lay's Classic Chips", sku: "SNK-LC-150", categoryId: snacks.id, costPrice: 13.00, sellingPrice: 22.00, lowStockThreshold: 15, description: "Lay's classic potato chips, 150g bag", imageUrl: await productImage("SNK-LC-150") },
     }),
     prisma.product.create({
-      data: { name: "Pringles Original", sku: "SNK-PR-165", categoryId: snacks.id, costPrice: 32.00, sellingPrice: 55.00, lowStockThreshold: 10, description: "Pringles original flavor, 165g can" },
+      data: { name: "Pringles Original", sku: "SNK-PR-165", categoryId: snacks.id, costPrice: 32.00, sellingPrice: 55.00, lowStockThreshold: 10, description: "Pringles original flavor, 165g can", imageUrl: await productImage("SNK-PR-165") },
     }),
     prisma.product.create({
-      data: { name: "Snickers Bar", sku: "SNK-SN-52", categoryId: snacks.id, costPrice: 7.50, sellingPrice: 13.00, lowStockThreshold: 25, description: "Snickers chocolate bar, 52g" },
+      data: { name: "Snickers Bar", sku: "SNK-SN-52", categoryId: snacks.id, costPrice: 7.50, sellingPrice: 13.00, lowStockThreshold: 25, description: "Snickers chocolate bar, 52g", imageUrl: await productImage("SNK-SN-52") },
     }),
     prisma.product.create({
-      data: { name: "USB-C Cable 1m", sku: "ELC-UC-1M", categoryId: electronics.id, costPrice: 28.00, sellingPrice: 55.00, lowStockThreshold: 10, description: "USB-C charging cable, 1 meter" },
+      data: { name: "USB-C Cable 1m", sku: "ELC-UC-1M", categoryId: electronics.id, costPrice: 28.00, sellingPrice: 55.00, lowStockThreshold: 10, description: "USB-C charging cable, 1 meter", imageUrl: await productImage("ELC-UC-1M") },
     }),
     prisma.product.create({
-      data: { name: "Wireless Earbuds", sku: "ELC-WE-BT", categoryId: electronics.id, costPrice: 240.00, sellingPrice: 430.00, lowStockThreshold: 5, description: "Bluetooth wireless earbuds with case" },
+      data: { name: "Wireless Earbuds", sku: "ELC-WE-BT", categoryId: electronics.id, costPrice: 240.00, sellingPrice: 430.00, lowStockThreshold: 5, description: "Bluetooth wireless earbuds with case", imageUrl: await productImage("ELC-WE-BT") },
     }),
     prisma.product.create({
-      data: { name: "Phone Case Universal", sku: "ELC-PC-UNI", categoryId: electronics.id, costPrice: 22.00, sellingPrice: 45.00, lowStockThreshold: 10, description: "Universal silicone phone case" },
+      data: { name: "Phone Case Universal", sku: "ELC-PC-UNI", categoryId: electronics.id, costPrice: 22.00, sellingPrice: 45.00, lowStockThreshold: 10, description: "Universal silicone phone case", imageUrl: await productImage("ELC-PC-UNI") },
     }),
     prisma.product.create({
-      data: { name: "Cotton T-Shirt Black", sku: "CLT-TS-BLK", categoryId: clothing.id, costPrice: 65.00, sellingPrice: 130.00, lowStockThreshold: 8, description: "100% cotton t-shirt, black, unisex" },
+      data: { name: "Cotton T-Shirt Black", sku: "CLT-TS-BLK", categoryId: clothing.id, costPrice: 65.00, sellingPrice: 130.00, lowStockThreshold: 8, description: "100% cotton t-shirt, black, unisex", imageUrl: await productImage("CLT-TS-BLK") },
     }),
     prisma.product.create({
-      data: { name: "Cotton T-Shirt White", sku: "CLT-TS-WHT", categoryId: clothing.id, costPrice: 65.00, sellingPrice: 130.00, lowStockThreshold: 8, description: "100% cotton t-shirt, white, unisex" },
+      data: { name: "Cotton T-Shirt White", sku: "CLT-TS-WHT", categoryId: clothing.id, costPrice: 65.00, sellingPrice: 130.00, lowStockThreshold: 8, description: "100% cotton t-shirt, white, unisex", imageUrl: await productImage("CLT-TS-WHT") },
     }),
     prisma.product.create({
-      data: { name: "Hand Sanitizer 250ml", sku: "PC-HS-250", categoryId: personalCare.id, costPrice: 18.00, sellingPrice: 34.00, lowStockThreshold: 12, description: "Antibacterial hand sanitizer, 250ml" },
+      data: { name: "Hand Sanitizer 250ml", sku: "PC-HS-250", categoryId: personalCare.id, costPrice: 18.00, sellingPrice: 34.00, lowStockThreshold: 12, description: "Antibacterial hand sanitizer, 250ml", imageUrl: await productImage("PC-HS-250") },
     }),
     prisma.product.create({
-      data: { name: "Face Mask Box (50pc)", sku: "PC-FM-50", categoryId: personalCare.id, costPrice: 42.00, sellingPrice: 78.00, lowStockThreshold: 5, description: "Disposable face masks, box of 50" },
+      data: { name: "Face Mask Box (50pc)", sku: "PC-FM-50", categoryId: personalCare.id, costPrice: 42.00, sellingPrice: 78.00, lowStockThreshold: 5, description: "Disposable face masks, box of 50", imageUrl: await productImage("PC-FM-50") },
     }),
     prisma.product.create({
-      data: { name: "Toothpaste Mint 100ml", sku: "PC-TP-100", categoryId: personalCare.id, costPrice: 16.00, sellingPrice: 29.00, lowStockThreshold: 10, description: "Mint toothpaste, 100ml tube" },
+      data: { name: "Toothpaste Mint 100ml", sku: "PC-TP-100", categoryId: personalCare.id, costPrice: 16.00, sellingPrice: 29.00, lowStockThreshold: 10, description: "Mint toothpaste, 100ml tube", imageUrl: await productImage("PC-TP-100") },
     }),
   ]);
   console.log(`  ✓ Created ${products.length} products`);
@@ -329,7 +333,7 @@ async function main() {
   const plannedSales: PlannedSale[] = [];
   const now = new Date();
 
-  for (let dayOffset = 6; dayOffset >= 0; dayOffset--) {
+  for (let dayOffset = 6; dayOffset >= 1; dayOffset--) {
     const day = new Date(now);
     day.setDate(day.getDate() - dayOffset);
 

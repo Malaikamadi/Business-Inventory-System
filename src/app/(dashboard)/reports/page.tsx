@@ -15,11 +15,13 @@ import {
   getTopProducts,
 } from "@/server/services/dashboard.service";
 import { PageHeader } from "@/components/shared/page-header";
+import { LiveRefresh } from "@/components/shared/live-refresh";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RevenueChart } from "@/components/dashboard/revenue-chart";
 import { PeriodTabs } from "@/components/reports/period-tabs";
 
 export const metadata = { title: "Reports · InvSys" };
+export const dynamic = "force-dynamic";
 
 const PERIODS = {
   today: { label: "Today", days: 1 },
@@ -80,6 +82,7 @@ export default async function ReportsPage(props: {
 
   return (
     <div className="space-y-6">
+      <LiveRefresh intervalMs={10000} />
       <PageHeader
         title="Reports"
         description={

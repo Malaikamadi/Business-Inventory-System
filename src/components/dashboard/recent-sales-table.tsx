@@ -1,7 +1,11 @@
 import Link from "next/link";
 import type { Prisma } from "@prisma/client";
 import { Badge } from "@/components/ui/badge";
-import { formatCurrency, formatDateTime } from "@/lib/utils";
+import {
+  formatCurrency,
+  formatRelativeTime,
+  isFreshTimestamp,
+} from "@/lib/utils";
 
 interface RecentSale {
   id: string;
@@ -46,14 +50,19 @@ export function RecentSalesTable({
           {sales.map((sale) => (
             <tr key={sale.id} className="hover:bg-surface-hover">
               <td className="px-6 py-3">
-                <Link
-                  href={`/sales/${sale.id}`}
-                  className="font-medium text-text-primary hover:text-accent"
-                >
-                  {sale.saleNumber}
-                </Link>
+                <div className="flex flex-wrap items-center gap-2">
+                  <Link
+                    href={`/sales/${sale.id}`}
+                    className="font-medium text-text-primary hover:text-accent"
+                  >
+                    {sale.saleNumber}
+                  </Link>
+                  {isFreshTimestamp(sale.createdAt) && (
+                    <Badge variant="success">New</Badge>
+                  )}
+                </div>
                 <p className="text-xs text-text-muted">
-                  {formatDateTime(sale.createdAt)} · {sale.itemsCount}{" "}
+                  {formatRelativeTime(sale.createdAt)} · {sale.itemsCount}{" "}
                   {sale.itemsCount === 1 ? "item" : "items"}
                 </p>
               </td>

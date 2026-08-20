@@ -85,20 +85,19 @@ export async function readStoredImage(filename: string) {
 }
 
 /**
- * Persist an uploaded product image and return the path to store on the
- * product. Throws `ValidationError` for anything that is not a supported image.
+ * Persist image bytes and return the path to store on the product.
+ * Throws `ValidationError` for anything that is not a supported image.
  */
-export async function storeProductImage(file: File): Promise<string> {
-  if (file.size === 0) {
+export async function storeProductImageBytes(bytes: Uint8Array): Promise<string> {
+  if (bytes.length === 0) {
     throw new ValidationError("The selected image is empty.");
   }
-  if (file.size > MAX_IMAGE_BYTES) {
+  if (bytes.length > MAX_IMAGE_BYTES) {
     throw new ValidationError(
       `Images must be smaller than ${Math.round(MAX_IMAGE_BYTES / (1024 * 1024))}MB.`
     );
   }
 
-  const bytes = new Uint8Array(await file.arrayBuffer());
   const kind = sniff(bytes);
   if (!kind) {
     throw new ValidationError("Only JPEG, PNG, and WebP images are supported.");
@@ -116,4 +115,18 @@ export async function storeProductImage(file: File): Promise<string> {
   );
 
   return `/api/images/products/${name}`;
+}
+
+export async function storeProductImageFromPath(absolutePath: string): Promise<string> {
+  const bytes = new Uint8Array(await readFile(absolutePath));
+  return storeProductImageBytes(bytes);
+}
+
+/**
+ * Persist an uploaded product image and return the path to store on the
+ * product. Throws `ValidationError` for anything that is not a supported image.
+ */
+export async function storeProductImage(file: File): Promise<string> {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  return storeProductImageBytes(bytes);
 }

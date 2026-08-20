@@ -156,3 +156,13 @@ body {
   padding: 0 0.75rem;
   font-size: 0.875rem;
 }
+
+@media print {
+  body {
+    background: #fff;
+  }
+
+  #sale-receipt {
+    box-shadow: none;
+  }
+}

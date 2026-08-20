@@ -19,6 +19,17 @@ const voidSaleSchema = z.object({
   reason: z.string().trim().min(5, "Please give a reason of at least 5 characters."),
 });
 
+function revalidateAfterSale(saleId: string) {
+  revalidatePath("/", "layout");
+  revalidatePath("/dashboard");
+  revalidatePath("/sales");
+  revalidatePath(`/sales/${saleId}`);
+  revalidatePath("/reports");
+  revalidatePath("/reviews");
+  revalidatePath("/inventory");
+  revalidatePath("/inventory/movements");
+}
+
 export async function createSaleAction(
   input: unknown
 ): Promise<ActionResult<{ saleId: string; saleNumber: string; totalAmount: string }>> {
@@ -49,9 +60,7 @@ export async function createSaleAction(
       },
     });
 
-    revalidatePath("/sales");
-    revalidatePath("/dashboard");
-    revalidatePath("/inventory");
+    revalidateAfterSale(result.saleId);
 
     return {
       saleId: result.saleId,
@@ -83,9 +92,7 @@ export async function voidSaleAction(
       details: { saleNumber: result.saleNumber, reason: data.reason },
     });
 
-    revalidatePath("/sales");
-    revalidatePath("/dashboard");
-    revalidatePath("/inventory");
+    revalidateAfterSale(data.saleId);
 
     return result;
   });

@@ -3,6 +3,7 @@ import { AlertTriangle, PackageX } from "lucide-react";
 import { listInventory } from "@/server/services/inventory.queries";
 import { formatNumber } from "@/lib/utils";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ProductIdentity } from "@/components/products/product-identity";
 
 /**
  * The restocking worklist. Out-of-stock lines are shown before low-stock ones
@@ -39,9 +40,12 @@ export async function StockAlerts({ shopIds }: { shopIds?: string[] } = {}) {
                   key={`${row.shopId}-${row.productId}`}
                   className="flex items-center justify-between gap-3 text-sm"
                 >
-                  <span className="min-w-0 truncate font-medium text-text-primary">
-                    {row.productName}
-                  </span>
+                  <ProductIdentity
+                    href={`/products/${row.productId}`}
+                    name={row.productName}
+                    sku={row.sku}
+                    imageUrl={row.imageUrl}
+                  />
                   <span className="shrink-0 text-xs text-text-muted">
                     {row.shopName}
                   </span>
@@ -73,9 +77,12 @@ export async function StockAlerts({ shopIds }: { shopIds?: string[] } = {}) {
                   key={`${row.shopId}-${row.productId}`}
                   className="flex items-center justify-between gap-3 text-sm"
                 >
-                  <span className="min-w-0 truncate font-medium text-text-primary">
-                    {row.productName}
-                  </span>
+                  <ProductIdentity
+                    href={`/products/${row.productId}`}
+                    name={row.productName}
+                    sku={row.sku}
+                    imageUrl={row.imageUrl}
+                  />
                   <span className="shrink-0 text-xs text-text-muted">
                     {row.quantity} left · {row.shopName}
                   </span>

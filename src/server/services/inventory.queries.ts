@@ -166,7 +166,7 @@ export async function listMovements(query: MovementQuery) {
         referenceId: true,
         createdAt: true,
         shop: { select: { id: true, name: true } },
-        product: { select: { id: true, name: true, sku: true } },
+        product: { select: { id: true, name: true, sku: true, imageUrl: true } },
         user: { select: { firstName: true, lastName: true } },
       },
     }),
