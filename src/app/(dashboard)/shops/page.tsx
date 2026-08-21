@@ -7,6 +7,7 @@ import { formatCurrency, formatNumber } from "@/lib/utils";
 import { can, canAny, getCurrentUser } from "@/server/auth-context";
 import { requireCanAny } from "@/server/page-guards";
 import { getShopPerformance } from "@/server/services/dashboard.service";
+import type { ShopPerformance } from "@/types";
 import { PageHeader } from "@/components/shared/page-header";
 import { EmptyState } from "@/components/shared/empty-state";
 import { Card, CardContent } from "@/components/ui/card";
@@ -48,7 +49,7 @@ export default async function ShopsPage() {
     }),
     canSeePerformance
       ? getShopPerformance(startOfBusinessMonth(), shopIds)
-      : Promise.resolve([]),
+      : Promise.resolve([] as ShopPerformance[]),
     prisma.shopInventory.groupBy({
       by: ["shopId"],
       where: shopIds ? { shopId: { in: shopIds } } : undefined,
