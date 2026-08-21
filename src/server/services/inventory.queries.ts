@@ -60,7 +60,7 @@ export async function listInventory(
     Prisma.sql`s.status = 'active'`,
     stockCondition(query.filter ?? "all"),
     query.shopIds
-      ? Prisma.sql`si.shop_id = ANY(${query.shopIds}::uuid[])`
+      ? Prisma.sql`si.shop_id IN (SELECT unnest(${query.shopIds}::uuid[]))`
       : Prisma.sql`TRUE`,
     query.categoryId
       ? Prisma.sql`p.category_id = ${query.categoryId}::uuid`
@@ -119,13 +119,20 @@ export async function listInventory(
  * Total cost value of stock on hand, for the inventory valuation KPI.
  */
 export async function getInventoryValue(shopIds?: string[]): Promise<number> {
-  const rows = await prisma.$queryRaw<{ value: string | null }[]>`
-    SELECT SUM(si.quantity * p.cost_price)::text AS value
-    FROM shop_inventory si
-    JOIN products p ON p.id = si.product_id
-    WHERE p.status = 'active'
-      AND (${shopIds ?? null}::uuid[] IS NULL OR si.shop_id = ANY(${shopIds ?? null}::uuid[]))
-  `;
+  const rows = shopIds
+    ? await prisma.$queryRaw<{ value: string | null }[]>`
+        SELECT SUM(si.quantity * p.cost_price)::text AS value
+        FROM shop_inventory si
+        JOIN products p ON p.id = si.product_id
+        WHERE p.status = 'active'
+          AND si.shop_id IN (SELECT unnest(${shopIds}::uuid[]))
+      `
+    : await prisma.$queryRaw<{ value: string | null }[]>`
+        SELECT SUM(si.quantity * p.cost_price)::text AS value
+        FROM shop_inventory si
+        JOIN products p ON p.id = si.product_id
+        WHERE p.status = 'active'
+      `;
   return Number(rows[0]?.value ?? 0);
 }
 

@@ -89,25 +89,55 @@ export async function getOwnerKPIs(shopIds?: string[]): Promise<DashboardKPIs> {
 export async function getStockAlertCounts(
   shopIds?: string[]
 ): Promise<{ lowStock: number; outOfStock: number }> {
-  const rows = await prisma.$queryRaw<
-    { low_stock: bigint; out_of_stock: bigint }[]
-  >`
-    SELECT
-      COUNT(*) FILTER (
-        WHERE si.quantity > 0 AND si.quantity <= p.low_stock_threshold
-      ) AS low_stock,
-      COUNT(*) FILTER (WHERE si.quantity <= 0) AS out_of_stock
-    FROM shop_inventory si
-    JOIN products p ON p.id = si.product_id
-    JOIN shops s ON s.id = si.shop_id
-    WHERE p.status = 'active'
-      AND s.status = 'active'
-      AND (${shopIds ?? null}::uuid[] IS NULL OR si.shop_id = ANY(${shopIds ?? null}::uuid[]))
-  `;
+  const where: Prisma.ShopInventoryWhereInput = {
+    product: { status: "ACTIVE" },
+    shop: { status: "ACTIVE" },
+    ...(shopIds ? { shopId: { in: shopIds } } : {}),
+  };
+
+  const [lowStock, outOfStock] = await Promise.all([
+    prisma.shopInventory.count({
+      where: {
+        ...where,
+        quantity: { gt: 0 },
+        product: {
+          status: "ACTIVE",
+          lowStockThreshold: { gte: 1 },
+        },
+        AND: {
+          quantity: { lte: prisma.shopInventory.fields.quantity },
+        },
+      },
+    }).catch(() => 0),
+    prisma.shopInventory.count({
+      where: { ...where, quantity: { lte: 0 } },
+    }),
+  ]);
+
+  // Prisma can't compare two columns directly, so use raw for the low-stock
+  // check but without the problematic uuid[] cast.
+  const lowStockRows = shopIds
+    ? await prisma.$queryRaw<{ cnt: bigint }[]>`
+        SELECT COUNT(*)::bigint AS cnt
+        FROM shop_inventory si
+        JOIN products p ON p.id = si.product_id
+        JOIN shops s ON s.id = si.shop_id
+        WHERE p.status = 'active' AND s.status = 'active'
+          AND si.quantity > 0 AND si.quantity <= p.low_stock_threshold
+          AND si.shop_id IN (SELECT unnest(${shopIds}::uuid[]))
+      `
+    : await prisma.$queryRaw<{ cnt: bigint }[]>`
+        SELECT COUNT(*)::bigint AS cnt
+        FROM shop_inventory si
+        JOIN products p ON p.id = si.product_id
+        JOIN shops s ON s.id = si.shop_id
+        WHERE p.status = 'active' AND s.status = 'active'
+          AND si.quantity > 0 AND si.quantity <= p.low_stock_threshold
+      `;
 
   return {
-    lowStock: Number(rows[0]?.low_stock ?? 0),
-    outOfStock: Number(rows[0]?.out_of_stock ?? 0),
+    lowStock: Number(lowStockRows[0]?.cnt ?? 0),
+    outOfStock,
   };
 }
 
