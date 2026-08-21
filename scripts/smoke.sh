@@ -4,7 +4,7 @@
 set -uo pipefail
 
 BASE="${BASE:-http://localhost:3000}"
-EMAIL="${1:-admin@invsys.com}"
+EMAIL="${1:-manager@invsys.com}"
 PASSWORD="${2:-password123}"
 JAR="$(mktemp)"
 trap 'rm -f "$JAR"' EXIT

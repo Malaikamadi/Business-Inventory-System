@@ -4,7 +4,7 @@ import { Pool } from "pg";
 import { PrismaPg } from "@prisma/adapter-pg";
 import "dotenv/config";
 
-import { OWNER_PERMISSIONS, PERMISSIONS, SALESPERSON_PERMISSIONS } from "../src/lib/constants";
+import { OWNER_PERMISSIONS, MANAGER_PERMISSIONS, PERMISSIONS, SALESPERSON_PERMISSIONS } from "../src/lib/constants";
 import { seedImageUrlForSku } from "../src/lib/seed-product-images";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -94,12 +94,27 @@ async function main() {
   const ownerRole = await prisma.role.create({
     data: {
       name: "owner",
-      description: "Business owner with full system access",
+      description: "Business owner. Sees shop performance, stock arrivals, and sales by staff.",
       isSystem: true,
       rolePermissions: {
         create: permissions
           .filter((p) =>
             OWNER_PERMISSIONS.includes(p.key as (typeof OWNER_PERMISSIONS)[number])
+          )
+          .map((p) => ({ permissionId: p.id })),
+      },
+    },
+  });
+
+  const managerRole = await prisma.role.create({
+    data: {
+      name: "manager",
+      description: "Shop manager. Catalog, stock, staff, and day-to-day operations.",
+      isSystem: true,
+      rolePermissions: {
+        create: permissions
+          .filter((p) =>
+            MANAGER_PERMISSIONS.includes(p.key as (typeof MANAGER_PERMISSIONS)[number])
           )
           .map((p) => ({ permissionId: p.id })),
       },
@@ -118,7 +133,7 @@ async function main() {
       },
     },
   });
-  console.log("  ✓ Created roles (owner, salesperson)");
+  console.log("  ✓ Created roles (owner, manager, salesperson)");
 
   // ─── Shops ────────────────────────────────────────────────────────
   const shopA = await prisma.shop.create({
@@ -155,14 +170,25 @@ async function main() {
   // ─── Users ────────────────────────────────────────────────────────
   const passwordHash = await bcrypt.hash("password123", 10);
 
-  const admin = await prisma.user.create({
+  await prisma.user.create({
     data: {
       email: "admin@invsys.com",
       passwordHash,
-      firstName: "Ram",
-      lastName: "Jalloh",
+      firstName: "Isatu",
+      lastName: "Koroma",
       phone: "+232 76 100 001",
       roleId: ownerRole.id,
+    },
+  });
+
+  const manager = await prisma.user.create({
+    data: {
+      email: "manager@invsys.com",
+      passwordHash,
+      firstName: "Ram",
+      lastName: "Jalloh",
+      phone: "+232 76 100 005",
+      roleId: managerRole.id,
     },
   });
 
@@ -207,7 +233,7 @@ async function main() {
       },
     },
   });
-  console.log("  ✓ Created 4 users (1 admin, 3 salespersons)");
+  console.log("  ✓ Created 5 users (1 owner, 1 manager, 3 salespersons)");
 
   // ─── Categories ───────────────────────────────────────────────────
   const beverages = await prisma.category.create({
@@ -424,7 +450,7 @@ async function main() {
           quantityAfter: opening,
           referenceType: "seed",
           reason: "Initial stock setup",
-          performedBy: admin.id,
+          performedBy: manager.id,
           createdAt: openingAt,
         },
       });
@@ -513,10 +539,11 @@ async function main() {
   console.log("\n✅ Seeding complete!\n");
   console.log("  Login Credentials:");
   console.log("  ──────────────────────────────────────");
-  console.log("  Owner (Ram Jalloh):  admin@invsys.com / password123");
-  console.log("  Fatmata Kamara:      fatmata@invsys.com / password123  (Freetown Central)");
-  console.log("  Mohamed Sesay:       mohamed@invsys.com / password123  (Lumley Branch)");
-  console.log("  Aminata Bangura:     aminata@invsys.com / password123  (Bo Town Branch)");
+  console.log("  Owner (Ram Jalloh):     admin@invsys.com / password123");
+  console.log("  Manager (Isata Koroma): manager@invsys.com / password123");
+  console.log("  Fatmata Kamara:         fatmata@invsys.com / password123  (Freetown Central)");
+  console.log("  Mohamed Sesay:          mohamed@invsys.com / password123  (Lumley Branch)");
+  console.log("  Aminata Bangura:        aminata@invsys.com / password123  (Bo Town Branch)");
   console.log("");
 }
 

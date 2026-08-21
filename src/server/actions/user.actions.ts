@@ -5,7 +5,7 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
-import { PERMISSIONS, ROLES } from "@/lib/constants";
+import { PERMISSIONS, ROLES, isBusinessWideRole } from "@/lib/constants";
 import { createUserSchema, updateUserSchema } from "@/lib/validations/user";
 import { assertCan, getCurrentUser } from "@/server/auth-context";
 import {
@@ -24,9 +24,8 @@ import type { ActionResult } from "@/types";
 const PASSWORD_COST = 12;
 
 /**
- * A non-owner role is meaningless without a shop, and an owner must not be
- * pinned to one. Enforced here rather than in the form schema because it
- * depends on the role record.
+ * A salesperson is meaningless without a shop. Owner and manager see every
+ * branch, so they must not be pinned to one.
  */
 async function resolveShopAssignments(
   roleId: string,
@@ -39,7 +38,7 @@ async function resolveShopAssignments(
   });
   if (!role) throw new NotFoundError("Role");
 
-  if (role.name === ROLES.OWNER) return { role, assignments: [] };
+  if (isBusinessWideRole(role.name)) return { role, assignments: [] };
 
   const shops = shopIds?.filter(Boolean) ?? [];
   if (shops.length === 0) {

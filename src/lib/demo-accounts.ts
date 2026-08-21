@@ -12,7 +12,15 @@ export const DEMO_ACCOUNTS = [
     name: "Ram Jalloh",
     email: "admin@invsys.com",
     shop: "All shops",
-    summary: "Full access to shops, stock, staff, and reports. Does not record sales.",
+    summary:
+      "Sees shop performance, stock the manager adds, and sales by each salesperson.",
+  },
+  {
+    role: "Manager",
+    name: "Isata Koroma",
+    email: "manager@invsys.com",
+    shop: "All shops",
+    summary: "Adds stock, manages the catalog and staff, and watches live sales.",
   },
   {
     role: "Salesperson",

@@ -63,14 +63,39 @@ export type PermissionKey = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];
 
 export const ROLES = {
   OWNER: "owner",
+  MANAGER: "manager",
   SALESPERSON: "salesperson",
 } as const;
 
 export type RoleName = (typeof ROLES)[keyof typeof ROLES];
 
-// ─── Owner Permissions ───────────────────────────────────────────────
+/** Owner and manager see every shop. Salespeople are assigned to branches. */
+export function isBusinessWideRole(name: string): boolean {
+  return name === ROLES.OWNER || name === ROLES.MANAGER;
+}
 
-export const OWNER_PERMISSIONS: PermissionKey[] = Object.values(
+/**
+ * Overall business owner: see how shops and staff are doing, not run the till
+ * or the stockroom. Day-to-day catalog, arrivals, and users belong to the
+ * manager.
+ */
+export const OWNER_PERMISSIONS: PermissionKey[] = [
+  PERMISSIONS.DASHBOARD_GLOBAL_VIEW,
+  PERMISSIONS.SHOPS_VIEW_ALL,
+  PERMISSIONS.PRODUCTS_VIEW,
+  PERMISSIONS.PRODUCTS_VIEW_COST,
+  PERMISSIONS.INVENTORY_VIEW_ALL,
+  PERMISSIONS.STOCK_MOVEMENTS_VIEW_ALL,
+  PERMISSIONS.SALES_VIEW_ALL,
+  PERMISSIONS.REPORTS_GLOBAL,
+  PERMISSIONS.AUDIT_VIEW,
+];
+
+/**
+ * Shop manager: the previous admin surface. Catalog, stock arrivals,
+ * adjustments, staff, and reviews — but not recording till sales.
+ */
+export const MANAGER_PERMISSIONS: PermissionKey[] = Object.values(
   PERMISSIONS
 ).filter((permission) => permission !== PERMISSIONS.SALES_CREATE);
 

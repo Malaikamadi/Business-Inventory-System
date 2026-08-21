@@ -1,46 +1,40 @@
 import Link from "next/link";
-import {
-  AlertTriangle,
-  Boxes,
-  Banknote,
-  Store,
-  TrendingUp,
-} from "lucide-react";
+import { Boxes, Banknote, Store, TrendingUp, TruckIcon } from "lucide-react";
 import { startOfBusinessMonth } from "@/lib/dates";
-import { formatCurrency, formatNumber } from "@/lib/utils";
+import {
+  formatCurrency,
+  formatNumber,
+  formatRelativeTime,
+} from "@/lib/utils";
 import {
   getOwnerKPIs,
   getRecentSales,
-  getRevenueTrend,
+  getSalespersonPerformance,
   getShopPerformance,
-  getTopProducts,
 } from "@/server/services/dashboard.service";
-import { getInventoryValue } from "@/server/services/inventory.queries";
+import {
+  getInventoryValue,
+  listMovements,
+} from "@/server/services/inventory.queries";
 import { StatCard } from "@/components/shared/stat-card";
 import { LiveRefresh } from "@/components/shared/live-refresh";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { RevenueChart } from "./revenue-chart";
 import { ShopPerformanceChart } from "./shop-performance-chart";
-import { StockAlerts } from "./stock-alerts";
 import { RecentSalesTable } from "./recent-sales-table";
-import { ReviewQueue } from "@/components/review/review-queue";
-import { listActivityReviews } from "@/server/services/review.service";
+import { ProductIdentity } from "@/components/products/product-identity";
 
 export async function OwnerDashboard({ firstName }: { firstName: string }) {
   const monthStart = startOfBusinessMonth();
 
-  const [kpis, trend, shops, topProducts, inventoryValue, reviews, recentSales] =
+  const [kpis, shops, staff, arrivals, inventoryValue, recentSales] =
     await Promise.all([
       getOwnerKPIs(),
-      getRevenueTrend(30),
       getShopPerformance(monthStart),
-      getTopProducts(monthStart, 5),
+      getSalespersonPerformance(monthStart),
+      listMovements({ movementType: ["ARRIVAL", "OPENING"], pageSize: 8 }),
       getInventoryValue(),
-      listActivityReviews({ limit: 6 }),
-      getRecentSales(10),
+      getRecentSales(8),
     ]);
-
-  const alertCount = kpis.lowStockCount + kpis.outOfStockCount;
 
   return (
     <div className="space-y-6">
@@ -49,14 +43,16 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
         <h1 className="text-2xl font-semibold tracking-tight text-text-primary sm:text-3xl">
           Welcome, {firstName}
         </h1>
-        <p className="mt-2 max-w-xl text-sm text-text-secondary">
-          Overview of {kpis.totalShops} shop{kpis.totalShops === 1 ? "" : "s"}.
-          Shop staff record sales; this view is for the business as a whole.
+        <p className="mt-2 max-w-2xl text-sm text-text-secondary">
+          Business overview of {kpis.totalShops} shop
+          {kpis.totalShops === 1 ? "" : "s"}. The manager adds stock and staff;
+          you see shop performance, those arrivals, and sales by each
+          salesperson.
         </p>
       </div>
 
       <section
-        aria-label="Today"
+        aria-label="This period"
         className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4"
       >
         <StatCard
@@ -78,19 +74,191 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
           icon={Boxes}
         />
         <StatCard
-          title="Stock alerts"
-          value={formatNumber(alertCount)}
-          subtitle={`${kpis.outOfStockCount} out of stock, ${kpis.lowStockCount} low`}
-          icon={alertCount > 0 ? AlertTriangle : Store}
-          iconClassName={
-            kpis.outOfStockCount > 0
-              ? "bg-danger-light text-danger"
-              : alertCount > 0
-                ? "bg-warning-light text-warning-foreground"
-                : undefined
-          }
+          title="Shops"
+          value={formatNumber(kpis.totalShops)}
+          subtitle="All branches"
+          icon={Store}
         />
       </section>
+
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
+        <Card className="xl:col-span-2">
+          <CardHeader className="flex-row items-center justify-between space-y-0">
+            <CardTitle>Shop performance</CardTitle>
+            <Link
+              href="/reports"
+              className="text-sm font-medium text-accent hover:underline"
+            >
+              Full reports
+            </Link>
+          </CardHeader>
+          <CardContent>
+            {shops.length > 0 ? (
+              <ShopPerformanceChart data={shops} />
+            ) : (
+              <p className="py-8 text-center text-sm text-text-muted">
+                No sales recorded this month yet.
+              </p>
+            )}
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle>This month by shop</CardTitle>
+          </CardHeader>
+          <CardContent className="p-0">
+            {shops.length === 0 ? (
+              <p className="px-6 py-8 text-center text-sm text-text-muted">
+                No shop sales this month.
+              </p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-text-muted">
+                  <tr>
+                    <th className="px-6 py-3 font-medium">Shop</th>
+                    <th className="px-6 py-3 text-right font-medium">Sales</th>
+                    <th className="px-6 py-3 text-right font-medium">Revenue</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {shops.map((shop) => (
+                    <tr key={shop.shopId} className="hover:bg-surface-hover">
+                      <td className="px-6 py-3">
+                        <Link
+                          href={`/shops/${shop.shopId}`}
+                          className="font-medium text-text-primary hover:text-accent"
+                        >
+                          {shop.shopName}
+                        </Link>
+                      </td>
+                      <td className="px-6 py-3 text-right tabular-nums text-text-secondary">
+                        {formatNumber(shop.salesCount)}
+                      </td>
+                      <td className="px-6 py-3 text-right font-medium tabular-nums">
+                        {formatCurrency(shop.revenue)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <Card>
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <CardTitle>Sales by salesperson</CardTitle>
+          <Link
+            href="/sales"
+            className="text-sm font-medium text-accent hover:underline"
+          >
+            All sales
+          </Link>
+        </CardHeader>
+        <CardContent className="p-0">
+          {staff.length === 0 ? (
+            <p className="px-6 py-10 text-center text-sm text-text-muted">
+              Salespeople have not recorded sales this month yet.
+            </p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-text-muted">
+                <tr>
+                  <th className="px-6 py-3 font-medium">Salesperson</th>
+                  <th className="px-6 py-3 text-right font-medium">Sales</th>
+                  <th className="px-6 py-3 text-right font-medium">Revenue</th>
+                  <th className="hidden px-6 py-3 text-right font-medium sm:table-cell">
+                    Avg. sale
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {staff.map((person) => (
+                  <tr key={person.userId} className="hover:bg-surface-hover">
+                    <td className="px-6 py-3 font-medium">{person.name}</td>
+                    <td className="px-6 py-3 text-right tabular-nums text-text-secondary">
+                      {formatNumber(person.salesCount)}
+                    </td>
+                    <td className="px-6 py-3 text-right font-semibold tabular-nums">
+                      {formatCurrency(person.revenue)}
+                    </td>
+                    <td className="hidden px-6 py-3 text-right tabular-nums text-text-secondary sm:table-cell">
+                      {person.salesCount > 0
+                        ? formatCurrency(person.revenue / person.salesCount)
+                        : "—"}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader className="flex-row items-center justify-between space-y-0">
+          <div className="flex items-center gap-2">
+            <TruckIcon className="h-4 w-4 text-text-muted" />
+            <CardTitle>Stock the manager added</CardTitle>
+          </div>
+          <Link
+            href="/inventory/movements?type=ARRIVAL"
+            className="text-sm font-medium text-accent hover:underline"
+          >
+            All arrivals
+          </Link>
+        </CardHeader>
+        <CardContent className="p-0">
+          {arrivals.data.length === 0 ? (
+            <p className="px-6 py-10 text-center text-sm text-text-muted">
+              When the manager records a stock arrival, it appears here.
+            </p>
+          ) : (
+            <table className="w-full text-sm">
+              <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-text-muted">
+                <tr>
+                  <th className="px-6 py-3 font-medium">Product</th>
+                  <th className="hidden px-6 py-3 font-medium md:table-cell">
+                    Shop
+                  </th>
+                  <th className="px-6 py-3 text-right font-medium">Qty</th>
+                  <th className="hidden px-6 py-3 font-medium sm:table-cell">
+                    Added by
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {arrivals.data.map((movement) => (
+                  <tr key={movement.id} className="hover:bg-surface-hover">
+                    <td className="px-6 py-3">
+                      <ProductIdentity
+                        href={`/products/${movement.product.id}`}
+                        name={movement.product.name}
+                        sku={movement.product.sku}
+                        imageUrl={movement.product.imageUrl}
+                      />
+                      <p className="mt-1 text-xs text-text-muted">
+                        {formatRelativeTime(movement.createdAt)}
+                      </p>
+                    </td>
+                    <td className="hidden px-6 py-3 text-text-secondary md:table-cell">
+                      {movement.shop.name}
+                    </td>
+                    <td className="px-6 py-3 text-right font-semibold tabular-nums text-success">
+                      +{formatNumber(movement.quantityChange)}
+                    </td>
+                    <td className="hidden px-6 py-3 text-text-secondary sm:table-cell">
+                      {movement.user.firstName} {movement.user.lastName}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader className="flex-row items-center justify-between space-y-0">
@@ -105,140 +273,11 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
         <CardContent className="p-0">
           {recentSales.length === 0 ? (
             <p className="px-6 py-10 text-center text-sm text-text-muted">
-              When shop staff record a sale, it appears here straight away.
+              Sales recorded by shop staff appear here.
             </p>
           ) : (
             <RecentSalesTable sales={recentSales} showShop />
           )}
-        </CardContent>
-      </Card>
-
-      {reviews.length > 0 && (
-        <div>
-          <ReviewQueue items={reviews} />
-          <p className="mt-2 text-right text-sm">
-            <Link href="/reviews" className="font-medium text-accent hover:underline">
-              Open full review list
-            </Link>
-          </p>
-        </div>
-      )}
-
-      {alertCount > 0 && <StockAlerts />}
-
-      <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
-          <CardHeader>
-            <CardTitle>Last 30 days</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <RevenueChart data={trend} />
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Shop performance</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {shops.length > 0 ? (
-              <ShopPerformanceChart data={shops} />
-            ) : (
-              <p className="py-8 text-center text-sm text-text-muted">
-                No sales recorded this month yet.
-              </p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card>
-        <CardHeader>
-            <CardTitle>Top products</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {topProducts.length === 0 ? (
-            <p className="py-8 text-center text-sm text-text-muted">
-              Shop staff have not recorded sales this month yet.
-            </p>
-          ) : (
-            <ol className="space-y-3">
-              {topProducts.map((product, index) => (
-                <li
-                  key={product.productId}
-                  className="flex items-center gap-3"
-                >
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-muted text-xs font-semibold text-text-secondary">
-                    {index + 1}
-                  </span>
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-text-primary">
-                      {product.productName}
-                    </p>
-                    <p className="text-xs text-text-muted">
-                      {formatNumber(product.totalQuantity)} units
-                    </p>
-                  </div>
-                  <span className="text-sm font-semibold tabular-nums text-text-primary">
-                    {formatCurrency(product.totalRevenue)}
-                  </span>
-                </li>
-              ))}
-            </ol>
-          )}
-        </CardContent>
-      </Card>
-
-      <Card>
-        <CardHeader className="flex-row items-center justify-between space-y-0">
-          <CardTitle>Shops</CardTitle>
-          <Link
-            href="/shops"
-            className="text-sm font-medium text-accent hover:underline"
-          >
-            View all
-          </Link>
-        </CardHeader>
-        <CardContent className="p-0">
-          <div className="data-table-wrapper">
-            <table className="w-full text-sm">
-              <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-text-muted">
-                <tr>
-                  <th className="px-6 py-3 font-medium">Shop</th>
-                  <th className="px-6 py-3 text-right font-medium">Sales</th>
-                  <th className="px-6 py-3 text-right font-medium">Revenue</th>
-                  <th className="px-6 py-3 text-right font-medium">
-                    Avg. sale
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {shops.map((shop) => (
-                  <tr key={shop.shopId} className="hover:bg-surface-hover">
-                    <td className="px-6 py-3">
-                      <Link
-                        href={`/shops/${shop.shopId}`}
-                        className="font-medium text-text-primary hover:text-accent"
-                      >
-                        {shop.shopName}
-                      </Link>
-                    </td>
-                    <td className="px-6 py-3 text-right tabular-nums text-text-secondary">
-                      {formatNumber(shop.salesCount)}
-                    </td>
-                    <td className="px-6 py-3 text-right font-medium tabular-nums">
-                      {formatCurrency(shop.revenue)}
-                    </td>
-                    <td className="px-6 py-3 text-right tabular-nums text-text-secondary">
-                      {shop.salesCount > 0
-                        ? formatCurrency(shop.revenue / shop.salesCount)
-                        : "—"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
         </CardContent>
       </Card>
     </div>

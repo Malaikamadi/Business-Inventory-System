@@ -1,8 +1,8 @@
 # Multi-Branch Inventory & Sales Management System
 
-Inventory and sales management for a business operating several shops. Owners
-get a business-wide view; salespeople get a shop-scoped view built around
-recording sales quickly.
+Inventory and sales management for a business operating several shops. The
+owner watches performance across shops; a manager runs stock, catalog, and
+staff; salespeople get a shop-scoped view built around recording sales quickly.
 
 ## The one rule that shapes everything
 
@@ -58,12 +58,14 @@ npm run dev
 
 The app opens on the login page. Pick a role card, or sign in with email.
 All of these use the password `password123`. Replace them before any real
-deployment. Recording a sale is a salesperson action; the owner reviews sales
-but does not use the till.
+deployment. Recording a sale is a salesperson action. The manager adds stock
+and staff. The owner reviews shop performance, those arrivals, and sales by
+each salesperson.
 
 | Email | Name | Role | Shop |
 | --- | --- | --- | --- |
 | `admin@invsys.com` | Ram Jalloh | Owner | All shops |
+| `manager@invsys.com` | Isata Koroma | Manager | All shops |
 | `fatmata@invsys.com` | Fatmata Kamara | Salesperson | Freetown Central |
 | `mohamed@invsys.com` | Mohamed Sesay | Salesperson | Lumley Branch |
 | `aminata@invsys.com` | Aminata Bangura | Salesperson | Bo Town Branch |

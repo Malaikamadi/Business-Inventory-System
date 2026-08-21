@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { signIn, signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { Loader2, Lock, Store, UserCog } from "lucide-react";
+import { Loader2, Lock, Store, UserCog, Briefcase } from "lucide-react";
 
 import { DEMO_ACCOUNTS, DEMO_PASSWORD } from "@/lib/demo-accounts";
 import { Button } from "@/components/ui/button";
@@ -104,7 +104,12 @@ export default function LoginPage() {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         {DEMO_ACCOUNTS.map((account) => {
-          const Icon = account.role === "Owner" ? UserCog : Store;
+          const Icon =
+            account.role === "Owner"
+              ? UserCog
+              : account.role === "Manager"
+                ? Briefcase
+                : Store;
           const loading = loadingEmail === account.email;
 
           return (

@@ -2,7 +2,7 @@
 
 import { useMemo, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ROLES } from "@/lib/constants";
+import { ROLES, isBusinessWideRole } from "@/lib/constants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -52,12 +52,12 @@ export function UserForm({
 
   const isEdit = Boolean(initialValues?.id);
 
-  // Owners have business-wide access, so shop assignment does not apply.
+  // Owner and manager see every shop, so assignment does not apply.
   const selectedRoleName = useMemo(
     () => roles.find((role) => role.id === values.roleId)?.name,
     [roles, values.roleId]
   );
-  const needsShops = selectedRoleName !== ROLES.OWNER;
+  const needsShops = !isBusinessWideRole(selectedRoleName ?? "");
 
   function set<K extends keyof UserFormValues>(key: K, value: UserFormValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -262,7 +262,7 @@ export function UserForm({
             </fieldset>
           ) : (
             <p className="rounded-md border border-border bg-muted/50 p-3 text-sm text-text-secondary">
-              Owners have access to every shop, so no assignment is needed.
+              Owners and managers have access to every shop, so no assignment is needed.
             </p>
           )}
         </CardContent>

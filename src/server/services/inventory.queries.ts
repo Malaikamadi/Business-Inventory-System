@@ -132,7 +132,7 @@ export async function getInventoryValue(shopIds?: string[]): Promise<number> {
 export interface MovementQuery {
   shopIds?: string[];
   productId?: string;
-  movementType?: string;
+  movementType?: string | string[];
   page?: number;
   pageSize?: number;
 }
@@ -141,12 +141,16 @@ export async function listMovements(query: MovementQuery) {
   const page = Math.max(1, query.page ?? 1);
   const pageSize = query.pageSize ?? DEFAULT_PAGE_SIZE;
 
+  const typeFilter = query.movementType
+    ? Array.isArray(query.movementType)
+      ? { movementType: { in: query.movementType as Prisma.EnumMovementTypeFilter["in"] } }
+      : { movementType: query.movementType as Prisma.EnumMovementTypeFilter["equals"] }
+    : {};
+
   const where: Prisma.StockMovementWhereInput = {
     ...(query.shopIds ? { shopId: { in: query.shopIds } } : {}),
     ...(query.productId ? { productId: query.productId } : {}),
-    ...(query.movementType
-      ? { movementType: query.movementType as Prisma.EnumMovementTypeFilter["equals"] }
-      : {}),
+    ...typeFilter,
   };
 
   const [data, total] = await Promise.all([
