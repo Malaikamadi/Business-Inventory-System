@@ -10,18 +10,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/toast";
 import { createCategoryAction } from "@/server/actions/product.actions";
 
-export function CategoryForm() {
+export function CategoryForm({
+  shops,
+  defaultShopId,
+}: {
+  shops: { id: string; name: string }[];
+  defaultShopId: string;
+}) {
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [shopId, setShopId] = useState(defaultShopId);
 
   function submit(event: React.FormEvent) {
     event.preventDefault();
 
     startTransition(async () => {
-      const result = await createCategoryAction({ name, description });
+      const result = await createCategoryAction({ name, description, shopId });
 
       if (!result.success) {
         toast({
@@ -46,13 +53,32 @@ export function CategoryForm() {
       </CardHeader>
       <CardContent>
         <form onSubmit={submit} className="space-y-4">
+          {shops.length > 1 && (
+            <div className="space-y-1.5">
+              <Label htmlFor="category-shop">Shop</Label>
+              <select
+                id="category-shop"
+                value={shopId}
+                onChange={(event) => setShopId(event.target.value)}
+                className="field-select w-full"
+                required
+              >
+                {shops.map((shop) => (
+                  <option key={shop.id} value={shop.id}>
+                    {shop.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+          )}
+
           <div className="space-y-1.5">
             <Label htmlFor="category-name">Name</Label>
             <Input
               id="category-name"
               value={name}
               onChange={(event) => setName(event.target.value)}
-              placeholder="e.g. Beverages"
+              placeholder="e.g. Cables & power"
               required
               maxLength={100}
             />

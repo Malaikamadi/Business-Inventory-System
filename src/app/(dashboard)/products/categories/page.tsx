@@ -1,7 +1,8 @@
 import { Tags } from "lucide-react";
+import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { formatNumber } from "@/lib/utils";
-import { getCurrentUser } from "@/server/auth-context";
+import { getCurrentUser, resolveShopScope } from "@/server/auth-context";
 import { requireCan } from "@/server/page-guards";
 import { listCategories } from "@/server/services/product.queries";
 import { PageHeader } from "@/components/shared/page-header";
@@ -15,13 +16,24 @@ export default async function CategoriesPage() {
   const user = await getCurrentUser();
   requireCan(user, PERMISSIONS.CATEGORIES_MANAGE, "/products/categories");
 
-  const categories = await listCategories();
+  const shopIds = resolveShopScope(user);
+  const [categories, shops] = await Promise.all([
+    listCategories(shopIds),
+    prisma.shop.findMany({
+      where: {
+        status: "ACTIVE",
+        ...(shopIds ? { id: { in: shopIds } } : {}),
+      },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
   return (
     <div className="space-y-6">
       <PageHeader
         title="Categories"
-        description="Group products for reporting and easier searching."
+        description="Categories belong to a shop, so electronics, pharmacy, and building materials stay separate."
       />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
@@ -40,6 +52,9 @@ export default async function CategoriesPage() {
                     <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-text-muted">
                       <tr>
                         <th className="px-6 py-3 font-medium">Category</th>
+                        <th className="hidden px-6 py-3 font-medium md:table-cell">
+                          Shop
+                        </th>
                         <th className="px-6 py-3 text-right font-medium">
                           Products
                         </th>
@@ -58,6 +73,9 @@ export default async function CategoriesPage() {
                               </p>
                             )}
                           </td>
+                          <td className="hidden px-6 py-3 text-text-secondary md:table-cell">
+                            {category.shopName}
+                          </td>
                           <td className="px-6 py-3 text-right tabular-nums text-text-secondary">
                             {formatNumber(category.productCount)}
                           </td>
@@ -71,7 +89,10 @@ export default async function CategoriesPage() {
           </Card>
         </div>
 
-        <CategoryForm />
+        <CategoryForm
+          shops={shops}
+          defaultShopId={user.primaryShopId ?? shops[0]?.id ?? ""}
+        />
       </div>
     </div>
   );

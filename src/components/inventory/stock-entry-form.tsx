@@ -17,6 +17,7 @@ export interface StockFormProduct {
   id: string;
   name: string;
   sku: string;
+  shopId: string;
 }
 
 interface StockEntryFormProps {
@@ -45,7 +46,10 @@ export function StockEntryForm({
   const [direction, setDirection] = useState<"increase" | "decrease">("decrease");
   const [reason, setReason] = useState("");
 
-  const isArrival = mode === "arrival";
+  const shopProducts = useMemo(
+    () => products.filter((product) => product.shopId === shopId),
+    [products, shopId]
+  );
 
   const currentQuantity = useMemo(() => {
     if (!shopId || !productId) return null;
@@ -126,7 +130,10 @@ export function StockEntryForm({
               <select
                 id="shop"
                 value={shopId}
-                onChange={(event) => setShopId(event.target.value)}
+                onChange={(event) => {
+                  setShopId(event.target.value);
+                  setProductId("");
+                }}
                 className="field-select w-full"
                 required
               >
@@ -149,7 +156,7 @@ export function StockEntryForm({
               required
             >
               <option value="">Select a product</option>
-              {products.map((product) => (
+              {shopProducts.map((product) => (
                 <option key={product.id} value={product.id}>
                   {product.name} ({product.sku})
                 </option>

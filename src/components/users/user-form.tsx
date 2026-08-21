@@ -262,7 +262,7 @@ export function UserForm({
             </fieldset>
           ) : (
             <p className="rounded-md border border-border bg-muted/50 p-3 text-sm text-text-secondary">
-              Owners and managers have access to every shop, so no assignment is needed.
+              Owners have access to every shop, so no assignment is needed.
             </p>
           )}
         </CardContent>

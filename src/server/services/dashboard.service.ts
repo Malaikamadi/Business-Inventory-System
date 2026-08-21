@@ -40,8 +40,18 @@ export async function getOwnerKPIs(shopIds?: string[]): Promise<DashboardKPIs> {
     month,
     stockCounts,
   ] = await Promise.all([
-    prisma.shop.count({ where: { status: "ACTIVE" } }),
-    prisma.product.count({ where: { status: "ACTIVE" } }),
+    prisma.shop.count({
+      where: {
+        status: "ACTIVE",
+        ...(shopIds ? { id: { in: shopIds } } : {}),
+      },
+    }),
+    prisma.product.count({
+      where: {
+        status: "ACTIVE",
+        ...(shopIds ? { shopId: { in: shopIds } } : {}),
+      },
+    }),
     prisma.shopInventory.aggregate({
       where: shopIds ? { shopId: { in: shopIds } } : undefined,
       _sum: { quantity: true },

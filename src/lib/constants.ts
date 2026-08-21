@@ -69,15 +69,14 @@ export const ROLES = {
 
 export type RoleName = (typeof ROLES)[keyof typeof ROLES];
 
-/** Owner and manager see every shop. Salespeople are assigned to branches. */
+/** Only the owner sees every shop. Managers and salespeople are assigned. */
 export function isBusinessWideRole(name: string): boolean {
-  return name === ROLES.OWNER || name === ROLES.MANAGER;
+  return name === ROLES.OWNER;
 }
 
 /**
- * Overall business owner: see how shops and staff are doing, not run the till
- * or the stockroom. Day-to-day catalog, arrivals, and users belong to the
- * manager.
+ * Overall business owner: watches the three shops. Does not run a till or a
+ * stockroom. Each shop has its own manager for catalog and arrivals.
  */
 export const OWNER_PERMISSIONS: PermissionKey[] = [
   PERMISSIONS.DASHBOARD_GLOBAL_VIEW,
@@ -92,12 +91,29 @@ export const OWNER_PERMISSIONS: PermissionKey[] = [
 ];
 
 /**
- * Shop manager: the previous admin surface. Catalog, stock arrivals,
- * adjustments, staff, and reviews — but not recording till sales.
+ * Shop manager: catalog, stock arrivals, and adjustments for the shop they
+ * are assigned to. They do not record till sales and they do not see other
+ * shops.
  */
-export const MANAGER_PERMISSIONS: PermissionKey[] = Object.values(
-  PERMISSIONS
-).filter((permission) => permission !== PERMISSIONS.SALES_CREATE);
+export const MANAGER_PERMISSIONS: PermissionKey[] = [
+  PERMISSIONS.DASHBOARD_SHOP_VIEW,
+  PERMISSIONS.SHOPS_VIEW_ASSIGNED,
+  PERMISSIONS.SHOPS_UPDATE,
+  PERMISSIONS.PRODUCTS_CREATE,
+  PERMISSIONS.PRODUCTS_UPDATE,
+  PERMISSIONS.PRODUCTS_DELETE,
+  PERMISSIONS.PRODUCTS_VIEW,
+  PERMISSIONS.PRODUCTS_VIEW_COST,
+  PERMISSIONS.CATEGORIES_MANAGE,
+  PERMISSIONS.INVENTORY_VIEW_ASSIGNED,
+  PERMISSIONS.STOCK_ARRIVALS_CREATE,
+  PERMISSIONS.STOCK_ADJUSTMENTS_CREATE,
+  PERMISSIONS.STOCK_MOVEMENTS_VIEW_ASSIGNED,
+  PERMISSIONS.SALES_VIEW_ASSIGNED,
+  PERMISSIONS.SALES_VOID,
+  PERMISSIONS.REPORTS_SHOP,
+  PERMISSIONS.AUDIT_VIEW,
+];
 
 /**
  * What a shop salesperson may do. Every entry is scoped to the branches they

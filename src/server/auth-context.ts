@@ -53,7 +53,7 @@ export function assertCanAny(
   }
 }
 
-/** Owners and managers see every shop; salespeople are limited to assignments. */
+/** Owners see every shop; managers and salespeople are limited to assignments. */
 export function canAccessShop(user: SessionUser, shopId: string): boolean {
   if (can(user, PERMISSIONS.SHOPS_VIEW_ALL)) return true;
   return user.shopIds.includes(shopId);

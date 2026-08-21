@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
-import { getCurrentUser } from "@/server/auth-context";
+import { getCurrentUser, resolveShopScope } from "@/server/auth-context";
 import { requireCan } from "@/server/page-guards";
 import { getProductDetail } from "@/server/services/product.queries";
 import { PageHeader } from "@/components/shared/page-header";
@@ -18,11 +18,24 @@ export default async function EditProductPage(props: {
   const user = await getCurrentUser();
   requireCan(user, PERMISSIONS.PRODUCTS_UPDATE, `/products/${productId}/edit`);
 
-  const [product, categories] = await Promise.all([
+  const shopIds = resolveShopScope(user);
+
+  const [product, shops, categories] = await Promise.all([
     getProductDetail(productId),
-    prisma.category.findMany({
-      where: { isActive: true },
+    prisma.shop.findMany({
+      where: {
+        status: "ACTIVE",
+        ...(shopIds ? { id: { in: shopIds } } : {}),
+      },
       select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
+    prisma.category.findMany({
+      where: {
+        isActive: true,
+        ...(shopIds ? { shopId: { in: shopIds } } : {}),
+      },
+      select: { id: true, name: true, shopId: true },
       orderBy: { name: "asc" },
     }),
   ]);
@@ -47,9 +60,11 @@ export default async function EditProductPage(props: {
       />
 
       <ProductForm
+        shops={shops}
         categories={categories}
         initialValues={{
           id: product.id,
+          shopId: product.shopId,
           name: product.name,
           sku: product.sku,
           categoryId: product.categoryId ?? "",

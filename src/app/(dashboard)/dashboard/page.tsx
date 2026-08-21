@@ -9,9 +9,8 @@ export const metadata = { title: "Dashboard · InvSys" };
 export const dynamic = "force-dynamic";
 
 /**
- * One route, three jobs. Permission — not the role name — decides which
- * dashboard renders: the owner watches performance, the manager runs stock
- * and staff, and a salesperson starts from the till.
+ * One route, three jobs. The owner watches all three businesses; a manager
+ * runs stock and catalog for their shop; a salesperson starts from the till.
  */
 export default async function DashboardPage() {
   const user = await getCurrentUser();
@@ -21,12 +20,14 @@ export default async function DashboardPage() {
     "/dashboard"
   );
 
-  if (can(user, PERMISSIONS.STOCK_ARRIVALS_CREATE)) {
-    return <ManagerDashboard firstName={user.firstName} />;
-  }
-
   if (can(user, PERMISSIONS.DASHBOARD_GLOBAL_VIEW)) {
     return <OwnerDashboard firstName={user.firstName} />;
+  }
+
+  if (can(user, PERMISSIONS.STOCK_ARRIVALS_CREATE)) {
+    return (
+      <ManagerDashboard firstName={user.firstName} shopIds={user.shopIds} />
+    );
   }
 
   return <ShopDashboard user={user} />;

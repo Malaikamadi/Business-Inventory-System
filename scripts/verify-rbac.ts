@@ -34,6 +34,9 @@ const MANAGER_ONLY = [
   "/products/categories",
   "/inventory/arrivals",
   "/inventory/adjustments",
+];
+
+const OWNER_ONLY = [
   "/shops/new",
   "/users",
   "/users/new",
@@ -63,7 +66,7 @@ console.log("\nOwner routes");
 for (const path of [...SHARED, ...OWNER_AND_MANAGER]) {
   check(`owner can open ${path}`, canAccessPath(path, OWNER_PERMISSIONS));
 }
-for (const path of [...MANAGER_ONLY, ...SALESPERSON_ONLY]) {
+for (const path of [...MANAGER_ONLY, ...SALESPERSON_ONLY, ...OWNER_ONLY]) {
   check(
     `owner cannot open ${path}`,
     !canAccessPath(path, OWNER_PERMISSIONS)
@@ -74,7 +77,7 @@ console.log("\nManager routes");
 for (const path of [...SHARED, ...MANAGER_ONLY, ...OWNER_AND_MANAGER]) {
   check(`manager can open ${path}`, canAccessPath(path, MANAGER_PERMISSIONS));
 }
-for (const path of SALESPERSON_ONLY) {
+for (const path of [...SALESPERSON_ONLY, ...OWNER_ONLY]) {
   check(
     `manager cannot open ${path}`,
     !canAccessPath(path, MANAGER_PERMISSIONS)
@@ -88,7 +91,7 @@ for (const path of [...SHARED, ...SALESPERSON_ONLY]) {
     canAccessPath(path, SALESPERSON_PERMISSIONS)
   );
 }
-for (const path of [...MANAGER_ONLY, ...OWNER_AND_MANAGER]) {
+for (const path of [...MANAGER_ONLY, ...OWNER_AND_MANAGER, ...OWNER_ONLY]) {
   check(
     `salesperson cannot open ${path}`,
     !canAccessPath(path, SALESPERSON_PERMISSIONS)
@@ -131,13 +134,13 @@ for (const label of [
   "Stock Arrivals",
   "Adjustments",
   "Sales",
-  "Users",
   "Reviews",
   "Audit Log",
 ]) {
   check(`manager menu includes ${label}`, managerMenu.includes(label));
 }
 check(`manager menu hides Record sale`, !managerMenu.includes("Record sale"));
+check(`manager menu hides Users`, !managerMenu.includes("Users"));
 
 for (const label of ["Dashboard", "Shops", "Record sale", "Products", "Overview", "Sales", "Reports"]) {
   check(`salesperson menu includes ${label}`, staffMenu.includes(label));

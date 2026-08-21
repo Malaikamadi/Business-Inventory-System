@@ -45,9 +45,9 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
         </h1>
         <p className="mt-2 max-w-2xl text-sm text-text-secondary">
           Business overview of {kpis.totalShops} shop
-          {kpis.totalShops === 1 ? "" : "s"}. The manager adds stock and staff;
-          you see shop performance, those arrivals, and sales by each
-          salesperson.
+          {kpis.totalShops === 1 ? "" : "s"} — electronics, pharmacy, and
+          building materials. Each shop has a manager who adds stock; you see
+          performance, those arrivals, and sales by each salesperson.
         </p>
       </div>
 

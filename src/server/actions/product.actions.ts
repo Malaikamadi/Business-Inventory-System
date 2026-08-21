@@ -6,7 +6,12 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { categorySchema, productSchema } from "@/lib/validations/product";
-import { assertCan, getCurrentUser } from "@/server/auth-context";
+import {
+  assertCan,
+  assertShopAccess,
+  getCurrentUser,
+  resolveWriteShop,
+} from "@/server/auth-context";
 import {
   AUDIT_ACTIONS,
   diffFields,
@@ -39,9 +44,21 @@ export async function createProductAction(
       );
     }
 
+    const shopId = resolveWriteShop(user, data.shopId);
+    if (data.categoryId) {
+      const category = await prisma.category.findFirst({
+        where: { id: data.categoryId, shopId },
+        select: { id: true },
+      });
+      if (!category) {
+        throw new ValidationError("That category does not belong to this shop.");
+      }
+    }
+
     try {
       const product = await prisma.product.create({
         data: {
+          shopId,
           name: data.name.trim(),
           sku: data.sku.trim().toUpperCase(),
           categoryId: nullIfBlank(data.categoryId),
@@ -96,6 +113,7 @@ export async function updateProductAction(
       select: {
         name: true,
         sku: true,
+        shopId: true,
         costPrice: true,
         sellingPrice: true,
         lowStockThreshold: true,
@@ -103,6 +121,17 @@ export async function updateProductAction(
       },
     });
     if (!existing) throw new NotFoundError("Product");
+    assertShopAccess(user, existing.shopId);
+
+    if (data.categoryId) {
+      const category = await prisma.category.findFirst({
+        where: { id: data.categoryId, shopId: existing.shopId },
+        select: { id: true },
+      });
+      if (!category) {
+        throw new ValidationError("That category does not belong to this shop.");
+      }
+    }
 
     const next = {
       name: data.name.trim(),
@@ -168,9 +197,10 @@ export async function discontinueProductAction(
 
     const product = await prisma.product.findUnique({
       where: { id },
-      select: { name: true, status: true },
+      select: { name: true, status: true, shopId: true },
     });
     if (!product) throw new NotFoundError("Product");
+    assertShopAccess(user, product.shopId);
 
     const remaining = await prisma.shopInventory.aggregate({
       where: { productId: id },
@@ -209,9 +239,12 @@ export async function createCategoryAction(
 
     const data = categorySchema.parse(input);
 
+    const shopId = resolveWriteShop(user, data.shopId);
+
     try {
       const category = await prisma.category.create({
         data: {
+          shopId,
           name: data.name.trim(),
           description: nullIfBlank(data.description),
           parentId: nullIfBlank(data.parentId),

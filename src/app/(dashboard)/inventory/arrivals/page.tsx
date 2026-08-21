@@ -26,8 +26,11 @@ export default async function ArrivalsPage() {
       orderBy: { name: "asc" },
     }),
     prisma.product.findMany({
-      where: { status: "ACTIVE" },
-      select: { id: true, name: true, sku: true },
+      where: {
+        status: "ACTIVE",
+        ...(shopIds ? { shopId: { in: shopIds } } : {}),
+      },
+      select: { id: true, name: true, sku: true, shopId: true },
       orderBy: { name: "asc" },
     }),
     prisma.shopInventory.findMany({

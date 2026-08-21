@@ -218,6 +218,7 @@ export async function listSellableProducts(shopId: string, search?: string) {
       ON si.product_id = p.id AND si.shop_id = ${shopId}::uuid
     LEFT JOIN categories c ON c.id = p.category_id
     WHERE p.status = 'active'
+      AND p.shop_id = ${shopId}::uuid
       AND (${term ?? null}::text IS NULL
            OR p.name ILIKE ${term ? `%${term}%` : null}
            OR p.sku ILIKE ${term ? `%${term}%` : null})

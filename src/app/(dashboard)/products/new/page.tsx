@@ -2,7 +2,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
-import { getCurrentUser } from "@/server/auth-context";
+import { getCurrentUser, resolveShopScope } from "@/server/auth-context";
 import { requireCan } from "@/server/page-guards";
 import { PageHeader } from "@/components/shared/page-header";
 import { ProductForm } from "@/components/products/product-form";
@@ -13,11 +13,26 @@ export default async function NewProductPage() {
   const user = await getCurrentUser();
   requireCan(user, PERMISSIONS.PRODUCTS_CREATE, "/products/new");
 
-  const categories = await prisma.category.findMany({
-    where: { isActive: true },
-    select: { id: true, name: true },
-    orderBy: { name: "asc" },
-  });
+  const shopIds = resolveShopScope(user);
+
+  const [shops, categories] = await Promise.all([
+    prisma.shop.findMany({
+      where: {
+        status: "ACTIVE",
+        ...(shopIds ? { id: { in: shopIds } } : {}),
+      },
+      select: { id: true, name: true },
+      orderBy: { name: "asc" },
+    }),
+    prisma.category.findMany({
+      where: {
+        isActive: true,
+        ...(shopIds ? { shopId: { in: shopIds } } : {}),
+      },
+      select: { id: true, name: true, shopId: true },
+      orderBy: { name: "asc" },
+    }),
+  ]);
 
   return (
     <div className="mx-auto max-w-3xl space-y-6">
@@ -33,10 +48,10 @@ export default async function NewProductPage() {
 
       <PageHeader
         title="Add product"
-        description="Products are shared across all shops. Stock is added separately as a shop-level arrival."
+        description="Products belong to one shop. Stock is then added as an arrival at that shop."
       />
 
-      <ProductForm categories={categories} />
+      <ProductForm shops={shops} categories={categories} />
     </div>
   );
 }

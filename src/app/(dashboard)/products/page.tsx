@@ -43,7 +43,10 @@ export default async function ProductsPage(props: {
       shopIds,
     }),
     prisma.category.findMany({
-      where: { isActive: true },
+      where: {
+        isActive: true,
+        ...(shopIds ? { shopId: { in: shopIds } } : {}),
+      },
       select: { id: true, name: true },
       orderBy: { name: "asc" },
     }),
@@ -58,7 +61,7 @@ export default async function ProductsPage(props: {
     <div className="space-y-6">
       <PageHeader
         title="Products"
-        description="The product catalog is business-wide. Stock quantities belong to individual shops."
+        description="Each shop has its own catalog. Stock quantities belong to that shop."
       >
         {canManage && (
           <Button asChild>
@@ -98,6 +101,11 @@ export default async function ProductsPage(props: {
                   <thead className="border-b border-border text-left text-xs uppercase tracking-wide text-text-muted">
                     <tr>
                       <th className="px-4 py-3 font-medium">Product</th>
+                      {canSeeAllShops && (
+                        <th className="hidden px-4 py-3 font-medium lg:table-cell">
+                          Shop
+                        </th>
+                      )}
                       <th className="hidden px-4 py-3 font-medium md:table-cell">
                         Category
                       </th>
@@ -136,6 +144,11 @@ export default async function ProductsPage(props: {
                               size="md"
                             />
                           </td>
+                          {canSeeAllShops && (
+                            <td className="hidden px-4 py-3 text-text-secondary lg:table-cell">
+                              {product.shop.name}
+                            </td>
+                          )}
                           <td className="hidden px-4 py-3 text-text-secondary md:table-cell">
                             {product.category?.name ?? "—"}
                           </td>

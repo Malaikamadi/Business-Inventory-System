@@ -17,6 +17,7 @@ import {
 
 export interface ProductFormValues {
   id?: string;
+  shopId: string;
   name: string;
   sku: string;
   categoryId: string;
@@ -28,6 +29,7 @@ export interface ProductFormValues {
 }
 
 const EMPTY: ProductFormValues = {
+  shopId: "",
   name: "",
   sku: "",
   categoryId: "",
@@ -39,20 +41,26 @@ const EMPTY: ProductFormValues = {
 };
 
 export function ProductForm({
+  shops,
   categories,
   initialValues,
 }: {
-  categories: { id: string; name: string }[];
+  shops: { id: string; name: string }[];
+  categories: { id: string; name: string; shopId: string }[];
   initialValues?: ProductFormValues;
 }) {
   const router = useRouter();
   const { toast } = useToast();
   const [isPending, startTransition] = useTransition();
   const [values, setValues] = useState<ProductFormValues>(
-    initialValues ?? EMPTY
+    initialValues ?? { ...EMPTY, shopId: shops[0]?.id ?? "" }
   );
 
   const isEdit = Boolean(initialValues?.id);
+  const shopCategories = categories.filter(
+    (category) => category.shopId === values.shopId
+  );
+  const canChooseShop = shops.length > 1 && !isEdit;
 
   function set<K extends keyof ProductFormValues>(
     key: K,
@@ -73,6 +81,7 @@ export function ProductForm({
     startTransition(async () => {
       const payload = {
         ...(isEdit ? { id: initialValues!.id } : {}),
+        shopId: values.shopId,
         name: values.name,
         sku: values.sku,
         categoryId: values.categoryId,
@@ -113,13 +122,38 @@ export function ProductForm({
           <h2 className="text-sm font-semibold text-text-primary">Details</h2>
 
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {canChooseShop ? (
+              <div className="space-y-1.5 sm:col-span-2">
+                <Label htmlFor="shop">Shop</Label>
+                <select
+                  id="shop"
+                  value={values.shopId}
+                  onChange={(event) =>
+                    setValues((current) => ({
+                      ...current,
+                      shopId: event.target.value,
+                      categoryId: "",
+                    }))
+                  }
+                  className="field-select w-full"
+                  required
+                >
+                  {shops.map((shop) => (
+                    <option key={shop.id} value={shop.id}>
+                      {shop.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            ) : null}
+
             <div className="space-y-1.5 sm:col-span-2">
               <Label htmlFor="name">Product name</Label>
               <Input
                 id="name"
                 value={values.name}
                 onChange={(event) => set("name", event.target.value)}
-                placeholder="e.g. Coca-Cola 500ml"
+                placeholder="e.g. USB-C Cable 1m"
                 required
                 maxLength={200}
               />
@@ -131,7 +165,7 @@ export function ProductForm({
                 id="sku"
                 value={values.sku}
                 onChange={(event) => set("sku", event.target.value)}
-                placeholder="e.g. BEV-CC-500"
+                placeholder="e.g. ELC-UC-1M"
                 required
                 maxLength={100}
               />
@@ -149,7 +183,7 @@ export function ProductForm({
                 className="field-select w-full"
               >
                 <option value="">Uncategorised</option>
-                {categories.map((category) => (
+                {shopCategories.map((category) => (
                   <option key={category.id} value={category.id}>
                     {category.name}
                   </option>

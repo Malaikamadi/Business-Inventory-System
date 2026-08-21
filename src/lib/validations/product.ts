@@ -5,6 +5,7 @@ import { isStoredImagePath } from "@/lib/images";
 export const productSchema = z.object({
   name: z.string().min(1, "Product name is required").max(200),
   sku: z.string().min(1, "SKU is required").max(100),
+  shopId: z.string().uuid("Shop is required"),
   categoryId: z.string().uuid().optional().or(z.literal("")),
   description: z.string().optional().or(z.literal("")),
   costPrice: z.coerce
@@ -35,6 +36,7 @@ export type ProductFormData = z.infer<typeof productSchema>;
 export const categorySchema = z.object({
   name: z.string().min(1, "Category name is required").max(100),
   description: z.string().optional().or(z.literal("")),
+  shopId: z.string().uuid("Shop is required"),
   parentId: z.string().uuid().optional().or(z.literal("")),
 });
 

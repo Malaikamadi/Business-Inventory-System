@@ -9,10 +9,8 @@ export interface ProductQuery {
   page?: number;
   pageSize?: number;
   /**
-   * Limits the stock rollup to these shops. The catalog itself is business-wide
-   * — every shop sells the same products — but the quantities beside each one
-   * must not report branches the viewer has no access to. `undefined` means all
-   * shops and should only come from `resolveShopScope`.
+   * Limits the catalog to these shops. Each product belongs to one shop.
+   * `undefined` means all shops and should only come from `resolveShopScope`.
    */
   shopIds?: string[];
 }
@@ -27,6 +25,7 @@ export async function listProducts(query: ProductQuery) {
 
   const where: Prisma.ProductWhereInput = {
     status: query.status ?? "ACTIVE",
+    ...(query.shopIds ? { shopId: { in: query.shopIds } } : {}),
     ...(query.categoryId ? { categoryId: query.categoryId } : {}),
     ...(search
       ? {
@@ -54,6 +53,7 @@ export async function listProducts(query: ProductQuery) {
         imageUrl: true,
         status: true,
         category: { select: { id: true, name: true } },
+        shop: { select: { id: true, name: true } },
         shopInventory: {
           where: query.shopIds ? { shopId: { in: query.shopIds } } : undefined,
           select: { quantity: true },
@@ -85,6 +85,7 @@ export async function listProducts(query: ProductQuery) {
         imageUrl: product.imageUrl,
         status: product.status,
         category: product.category,
+        shop: product.shop,
         totalStock,
         shopsNeedingStock,
         shopCount: product.shopInventory.length,
@@ -113,7 +114,9 @@ export async function getProductDetail(productId: string) {
       createdAt: true,
       updatedAt: true,
       categoryId: true,
+      shopId: true,
       category: { select: { id: true, name: true } },
+      shop: { select: { id: true, name: true } },
       shopInventory: {
         select: {
           quantity: true,
@@ -153,14 +156,18 @@ export async function getProductSalesSummary(
   };
 }
 
-export async function listCategories() {
+export async function listCategories(shopIds?: string[]) {
   const categories = await prisma.category.findMany({
-    where: { isActive: true },
-    orderBy: { name: "asc" },
+    where: {
+      isActive: true,
+      ...(shopIds ? { shopId: { in: shopIds } } : {}),
+    },
+    orderBy: [{ shop: { name: "asc" } }, { name: "asc" }],
     select: {
       id: true,
       name: true,
       description: true,
+      shop: { select: { id: true, name: true } },
       _count: { select: { products: true } },
     },
   });
@@ -169,6 +176,8 @@ export async function listCategories() {
     id: category.id,
     name: category.name,
     description: category.description,
+    shopId: category.shop.id,
+    shopName: category.shop.name,
     productCount: category._count.products,
   }));
 }

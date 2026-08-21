@@ -109,7 +109,7 @@ async function main() {
   const managerRole = await prisma.role.create({
     data: {
       name: "manager",
-      description: "Shop manager. Catalog, stock, staff, and day-to-day operations.",
+      description: "Shop manager. Catalog, arrivals, and stock for the assigned shop.",
       isSystem: true,
       rolePermissions: {
         create: permissions
@@ -135,37 +135,37 @@ async function main() {
   });
   console.log("  ✓ Created roles (owner, manager, salesperson)");
 
-  // ─── Shops ────────────────────────────────────────────────────────
-  const shopA = await prisma.shop.create({
+  // ─── Shops: three distinct businesses, not branches of one catalog ─
+  const electronics = await prisma.shop.create({
     data: {
-      name: "Freetown Central",
+      name: "Jalloh Electronics",
       location: "Central Freetown",
       address: "24 Siaka Stevens Street, Freetown",
       phone: "+232 76 100 101",
-      email: "central@invsys.com",
+      email: "electronics@invsys.com",
     },
   });
 
-  const shopB = await prisma.shop.create({
+  const pharmacy = await prisma.shop.create({
     data: {
-      name: "Lumley Branch",
+      name: "Jalloh Pharmacy",
       location: "Lumley, Freetown",
       address: "8 Lumley Beach Road, Lumley, Freetown",
       phone: "+232 76 100 102",
-      email: "lumley@invsys.com",
+      email: "pharmacy@invsys.com",
     },
   });
 
-  const shopC = await prisma.shop.create({
+  const building = await prisma.shop.create({
     data: {
-      name: "Bo Town Branch",
+      name: "Jalloh Building Materials",
       location: "Bo, Southern Province",
       address: "15 Fenton Road, Bo",
       phone: "+232 76 100 103",
-      email: "bo@invsys.com",
+      email: "building@invsys.com",
     },
   });
-  console.log("  ✓ Created 3 shops");
+  console.log("  ✓ Created 3 shops (electronics, pharmacy, building materials)");
 
   // ─── Users ────────────────────────────────────────────────────────
   const passwordHash = await bcrypt.hash("password123", 10);
@@ -174,25 +174,56 @@ async function main() {
     data: {
       email: "admin@invsys.com",
       passwordHash,
-      firstName: "Isatu",
-      lastName: "Koroma",
+      firstName: "Ram",
+      lastName: "Jalloh",
       phone: "+232 76 100 001",
       roleId: ownerRole.id,
     },
   });
 
-  const manager = await prisma.user.create({
+  const electronicsManager = await prisma.user.create({
     data: {
-      email: "manager@invsys.com",
+      email: "mohamed@invsys.com",
       passwordHash,
-      firstName: "Ram",
-      lastName: "Jalloh",
-      phone: "+232 76 100 005",
+      firstName: "Mohamed",
+      lastName: "Sesay",
+      phone: "+232 76 100 003",
       roleId: managerRole.id,
+      shopAssignments: {
+        create: { shopId: electronics.id, isPrimary: true },
+      },
     },
   });
 
-  const sp1 = await prisma.user.create({
+  const pharmacyManager = await prisma.user.create({
+    data: {
+      email: "manager@invsys.com",
+      passwordHash,
+      firstName: "Isata",
+      lastName: "Koroma",
+      phone: "+232 76 100 005",
+      roleId: managerRole.id,
+      shopAssignments: {
+        create: { shopId: pharmacy.id, isPrimary: true },
+      },
+    },
+  });
+
+  const buildingManager = await prisma.user.create({
+    data: {
+      email: "ibrahim@invsys.com",
+      passwordHash,
+      firstName: "Ibrahim",
+      lastName: "Turay",
+      phone: "+232 76 100 006",
+      roleId: managerRole.id,
+      shopAssignments: {
+        create: { shopId: building.id, isPrimary: true },
+      },
+    },
+  });
+
+  const electronicsSales = await prisma.user.create({
     data: {
       email: "fatmata@invsys.com",
       passwordHash,
@@ -201,26 +232,12 @@ async function main() {
       phone: "+232 76 100 002",
       roleId: salespersonRole.id,
       shopAssignments: {
-        create: { shopId: shopA.id, isPrimary: true },
+        create: { shopId: electronics.id, isPrimary: true },
       },
     },
   });
 
-  const sp2 = await prisma.user.create({
-    data: {
-      email: "mohamed@invsys.com",
-      passwordHash,
-      firstName: "Mohamed",
-      lastName: "Sesay",
-      phone: "+232 76 100 003",
-      roleId: salespersonRole.id,
-      shopAssignments: {
-        create: { shopId: shopB.id, isPrimary: true },
-      },
-    },
-  });
-
-  const sp3 = await prisma.user.create({
+  const pharmacySales = await prisma.user.create({
     data: {
       email: "aminata@invsys.com",
       passwordHash,
@@ -229,114 +246,382 @@ async function main() {
       phone: "+232 76 100 004",
       roleId: salespersonRole.id,
       shopAssignments: {
-        create: { shopId: shopC.id, isPrimary: true },
+        create: { shopId: pharmacy.id, isPrimary: true },
       },
     },
   });
-  console.log("  ✓ Created 5 users (1 owner, 1 manager, 3 salespersons)");
 
-  // ─── Categories ───────────────────────────────────────────────────
-  const beverages = await prisma.category.create({
-    data: { name: "Beverages", description: "Drinks and liquid refreshments" },
+  const buildingSales = await prisma.user.create({
+    data: {
+      email: "musa@invsys.com",
+      passwordHash,
+      firstName: "Musa",
+      lastName: "Conteh",
+      phone: "+232 76 100 007",
+      roleId: salespersonRole.id,
+      shopAssignments: {
+        create: { shopId: building.id, isPrimary: true },
+      },
+    },
   });
-  const snacks = await prisma.category.create({
-    data: { name: "Snacks", description: "Light food items and quick bites" },
-  });
-  const electronics = await prisma.category.create({
-    data: { name: "Electronics", description: "Electronic devices and accessories" },
-  });
-  const clothing = await prisma.category.create({
-    data: { name: "Clothing", description: "Apparel and fashion items" },
-  });
-  const personalCare = await prisma.category.create({
-    data: { name: "Personal Care", description: "Health and hygiene products" },
-  });
-  console.log("  ✓ Created 5 categories");
+  console.log("  ✓ Created 7 users (1 owner, 3 managers, 3 salespersons)");
+
+  const managerByShop = new Map([
+    [electronics.id, electronicsManager.id],
+    [pharmacy.id, pharmacyManager.id],
+    [building.id, buildingManager.id],
+  ]);
+
+  // ─── Categories (per shop) ────────────────────────────────────────
+  const [cables, audio, phoneAcc] = await Promise.all([
+    prisma.category.create({
+      data: {
+        shopId: electronics.id,
+        name: "Cables & Power",
+        description: "Charging cables, power banks, and lighting",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        shopId: electronics.id,
+        name: "Audio",
+        description: "Earbuds, speakers, and sound accessories",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        shopId: electronics.id,
+        name: "Phone Accessories",
+        description: "Cases and other phone add-ons",
+      },
+    }),
+  ]);
+
+  const [painFever, firstAid, personalCare] = await Promise.all([
+    prisma.category.create({
+      data: {
+        shopId: pharmacy.id,
+        name: "Pain & Fever",
+        description: "Over-the-counter pain and fever relief",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        shopId: pharmacy.id,
+        name: "First Aid",
+        description: "Wound care, ORS, and emergency supplies",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        shopId: pharmacy.id,
+        name: "Personal Care",
+        description: "Hygiene and everyday health products",
+      },
+    }),
+  ]);
+
+  const [cementMasonry, hardware, timberPaint] = await Promise.all([
+    prisma.category.create({
+      data: {
+        shopId: building.id,
+        name: "Cement & Masonry",
+        description: "Cement, wire, and masonry supplies",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        shopId: building.id,
+        name: "Hardware",
+        description: "Nails, locks, pipe, and fittings",
+      },
+    }),
+    prisma.category.create({
+      data: {
+        shopId: building.id,
+        name: "Timber & Paint",
+        description: "Sawn timber and decorative paint",
+      },
+    }),
+  ]);
+  console.log("  ✓ Created 9 shop-specific categories");
 
   // ─── Products ─────────────────────────────────────────────────────
-  // Prices are in new leones (SLE) at roughly Freetown retail levels, so the
-  // dashboards and reports read like real trading figures rather than the
-  // single-digit amounts a dollar price list would produce.
+  // Prices are in new leones (SLE) at roughly Freetown / Bo retail levels.
   const productImage = async (sku: string) =>
     (await seedImageUrlForSku(sku)) ?? undefined;
 
-  const products = await Promise.all([
-    prisma.product.create({
-      data: { name: "Coca-Cola 500ml", sku: "BEV-CC-500", categoryId: beverages.id, costPrice: 8.00, sellingPrice: 13.00, lowStockThreshold: 20, description: "Classic Coca-Cola in 500ml PET bottle", imageUrl: await productImage("BEV-CC-500") },
-    }),
-    prisma.product.create({
-      data: { name: "Pepsi 500ml", sku: "BEV-PP-500", categoryId: beverages.id, costPrice: 8.00, sellingPrice: 13.00, lowStockThreshold: 20, description: "Pepsi cola in 500ml PET bottle", imageUrl: await productImage("BEV-PP-500") },
-    }),
-    prisma.product.create({
-      data: { name: "Spring Water 1L", sku: "BEV-SW-1L", categoryId: beverages.id, costPrice: 3.50, sellingPrice: 6.00, lowStockThreshold: 30, description: "Natural spring water, 1 liter", imageUrl: await productImage("BEV-SW-1L") },
-    }),
-    prisma.product.create({
-      data: { name: "Orange Juice 330ml", sku: "BEV-OJ-330", categoryId: beverages.id, costPrice: 11.00, sellingPrice: 18.00, lowStockThreshold: 15, description: "Fresh orange juice, 330ml carton", imageUrl: await productImage("BEV-OJ-330") },
-    }),
-    prisma.product.create({
-      data: { name: "Lay's Classic Chips", sku: "SNK-LC-150", categoryId: snacks.id, costPrice: 13.00, sellingPrice: 22.00, lowStockThreshold: 15, description: "Lay's classic potato chips, 150g bag", imageUrl: await productImage("SNK-LC-150") },
-    }),
-    prisma.product.create({
-      data: { name: "Pringles Original", sku: "SNK-PR-165", categoryId: snacks.id, costPrice: 32.00, sellingPrice: 55.00, lowStockThreshold: 10, description: "Pringles original flavor, 165g can", imageUrl: await productImage("SNK-PR-165") },
-    }),
-    prisma.product.create({
-      data: { name: "Snickers Bar", sku: "SNK-SN-52", categoryId: snacks.id, costPrice: 7.50, sellingPrice: 13.00, lowStockThreshold: 25, description: "Snickers chocolate bar, 52g", imageUrl: await productImage("SNK-SN-52") },
-    }),
-    prisma.product.create({
-      data: { name: "USB-C Cable 1m", sku: "ELC-UC-1M", categoryId: electronics.id, costPrice: 28.00, sellingPrice: 55.00, lowStockThreshold: 10, description: "USB-C charging cable, 1 meter", imageUrl: await productImage("ELC-UC-1M") },
-    }),
-    prisma.product.create({
-      data: { name: "Wireless Earbuds", sku: "ELC-WE-BT", categoryId: electronics.id, costPrice: 240.00, sellingPrice: 430.00, lowStockThreshold: 5, description: "Bluetooth wireless earbuds with case", imageUrl: await productImage("ELC-WE-BT") },
-    }),
-    prisma.product.create({
-      data: { name: "Phone Case Universal", sku: "ELC-PC-UNI", categoryId: electronics.id, costPrice: 22.00, sellingPrice: 45.00, lowStockThreshold: 10, description: "Universal silicone phone case", imageUrl: await productImage("ELC-PC-UNI") },
-    }),
-    prisma.product.create({
-      data: { name: "Cotton T-Shirt Black", sku: "CLT-TS-BLK", categoryId: clothing.id, costPrice: 65.00, sellingPrice: 130.00, lowStockThreshold: 8, description: "100% cotton t-shirt, black, unisex", imageUrl: await productImage("CLT-TS-BLK") },
-    }),
-    prisma.product.create({
-      data: { name: "Cotton T-Shirt White", sku: "CLT-TS-WHT", categoryId: clothing.id, costPrice: 65.00, sellingPrice: 130.00, lowStockThreshold: 8, description: "100% cotton t-shirt, white, unisex", imageUrl: await productImage("CLT-TS-WHT") },
-    }),
-    prisma.product.create({
-      data: { name: "Hand Sanitizer 250ml", sku: "PC-HS-250", categoryId: personalCare.id, costPrice: 18.00, sellingPrice: 34.00, lowStockThreshold: 12, description: "Antibacterial hand sanitizer, 250ml", imageUrl: await productImage("PC-HS-250") },
-    }),
-    prisma.product.create({
-      data: { name: "Face Mask Box (50pc)", sku: "PC-FM-50", categoryId: personalCare.id, costPrice: 42.00, sellingPrice: 78.00, lowStockThreshold: 5, description: "Disposable face masks, box of 50", imageUrl: await productImage("PC-FM-50") },
-    }),
-    prisma.product.create({
-      data: { name: "Toothpaste Mint 100ml", sku: "PC-TP-100", categoryId: personalCare.id, costPrice: 16.00, sellingPrice: 29.00, lowStockThreshold: 10, description: "Mint toothpaste, 100ml tube", imageUrl: await productImage("PC-TP-100") },
-    }),
-  ]);
+  type CatalogItem = {
+    shopId: string;
+    categoryId: string;
+    name: string;
+    sku: string;
+    costPrice: number;
+    sellingPrice: number;
+    lowStockThreshold: number;
+    description: string;
+  };
+
+  const catalog: CatalogItem[] = [
+    {
+      shopId: electronics.id,
+      categoryId: cables.id,
+      name: "USB-C Cable 1m",
+      sku: "ELC-UC-1M",
+      costPrice: 28,
+      sellingPrice: 55,
+      lowStockThreshold: 10,
+      description: "USB-C charging cable, 1 meter",
+    },
+    {
+      shopId: electronics.id,
+      categoryId: audio.id,
+      name: "Wireless Earbuds",
+      sku: "ELC-WE-BT",
+      costPrice: 240,
+      sellingPrice: 430,
+      lowStockThreshold: 5,
+      description: "Bluetooth wireless earbuds with case",
+    },
+    {
+      shopId: electronics.id,
+      categoryId: phoneAcc.id,
+      name: "Phone Case Universal",
+      sku: "ELC-PC-UNI",
+      costPrice: 22,
+      sellingPrice: 45,
+      lowStockThreshold: 10,
+      description: "Universal silicone phone case",
+    },
+    {
+      shopId: electronics.id,
+      categoryId: cables.id,
+      name: "Power Bank 10000mAh",
+      sku: "ELC-PB-10K",
+      costPrice: 180,
+      sellingPrice: 320,
+      lowStockThreshold: 6,
+      description: "Portable power bank, 10000mAh",
+    },
+    {
+      shopId: electronics.id,
+      categoryId: audio.id,
+      name: "Bluetooth Speaker",
+      sku: "ELC-SP-BT",
+      costPrice: 150,
+      sellingPrice: 275,
+      lowStockThreshold: 5,
+      description: "Portable Bluetooth speaker",
+    },
+    {
+      shopId: electronics.id,
+      categoryId: cables.id,
+      name: "LED Bulb 12W",
+      sku: "ELC-LED-12",
+      costPrice: 18,
+      sellingPrice: 35,
+      lowStockThreshold: 12,
+      description: "Energy-saving LED bulb, 12 watt",
+    },
+    {
+      shopId: pharmacy.id,
+      categoryId: painFever.id,
+      name: "Paracetamol 500mg (20 tabs)",
+      sku: "PH-PCM-20",
+      costPrice: 8,
+      sellingPrice: 15,
+      lowStockThreshold: 20,
+      description: "Paracetamol 500mg tablets, pack of 20",
+    },
+    {
+      shopId: pharmacy.id,
+      categoryId: firstAid.id,
+      name: "ORS Sachets (10-pack)",
+      sku: "PH-ORS-10",
+      costPrice: 12,
+      sellingPrice: 22,
+      lowStockThreshold: 15,
+      description: "Oral rehydration salts, box of 10 sachets",
+    },
+    {
+      shopId: pharmacy.id,
+      categoryId: painFever.id,
+      name: "Cough Syrup 100ml",
+      sku: "PH-CS-100",
+      costPrice: 28,
+      sellingPrice: 48,
+      lowStockThreshold: 8,
+      description: "Cough syrup, 100ml bottle",
+    },
+    {
+      shopId: pharmacy.id,
+      categoryId: firstAid.id,
+      name: "Adhesive Plasters (20pc)",
+      sku: "PH-PL-20",
+      costPrice: 10,
+      sellingPrice: 18,
+      lowStockThreshold: 10,
+      description: "Assorted adhesive plasters, pack of 20",
+    },
+    {
+      shopId: pharmacy.id,
+      categoryId: personalCare.id,
+      name: "Hand Sanitizer 250ml",
+      sku: "PC-HS-250",
+      costPrice: 18,
+      sellingPrice: 34,
+      lowStockThreshold: 12,
+      description: "Antibacterial hand sanitizer, 250ml",
+    },
+    {
+      shopId: pharmacy.id,
+      categoryId: personalCare.id,
+      name: "Face Mask Box (50pc)",
+      sku: "PC-FM-50",
+      costPrice: 42,
+      sellingPrice: 78,
+      lowStockThreshold: 5,
+      description: "Disposable face masks, box of 50",
+    },
+    {
+      shopId: pharmacy.id,
+      categoryId: personalCare.id,
+      name: "Toothpaste Mint 100ml",
+      sku: "PC-TP-100",
+      costPrice: 16,
+      sellingPrice: 29,
+      lowStockThreshold: 10,
+      description: "Mint toothpaste, 100ml tube",
+    },
+    {
+      shopId: building.id,
+      categoryId: cementMasonry.id,
+      name: "Portland Cement 50kg",
+      sku: "BLD-CEM-50",
+      costPrice: 95,
+      sellingPrice: 125,
+      lowStockThreshold: 15,
+      description: "Portland cement, 50kg bag",
+    },
+    {
+      shopId: building.id,
+      categoryId: cementMasonry.id,
+      name: "Binding Wire 25kg",
+      sku: "BLD-BW-25",
+      costPrice: 85,
+      sellingPrice: 120,
+      lowStockThreshold: 8,
+      description: "Galvanised binding wire, 25kg coil",
+    },
+    {
+      shopId: building.id,
+      categoryId: hardware.id,
+      name: "Roofing Nails 1kg",
+      sku: "BLD-RN-1K",
+      costPrice: 22,
+      sellingPrice: 38,
+      lowStockThreshold: 12,
+      description: "Umbrella head roofing nails, 1kg",
+    },
+    {
+      shopId: building.id,
+      categoryId: timberPaint.id,
+      name: "Emulsion Paint 4L",
+      sku: "BLD-EP-4L",
+      costPrice: 95,
+      sellingPrice: 155,
+      lowStockThreshold: 6,
+      description: "Interior emulsion paint, 4 litre",
+    },
+    {
+      shopId: building.id,
+      categoryId: timberPaint.id,
+      name: "Timber 2x4 12ft",
+      sku: "BLD-TM-24",
+      costPrice: 45,
+      sellingPrice: 75,
+      lowStockThreshold: 10,
+      description: "Sawn timber, 2x4 inches, 12 feet",
+    },
+    {
+      shopId: building.id,
+      categoryId: hardware.id,
+      name: "Padlock 50mm",
+      sku: "BLD-PL-50",
+      costPrice: 28,
+      sellingPrice: 55,
+      lowStockThreshold: 8,
+      description: "Brass padlock, 50mm",
+    },
+    {
+      shopId: building.id,
+      categoryId: hardware.id,
+      name: "PVC Pipe 3/4\" 6m",
+      sku: "BLD-PVC-34",
+      costPrice: 18,
+      sellingPrice: 32,
+      lowStockThreshold: 10,
+      description: "PVC pressure pipe, 3/4 inch, 6 metres",
+    },
+  ];
+
+  const products = await Promise.all(
+    catalog.map(async (item) =>
+      prisma.product.create({
+        data: {
+          shopId: item.shopId,
+          categoryId: item.categoryId,
+          name: item.name,
+          sku: item.sku,
+          costPrice: item.costPrice,
+          sellingPrice: item.sellingPrice,
+          lowStockThreshold: item.lowStockThreshold,
+          description: item.description,
+          imageUrl: await productImage(item.sku),
+        },
+      })
+    )
+  );
   console.log(`  ✓ Created ${products.length} products`);
+
+  const closingBySku = new Map<string, number>([
+    ["ELC-UC-1M", 12],
+    ["ELC-WE-BT", 4],
+    ["ELC-PC-UNI", 15],
+    ["ELC-PB-10K", 8],
+    ["ELC-SP-BT", 6],
+    ["ELC-LED-12", 2],
+    ["PH-PCM-20", 40],
+    ["PH-ORS-10", 25],
+    ["PH-CS-100", 8],
+    ["PH-PL-20", 18],
+    ["PC-HS-250", 14],
+    ["PC-FM-50", 3],
+    ["PC-TP-100", 0],
+    ["BLD-CEM-50", 30],
+    ["BLD-BW-25", 12],
+    ["BLD-RN-1K", 20],
+    ["BLD-EP-4L", 8],
+    ["BLD-TM-24", 15],
+    ["BLD-PL-50", 4],
+    ["BLD-PVC-34", 10],
+  ]);
 
   // ─── Sales history ────────────────────────────────────────────────
   // Sales are planned before any stock is written so that opening balances can
   // be sized to end at the target levels below. Seeding stock and then selling
   // from it independently is what lets a ledger drift from its balances.
-  const shops = [shopA, shopB, shopC];
-  const closingLevels = [
-    // Target [shopA, shopB, shopC] quantity per product after all sales.
-    [45, 30, 60], // Coca-Cola
-    [35, 25, 40], // Pepsi
-    [80, 50, 70], // Spring Water
-    [20, 15, 25], // Orange Juice
-    [18, 12, 22], // Lay's
-    [10, 8, 14], // Pringles
-    [30, 20, 35], // Snickers
-    [12, 8, 15], // USB-C Cable
-    [6, 4, 7], // Wireless Earbuds
-    [15, 10, 12], // Phone Case
-    [5, 8, 10], // T-Shirt Black (low at Freetown Central)
-    [3, 6, 12], // T-Shirt White (low at Freetown Central)
-    [14, 10, 18], // Hand Sanitizer
-    [4, 2, 6], // Face Masks (low at Lumley)
-    [0, 8, 12], // Toothpaste (out of stock at Freetown Central)
-  ];
+  const catalogByShop = new Map<string, typeof products>();
+  for (const product of products) {
+    const list = catalogByShop.get(product.shopId) ?? [];
+    list.push(product);
+    catalogByShop.set(product.shopId, list);
+  }
 
   const salespersons = [
-    { user: sp1, shop: shopA },
-    { user: sp2, shop: shopB },
-    { user: sp3, shop: shopC },
+    { user: electronicsSales, shop: electronics },
+    { user: pharmacySales, shop: pharmacy },
+    { user: buildingSales, shop: building },
   ];
 
   interface PlannedItem {
@@ -364,6 +649,7 @@ async function main() {
     day.setDate(day.getDate() - dayOffset);
 
     for (const { user: sp, shop } of salespersons) {
+      const shopCatalog = catalogByShop.get(shop.id) ?? [];
       const numSales = 2 + Math.floor(Math.random() * 3);
 
       for (let s = 0; s < numSales; s++) {
@@ -375,7 +661,7 @@ async function main() {
           0
         );
 
-        const chosen = [...products]
+        const chosen = [...shopCatalog]
           .sort(() => Math.random() - 0.5)
           .slice(0, 1 + Math.floor(Math.random() * 3));
 
@@ -412,7 +698,7 @@ async function main() {
 
   plannedSales.sort((a, b) => a.at.getTime() - b.at.getTime());
 
-  // ─── Opening stock ────────────────────────────────────────────────
+  // ─── Opening stock (only at the product's own shop) ───────────────
   const key = (shopId: string, productId: string) => `${shopId}:${productId}`;
   const soldTotals = new Map<string, number>();
   for (const sale of plannedSales) {
@@ -426,37 +712,36 @@ async function main() {
   const openingAt = new Date(now);
   openingAt.setDate(openingAt.getDate() - 7);
 
-  for (let pIdx = 0; pIdx < products.length; pIdx++) {
-    for (let sIdx = 0; sIdx < shops.length; sIdx++) {
-      const k = key(shops[sIdx].id, products[pIdx].id);
-      const opening = closingLevels[pIdx][sIdx] + (soldTotals.get(k) ?? 0);
-      balances.set(k, opening);
+  for (const product of products) {
+    const k = key(product.shopId, product.id);
+    const closing = closingBySku.get(product.sku) ?? 10;
+    const opening = closing + (soldTotals.get(k) ?? 0);
+    balances.set(k, opening);
 
-      await prisma.shopInventory.create({
-        data: {
-          shopId: shops[sIdx].id,
-          productId: products[pIdx].id,
-          quantity: opening,
-          updatedAt: openingAt,
-        },
-      });
-      await prisma.stockMovement.create({
-        data: {
-          shopId: shops[sIdx].id,
-          productId: products[pIdx].id,
-          movementType: "OPENING",
-          quantityChange: opening,
-          quantityBefore: 0,
-          quantityAfter: opening,
-          referenceType: "seed",
-          reason: "Initial stock setup",
-          performedBy: manager.id,
-          createdAt: openingAt,
-        },
-      });
-    }
+    await prisma.shopInventory.create({
+      data: {
+        shopId: product.shopId,
+        productId: product.id,
+        quantity: opening,
+        updatedAt: openingAt,
+      },
+    });
+    await prisma.stockMovement.create({
+      data: {
+        shopId: product.shopId,
+        productId: product.id,
+        movementType: "OPENING",
+        quantityChange: opening,
+        quantityBefore: 0,
+        quantityAfter: opening,
+        referenceType: "seed",
+        reason: "Initial stock setup",
+        performedBy: managerByShop.get(product.shopId)!,
+        createdAt: openingAt,
+      },
+    });
   }
-  console.log("  ✓ Created opening stock for all shops");
+  console.log("  ✓ Created opening stock for each shop's own products");
 
   // ─── Apply sales through the ledger ───────────────────────────────
   const dailyCounters = new Map<string, number>();
@@ -539,11 +824,13 @@ async function main() {
   console.log("\n✅ Seeding complete!\n");
   console.log("  Login Credentials:");
   console.log("  ──────────────────────────────────────");
-  console.log("  Owner (Ram Jalloh):     admin@invsys.com / password123");
-  console.log("  Manager (Isata Koroma): manager@invsys.com / password123");
-  console.log("  Fatmata Kamara:         fatmata@invsys.com / password123  (Freetown Central)");
-  console.log("  Mohamed Sesay:          mohamed@invsys.com / password123  (Lumley Branch)");
-  console.log("  Aminata Bangura:        aminata@invsys.com / password123  (Bo Town Branch)");
+  console.log("  Owner (Ram Jalloh):              admin@invsys.com / password123");
+  console.log("  Mohamed Sesay (Electronics):     mohamed@invsys.com / password123");
+  console.log("  Isata Koroma (Pharmacy):         manager@invsys.com / password123");
+  console.log("  Ibrahim Turay (Building):        ibrahim@invsys.com / password123");
+  console.log("  Fatmata Kamara (Electronics):    fatmata@invsys.com / password123");
+  console.log("  Aminata Bangura (Pharmacy):      aminata@invsys.com / password123");
+  console.log("  Musa Conteh (Building):          musa@invsys.com / password123");
   console.log("");
 }
 

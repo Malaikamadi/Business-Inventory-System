@@ -26,18 +26,25 @@ import { RecentSalesTable } from "./recent-sales-table";
 import { ReviewQueue } from "@/components/review/review-queue";
 import { listActivityReviews } from "@/server/services/review.service";
 
-export async function ManagerDashboard({ firstName }: { firstName: string }) {
+export async function ManagerDashboard({
+  firstName,
+  shopIds,
+}: {
+  firstName: string;
+  shopIds: string[];
+}) {
   const monthStart = startOfBusinessMonth();
+  const scope = shopIds.length > 0 ? shopIds : [];
 
   const [kpis, trend, shops, topProducts, inventoryValue, reviews, recentSales] =
     await Promise.all([
-      getOwnerKPIs(),
-      getRevenueTrend(30),
-      getShopPerformance(monthStart),
-      getTopProducts(monthStart, 5),
-      getInventoryValue(),
-      listActivityReviews({ limit: 6 }),
-      getRecentSales(10),
+      getOwnerKPIs(scope),
+      getRevenueTrend(30, scope),
+      getShopPerformance(monthStart, scope),
+      getTopProducts(monthStart, 5, scope),
+      getInventoryValue(scope),
+      listActivityReviews({ shopIds: scope, limit: 6 }),
+      getRecentSales(10, scope),
     ]);
 
   const alertCount = kpis.lowStockCount + kpis.outOfStockCount;
@@ -50,9 +57,8 @@ export async function ManagerDashboard({ firstName }: { firstName: string }) {
           Welcome, {firstName}
         </h1>
         <p className="mt-2 max-w-xl text-sm text-text-secondary">
-          Day-to-day operations across {kpis.totalShops} shop
-          {kpis.totalShops === 1 ? "" : "s"}. Add stock, manage the catalog and
-          staff, and watch live sales. Salespeople record the till.
+          Day-to-day operations for your shop. Add stock, manage this shop's
+          catalog, and watch live sales. Salespeople record the till.
         </p>
       </div>
 
