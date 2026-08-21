@@ -11,10 +11,14 @@ import {
 } from "recharts";
 import { formatCompactCurrency, formatCurrency, truncate } from "@/lib/utils";
 import type { ShopPerformance } from "@/types";
+import { ClientChartFrame } from "./client-chart-frame";
 
 export function ShopPerformanceChart({ data }: { data: ShopPerformance[] }) {
+  const height = Math.max(200, data.length * 48);
+
   return (
-    <ResponsiveContainer width="100%" height={Math.max(200, data.length * 48)}>
+    <ClientChartFrame height={height}>
+      <ResponsiveContainer width="100%" height={height} minWidth={1} minHeight={1}>
       <BarChart
         data={data}
         layout="vertical"
@@ -50,5 +54,6 @@ export function ShopPerformanceChart({ data }: { data: ShopPerformance[] }) {
         <Bar dataKey="revenue" fill="#2563eb" radius={[0, 4, 4, 0]} barSize={20} />
       </BarChart>
     </ResponsiveContainer>
+    </ClientChartFrame>
   );
 }

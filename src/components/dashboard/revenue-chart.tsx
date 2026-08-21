@@ -11,6 +11,7 @@ import {
 } from "recharts";
 import { formatCompactCurrency, formatCurrency } from "@/lib/utils";
 import type { SalesDataPoint } from "@/types";
+import { ClientChartFrame } from "./client-chart-frame";
 
 function shortDate(iso: string) {
   const [, month, day] = iso.split("-");
@@ -19,7 +20,8 @@ function shortDate(iso: string) {
 
 export function RevenueChart({ data }: { data: SalesDataPoint[] }) {
   return (
-    <ResponsiveContainer width="100%" height={280}>
+    <ClientChartFrame height={280}>
+    <ResponsiveContainer width="100%" height={280} minWidth={1} minHeight={1}>
       <AreaChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
         <defs>
           <linearGradient id="revenueFill" x1="0" y1="0" x2="0" y2="1">
@@ -68,5 +70,6 @@ export function RevenueChart({ data }: { data: SalesDataPoint[] }) {
         />
       </AreaChart>
     </ResponsiveContainer>
+    </ClientChartFrame>
   );
 }

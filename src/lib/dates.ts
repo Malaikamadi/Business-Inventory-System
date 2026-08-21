@@ -2,10 +2,27 @@
  * All timestamps are stored in UTC. Reporting periods ("today", "this month")
  * are business-calendar concepts, so they must be resolved against the
  * business timezone rather than the server's or the viewer's.
+ *
+ * Locales and timezones are resolved against what this Node build actually
+ * ships. Vercel’s ICU data does not include `en-CA` / `en-SL`, and
+ * `DateTimeFormat` throws at module load if we insist on them.
  */
 
-export const BUSINESS_TIMEZONE =
+function timeZoneIsSupported(timeZone: string): boolean {
+  try {
+    new Intl.DateTimeFormat("en-US", { timeZone }).format(new Date());
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+const PREFERRED_TIMEZONE =
   process.env.NEXT_PUBLIC_BUSINESS_TIMEZONE ?? "UTC";
+
+export const BUSINESS_TIMEZONE = timeZoneIsSupported(PREFERRED_TIMEZONE)
+  ? PREFERRED_TIMEZONE
+  : "UTC";
 
 /** Offset between the business timezone and UTC at a given instant, in ms. */
 function timezoneOffsetMs(date: Date, timeZone: string): number {
@@ -19,12 +36,16 @@ export function businessDateString(
   date: Date = new Date(),
   timeZone: string = BUSINESS_TIMEZONE
 ): string {
-  return new Intl.DateTimeFormat("en-CA", {
+  const parts = new Intl.DateTimeFormat("en-US", {
     timeZone,
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
-  }).format(date);
+  }).formatToParts(date);
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+  return `${year}-${month}-${day}`;
 }
 
 /** UTC instant at which the business day containing `date` begins. */
@@ -75,7 +96,7 @@ export function businessHour(
   date: Date,
   timeZone: string = BUSINESS_TIMEZONE
 ): number {
-  const formatted = new Intl.DateTimeFormat("en-GB", {
+  const formatted = new Intl.DateTimeFormat("en-US", {
     timeZone,
     hour: "2-digit",
     hourCycle: "h23",
