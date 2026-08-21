@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 
 import type { PermissionKey } from "@/lib/constants";
 import { NO_ACCESS_PATH } from "@/lib/route-access";
-import { can, canAccessShop, canAny } from "@/server/auth-context";
+import { can, canAccessShop, canAny, canViewSale } from "@/server/auth-context";
 import type { SessionUser } from "@/types";
 
 /**
@@ -41,4 +41,12 @@ export function requireShopAccess(
   from: string
 ): void {
   if (!canAccessShop(user, shopId)) bounce(from);
+}
+
+export function requireCanViewSale(
+  user: SessionUser,
+  sale: { shopId: string; salespersonId: string },
+  from: string
+): void {
+  if (!canViewSale(user, sale)) bounce(from);
 }

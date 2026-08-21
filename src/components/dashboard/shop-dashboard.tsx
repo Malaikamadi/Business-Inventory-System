@@ -1,36 +1,27 @@
 import Link from "next/link";
 import {
   AlertTriangle,
-  Banknote,
-  BarChart3,
   Boxes,
   Package,
   PackageX,
   Plus,
-  Receipt,
-  ShoppingBag,
   Store,
 } from "lucide-react";
 import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
-import { formatCurrency, formatNumber } from "@/lib/utils";
+import { formatNumber } from "@/lib/utils";
 import { can, canAny } from "@/server/auth-context";
-import {
-  getRecentSales,
-  getShopKPIs,
-} from "@/server/services/dashboard.service";
+import { getStockAlertCounts } from "@/server/services/dashboard.service";
 import { StatCard } from "@/components/shared/stat-card";
 import { LiveRefresh } from "@/components/shared/live-refresh";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { EmptyState } from "@/components/shared/empty-state";
-import { RecentSalesTable } from "./recent-sales-table";
 import { StockAlerts } from "./stock-alerts";
 import type { SessionUser } from "@/types";
 
 /**
- * Shop-scoped view for staff. Optimised for recording a sale quickly rather
- * than for analysis, so the primary action stays above the fold on a phone.
+ * Till view for salespeople. Stock they need to sell is here; revenue and
+ * what was sold stay on the owner and manager dashboards.
  */
 export async function ShopDashboard({ user }: { user: SessionUser }) {
   const shopId = user.primaryShopId ?? user.shopIds[0];
@@ -44,13 +35,12 @@ export async function ShopDashboard({ user }: { user: SessionUser }) {
     );
   }
 
-  const [shop, kpis, recentSales] = await Promise.all([
+  const [shop, alerts] = await Promise.all([
     prisma.shop.findUnique({
       where: { id: shopId },
       select: { name: true, location: true },
     }),
-    getShopKPIs(shopId),
-    getRecentSales(8, [shopId]),
+    getStockAlertCounts([shopId]),
   ]);
 
   return (
@@ -62,7 +52,8 @@ export async function ShopDashboard({ user }: { user: SessionUser }) {
             Welcome, {user.firstName}
           </h1>
           <p className="mt-2 text-sm text-text-secondary">
-            {shop?.name ?? "Your shop"} — record sales and check stock from here.
+            {shop?.name ?? "Your shop"} — record sales and check what is in
+            stock. Shop revenue is for the manager and owner.
           </p>
         </div>
         {can(user, PERMISSIONS.SALES_CREATE) && (
@@ -78,74 +69,30 @@ export async function ShopDashboard({ user }: { user: SessionUser }) {
       <RoleShortcuts user={user} shopId={shopId} />
 
       <section
-        aria-label="Today"
-        className="grid grid-cols-2 gap-4 lg:grid-cols-4"
+        aria-label="Stock"
+        className="grid grid-cols-2 gap-4"
       >
         <StatCard
-          title="Today's revenue"
-          value={formatCurrency(kpis.todayRevenue)}
-          icon={Banknote}
-        />
-        <StatCard
-          title="Sales today"
-          value={formatNumber(kpis.todaySales)}
-          subtitle={`${formatNumber(kpis.todayItemsSold)} items sold`}
-          icon={Receipt}
-        />
-        <StatCard
           title="Low stock"
-          value={formatNumber(kpis.lowStockCount)}
+          value={formatNumber(alerts.lowStock)}
           icon={AlertTriangle}
           iconClassName={
-            kpis.lowStockCount > 0
+            alerts.lowStock > 0
               ? "bg-warning-light text-warning-foreground"
               : undefined
           }
         />
         <StatCard
           title="Out of stock"
-          value={formatNumber(kpis.outOfStockCount)}
+          value={formatNumber(alerts.outOfStock)}
           icon={PackageX}
           iconClassName={
-            kpis.outOfStockCount > 0 ? "bg-danger-light text-danger" : undefined
+            alerts.outOfStock > 0 ? "bg-danger-light text-danger" : undefined
           }
         />
       </section>
 
       <StockAlerts shopIds={[shopId]} />
-
-      <Card>
-        <CardHeader className="flex-row items-center justify-between space-y-0">
-          <CardTitle>Recent sales</CardTitle>
-          <Link
-            href="/sales"
-            className="text-sm font-medium text-accent hover:underline"
-          >
-            View all
-          </Link>
-        </CardHeader>
-        <CardContent className="p-0">
-          {recentSales.length === 0 ? (
-            <div className="px-6">
-              <EmptyState
-                icon={ShoppingBag}
-                title="No sales yet"
-                description="Sales you record at this shop will appear here."
-                actionLabel={
-                  can(user, PERMISSIONS.SALES_CREATE)
-                    ? "Record your first sale"
-                    : undefined
-                }
-                actionHref={
-                  can(user, PERMISSIONS.SALES_CREATE) ? "/sales/new" : undefined
-                }
-              />
-            </div>
-          ) : (
-            <RecentSalesTable sales={recentSales} />
-          )}
-        </CardContent>
-      </Card>
     </div>
   );
 }
@@ -165,16 +112,6 @@ function RoleShortcuts({ user, shopId }: { user: SessionUser; shopId: string }) 
       label: "Products",
       icon: Package,
     },
-    canAny(user, [PERMISSIONS.SALES_VIEW_ALL, PERMISSIONS.SALES_VIEW_ASSIGNED]) && {
-      href: "/sales",
-      label: "Sales",
-      icon: Receipt,
-    },
-    canAny(user, [PERMISSIONS.REPORTS_GLOBAL, PERMISSIONS.REPORTS_SHOP]) && {
-      href: "/reports",
-      label: "Reports",
-      icon: BarChart3,
-    },
     canAny(user, [
       PERMISSIONS.SHOPS_VIEW_ALL,
       PERMISSIONS.SHOPS_VIEW_ASSIGNED,
@@ -191,7 +128,7 @@ function RoleShortcuts({ user, shopId }: { user: SessionUser; shopId: string }) 
   if (items.length === 0) return null;
 
   return (
-    <nav aria-label="Your sections" className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+    <nav aria-label="Your sections" className="grid grid-cols-2 gap-3 sm:grid-cols-3">
       {items.map((item) => (
         <Link
           key={item.href}

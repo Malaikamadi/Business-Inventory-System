@@ -103,6 +103,16 @@ const RULES: RouteRule[] = [
     section: "Record sale",
   },
   {
+    // Receipt for a sale just recorded, or any sale for those who may review.
+    pattern: new RegExp(`^/sales/${ID}$`),
+    anyOf: [
+      PERMISSIONS.SALES_CREATE,
+      PERMISSIONS.SALES_VIEW_ALL,
+      PERMISSIONS.SALES_VIEW_ASSIGNED,
+    ],
+    section: "Sale",
+  },
+  {
     pattern: new RegExp(`^/sales(?:/|$)`),
     anyOf: [PERMISSIONS.SALES_VIEW_ALL, PERMISSIONS.SALES_VIEW_ASSIGNED],
     section: "Sales",

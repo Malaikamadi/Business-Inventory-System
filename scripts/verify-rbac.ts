@@ -54,16 +54,19 @@ const SHARED = [
   "/inventory",
   "/inventory/low-stock",
   "/inventory/out-of-stock",
+  "/settings/profile",
+];
+
+const SALES_HISTORY = [
   "/inventory/movements",
   "/sales",
   "/reports",
-  "/settings/profile",
 ];
 
 const SALESPERSON_ONLY = ["/sales/new"];
 
 console.log("\nOwner routes");
-for (const path of [...SHARED, ...OWNER_AND_MANAGER]) {
+for (const path of [...SHARED, ...SALES_HISTORY, ...OWNER_AND_MANAGER]) {
   check(`owner can open ${path}`, canAccessPath(path, OWNER_PERMISSIONS));
 }
 for (const path of [...MANAGER_ONLY, ...SALESPERSON_ONLY, ...OWNER_ONLY]) {
@@ -74,7 +77,12 @@ for (const path of [...MANAGER_ONLY, ...SALESPERSON_ONLY, ...OWNER_ONLY]) {
 }
 
 console.log("\nManager routes");
-for (const path of [...SHARED, ...MANAGER_ONLY, ...OWNER_AND_MANAGER]) {
+for (const path of [
+  ...SHARED,
+  ...SALES_HISTORY,
+  ...MANAGER_ONLY,
+  ...OWNER_AND_MANAGER,
+]) {
   check(`manager can open ${path}`, canAccessPath(path, MANAGER_PERMISSIONS));
 }
 for (const path of [...SALESPERSON_ONLY, ...OWNER_ONLY]) {
@@ -91,7 +99,12 @@ for (const path of [...SHARED, ...SALESPERSON_ONLY]) {
     canAccessPath(path, SALESPERSON_PERMISSIONS)
   );
 }
-for (const path of [...MANAGER_ONLY, ...OWNER_AND_MANAGER, ...OWNER_ONLY]) {
+for (const path of [
+  ...SALES_HISTORY,
+  ...MANAGER_ONLY,
+  ...OWNER_AND_MANAGER,
+  ...OWNER_ONLY,
+]) {
   check(
     `salesperson cannot open ${path}`,
     !canAccessPath(path, SALESPERSON_PERMISSIONS)
@@ -142,11 +155,21 @@ for (const label of [
 check(`manager menu hides Record sale`, !managerMenu.includes("Record sale"));
 check(`manager menu hides Users`, !managerMenu.includes("Users"));
 
-for (const label of ["Dashboard", "Shops", "Record sale", "Products", "Overview", "Sales", "Reports"]) {
+for (const label of ["Dashboard", "Shops", "Record sale", "Products", "Overview"]) {
   check(`salesperson menu includes ${label}`, staffMenu.includes(label));
 }
 
-for (const label of ["Categories", "Stock Arrivals", "Adjustments", "Users", "Reviews", "Audit Log"]) {
+for (const label of [
+  "Categories",
+  "Stock Arrivals",
+  "Adjustments",
+  "Movements",
+  "Sales",
+  "Reports",
+  "Users",
+  "Reviews",
+  "Audit Log",
+]) {
   check(`salesperson menu hides ${label}`, !staffMenu.includes(label));
 }
 

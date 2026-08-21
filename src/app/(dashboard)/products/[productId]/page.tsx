@@ -12,6 +12,7 @@ import {
 import {
   can,
   canAny,
+  canViewSalesHistory,
   getCurrentUser,
   resolveShopScope,
 } from "@/server/auth-context";
@@ -52,12 +53,19 @@ export default async function ProductDetailPage(props: {
     PERMISSIONS.SHOPS_VIEW_ASSIGNED,
   ]);
   const canSeeCost = can(user, PERMISSIONS.PRODUCTS_VIEW_COST);
+  const canSeeSales = canViewSalesHistory(user);
+  const canSeeMovements = canAny(user, [
+    PERMISSIONS.STOCK_MOVEMENTS_VIEW_ALL,
+    PERMISSIONS.STOCK_MOVEMENTS_VIEW_ASSIGNED,
+  ]);
 
-  const sales = await getProductSalesSummary(
-    productId,
-    startOfBusinessMonth(),
-    resolveShopScope(user)
-  );
+  const sales = canSeeSales
+    ? await getProductSalesSummary(
+        productId,
+        startOfBusinessMonth(),
+        resolveShopScope(user)
+      )
+    : null;
 
   // Staff only see the branches they work at; owners see the whole picture.
   const visibleInventory = can(user, PERMISSIONS.INVENTORY_VIEW_ALL)
@@ -235,33 +243,51 @@ export default async function ProductDetailPage(props: {
             </CardContent>
           </Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>This month</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <dl className="space-y-3 text-sm">
-                <div className="flex justify-between gap-4">
-                  <dt className="text-text-secondary">Units sold</dt>
-                  <dd className="font-semibold tabular-nums">
-                    {formatNumber(sales.unitsSold)}
-                  </dd>
-                </div>
-                <div className="flex justify-between gap-4">
-                  <dt className="text-text-secondary">Revenue</dt>
-                  <dd className="font-semibold tabular-nums">
-                    {formatCurrency(sales.revenue)}
-                  </dd>
-                </div>
-              </dl>
-              <Link
-                href={`/inventory/movements?product=${product.id}`}
-                className="mt-4 inline-block text-sm font-medium text-accent hover:underline"
-              >
-                View stock movements
-              </Link>
-            </CardContent>
-          </Card>
+          {(canSeeSales || canSeeMovements) && (
+            <Card>
+              {canSeeSales && sales && (
+                <>
+                  <CardHeader>
+                    <CardTitle>This month</CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <dl className="space-y-3 text-sm">
+                      <div className="flex justify-between gap-4">
+                        <dt className="text-text-secondary">Units sold</dt>
+                        <dd className="font-semibold tabular-nums">
+                          {formatNumber(sales.unitsSold)}
+                        </dd>
+                      </div>
+                      <div className="flex justify-between gap-4">
+                        <dt className="text-text-secondary">Revenue</dt>
+                        <dd className="font-semibold tabular-nums">
+                          {formatCurrency(sales.revenue)}
+                        </dd>
+                      </div>
+                    </dl>
+                    {canSeeMovements && (
+                      <Link
+                        href={`/inventory/movements?product=${product.id}`}
+                        className="mt-4 inline-block text-sm font-medium text-accent hover:underline"
+                      >
+                        View stock movements
+                      </Link>
+                    )}
+                  </CardContent>
+                </>
+              )}
+              {!canSeeSales && canSeeMovements && (
+                <CardContent className="p-6">
+                  <Link
+                    href={`/inventory/movements?product=${product.id}`}
+                    className="text-sm font-medium text-accent hover:underline"
+                  >
+                    View stock movements
+                  </Link>
+                </CardContent>
+              )}
+            </Card>
+          )}
         </div>
       </div>
 

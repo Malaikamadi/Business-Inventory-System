@@ -4,7 +4,7 @@ import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { startOfBusinessMonth } from "@/lib/dates";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import { can, getCurrentUser } from "@/server/auth-context";
+import { can, canAny, getCurrentUser } from "@/server/auth-context";
 import { requireCanAny } from "@/server/page-guards";
 import { getShopPerformance } from "@/server/services/dashboard.service";
 import { PageHeader } from "@/components/shared/page-header";
@@ -25,6 +25,12 @@ export default async function ShopsPage() {
 
   const canSeeAll = can(user, PERMISSIONS.SHOPS_VIEW_ALL);
   const canCreate = can(user, PERMISSIONS.SHOPS_CREATE);
+  const canSeePerformance = canAny(user, [
+    PERMISSIONS.SALES_VIEW_ALL,
+    PERMISSIONS.SALES_VIEW_ASSIGNED,
+    PERMISSIONS.REPORTS_GLOBAL,
+    PERMISSIONS.REPORTS_SHOP,
+  ]);
   const shopIds = canSeeAll ? undefined : user.shopIds;
 
   const [shops, performance, inventory] = await Promise.all([
@@ -40,7 +46,9 @@ export default async function ShopsPage() {
         _count: { select: { staffAssignments: true } },
       },
     }),
-    getShopPerformance(startOfBusinessMonth(), shopIds),
+    canSeePerformance
+      ? getShopPerformance(startOfBusinessMonth(), shopIds)
+      : Promise.resolve([]),
     prisma.shopInventory.groupBy({
       by: ["shopId"],
       where: shopIds ? { shopId: { in: shopIds } } : undefined,
@@ -60,7 +68,7 @@ export default async function ShopsPage() {
         description={
           canSeeAll
             ? "Every branch, its staff, and how it is performing this month."
-            : "The branch you are assigned to. You can view its stock and sales, but not add or edit shops."
+            : "The shop you are assigned to. Record sales and check stock here."
         }
       >
         {canCreate && (
@@ -113,20 +121,24 @@ export default async function ShopsPage() {
                   </div>
 
                   <dl className="grid grid-cols-2 gap-4 border-t border-border pt-4 text-sm">
-                    <div>
-                      <dt className="text-xs text-text-muted">
-                        Revenue this month
-                      </dt>
-                      <dd className="mt-0.5 font-semibold tabular-nums">
-                        {formatCurrency(stats?.revenue ?? 0)}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt className="text-xs text-text-muted">Sales</dt>
-                      <dd className="mt-0.5 font-semibold tabular-nums">
-                        {formatNumber(stats?.salesCount ?? 0)}
-                      </dd>
-                    </div>
+                    {canSeePerformance && (
+                      <>
+                        <div>
+                          <dt className="text-xs text-text-muted">
+                            Revenue this month
+                          </dt>
+                          <dd className="mt-0.5 font-semibold tabular-nums">
+                            {formatCurrency(stats?.revenue ?? 0)}
+                          </dd>
+                        </div>
+                        <div>
+                          <dt className="text-xs text-text-muted">Sales</dt>
+                          <dd className="mt-0.5 font-semibold tabular-nums">
+                            {formatNumber(stats?.salesCount ?? 0)}
+                          </dd>
+                        </div>
+                      </>
+                    )}
                     <div>
                       <dt className="text-xs text-text-muted">Units in stock</dt>
                       <dd className="mt-0.5 font-semibold tabular-nums">

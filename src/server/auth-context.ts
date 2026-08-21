@@ -65,6 +65,36 @@ export function assertShopAccess(user: SessionUser, shopId: string): void {
   }
 }
 
+/** Owner and manager may read sales history and revenue. Till staff may not. */
+export function canViewSalesHistory(user: SessionUser): boolean {
+  return canAny(user, [
+    PERMISSIONS.SALES_VIEW_ALL,
+    PERMISSIONS.SALES_VIEW_ASSIGNED,
+  ]);
+}
+
+/**
+ * A salesperson may open the receipt for a sale they just recorded. Everyone
+ * else with sales-view permission may open any sale at a shop they can access.
+ */
+export function canViewSale(
+  user: SessionUser,
+  sale: { shopId: string; salespersonId: string }
+): boolean {
+  if (!canAccessShop(user, sale.shopId)) return false;
+  if (canViewSalesHistory(user)) return true;
+  return can(user, PERMISSIONS.SALES_CREATE) && sale.salespersonId === user.id;
+}
+
+export function assertCanViewSale(
+  user: SessionUser,
+  sale: { shopId: string; salespersonId: string }
+): void {
+  if (!canViewSale(user, sale)) {
+    throw new ForbiddenError("You do not have permission to view this sale.");
+  }
+}
+
 /**
  * The shop filter to apply to a query.
  *

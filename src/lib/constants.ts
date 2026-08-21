@@ -116,19 +116,15 @@ export const MANAGER_PERMISSIONS: PermissionKey[] = [
 ];
 
 /**
- * What a shop salesperson may do. Every entry is scoped to the branches they
- * are assigned to; none of them grant a business-wide view, and none reveal
- * cost or profit. Recording a sale belongs here — not on the owner role.
+ * What a shop salesperson may do. They run the till and check stock at their
+ * shop. Revenue, sales history, and reports stay with the owner and manager.
  */
 export const SALESPERSON_PERMISSIONS: PermissionKey[] = [
   PERMISSIONS.DASHBOARD_SHOP_VIEW,
   PERMISSIONS.SHOPS_VIEW_ASSIGNED,
   PERMISSIONS.PRODUCTS_VIEW,
   PERMISSIONS.INVENTORY_VIEW_ASSIGNED,
-  PERMISSIONS.STOCK_MOVEMENTS_VIEW_ASSIGNED,
   PERMISSIONS.SALES_CREATE,
-  PERMISSIONS.SALES_VIEW_ASSIGNED,
-  PERMISSIONS.REPORTS_SHOP,
 ];
 
 // ─── Movement Types ──────────────────────────────────────────────────

@@ -124,7 +124,7 @@ async function main() {
   const salespersonRole = await prisma.role.create({
     data: {
       name: "salesperson",
-      description: "Salesperson with shop-level access",
+      description: "Salesperson. Records till sales at the assigned shop; does not see revenue or sales history.",
       isSystem: true,
       rolePermissions: {
         create: permissions

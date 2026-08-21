@@ -84,6 +84,7 @@ export async function getSaleDetail(saleId: string) {
       id: true,
       saleNumber: true,
       shopId: true,
+      salespersonId: true,
       totalAmount: true,
       totalCost: true,
       itemsCount: true,

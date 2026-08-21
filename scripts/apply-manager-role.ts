@@ -19,6 +19,7 @@ import {
   MANAGER_PERMISSIONS,
   OWNER_PERMISSIONS,
   PERMISSIONS,
+  SALESPERSON_PERMISSIONS,
 } from "../src/lib/constants";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
@@ -69,6 +70,12 @@ async function main() {
     "manager",
     "Shop manager. Catalog, arrivals, and stock for the assigned shop.",
     MANAGER_PERMISSIONS
+  );
+
+  await syncRole(
+    "salesperson",
+    "Salesperson with shop-level access. Records sales; does not see revenue or sales history.",
+    SALESPERSON_PERMISSIONS
   );
 
   const passwordHash = await bcrypt.hash("password123", 10);
@@ -131,6 +138,7 @@ async function main() {
   });
 
   console.log("Owner (admin@invsys.com) now has oversight permissions.");
+  console.log("Salespeople can record sales but cannot open sales history or reports.");
   console.log("Sign out and back in so sessions pick up the new permissions.");
 }
 

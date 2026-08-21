@@ -3,7 +3,7 @@ import { PERMISSIONS } from "@/lib/constants";
 import type { ReceiptData } from "@/lib/receipt";
 import {
   assertCanAny,
-  assertShopAccess,
+  assertCanViewSale,
   getCurrentUser,
 } from "@/server/auth-context";
 import { getSaleDetail } from "@/server/services/sales.queries";
@@ -18,6 +18,7 @@ export async function GET(
     const { saleId } = await context.params;
     const user = await getCurrentUser();
     assertCanAny(user, [
+      PERMISSIONS.SALES_CREATE,
       PERMISSIONS.SALES_VIEW_ALL,
       PERMISSIONS.SALES_VIEW_ASSIGNED,
     ]);
@@ -27,7 +28,7 @@ export async function GET(
       return NextResponse.json({ error: "Sale not found." }, { status: 404 });
     }
 
-    assertShopAccess(user, sale.shopId);
+    assertCanViewSale(user, sale);
 
     const receipt: ReceiptData = {
       saleId: sale.id,

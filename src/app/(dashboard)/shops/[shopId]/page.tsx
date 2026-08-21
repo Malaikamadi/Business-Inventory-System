@@ -12,7 +12,7 @@ import { prisma } from "@/lib/db";
 import { PERMISSIONS } from "@/lib/constants";
 import { startOfBusinessMonth } from "@/lib/dates";
 import { formatCurrency, formatNumber } from "@/lib/utils";
-import { can, canAny, getCurrentUser } from "@/server/auth-context";
+import { can, canAny, canViewSalesHistory, getCurrentUser } from "@/server/auth-context";
 import { requireShopAccess } from "@/server/page-guards";
 import {
   getStockAlertCounts,
@@ -42,6 +42,7 @@ export default async function ShopDetailPage(props: {
   requireShopAccess(user, shopId, `/shops/${shopId}`);
 
   const canSeeCost = can(user, PERMISSIONS.PRODUCTS_VIEW_COST);
+  const canSeeSales = canViewSalesHistory(user);
 
   const shop = await prisma.shop.findUnique({
     where: { id: shopId },
@@ -77,15 +78,17 @@ export default async function ShopDetailPage(props: {
 
   const [monthSales, alerts, inventoryValue, units, lowStock, recentSales] =
     await Promise.all([
-      prisma.sale.aggregate({
-        where: {
-          shopId,
-          status: "COMPLETED",
-          createdAt: { gte: monthStart },
-        },
-        _sum: { totalAmount: true },
-        _count: true,
-      }),
+      canSeeSales
+        ? prisma.sale.aggregate({
+            where: {
+              shopId,
+              status: "COMPLETED",
+              createdAt: { gte: monthStart },
+            },
+            _sum: { totalAmount: true },
+            _count: true,
+          })
+        : Promise.resolve(null),
       getStockAlertCounts([shopId]),
         canSeeCost ? getInventoryValue([shopId]) : Promise.resolve(0),
       prisma.shopInventory.aggregate({
@@ -93,7 +96,7 @@ export default async function ShopDetailPage(props: {
         _sum: { quantity: true },
       }),
       listInventory({ shopIds: [shopId], filter: "low", pageSize: 8 }),
-      getRecentSales(8, [shopId]),
+      canSeeSales ? getRecentSales(8, [shopId]) : Promise.resolve([]),
     ]);
 
   return (
@@ -130,12 +133,14 @@ export default async function ShopDetailPage(props: {
       </PageHeader>
 
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          title="Revenue this month"
-          value={formatCurrency(Number(monthSales._sum.totalAmount ?? 0))}
-          subtitle={`${formatNumber(monthSales._count)} sales`}
-          icon={Banknote}
-        />
+        {canSeeSales && monthSales && (
+          <StatCard
+            title="Revenue this month"
+            value={formatCurrency(Number(monthSales._sum.totalAmount ?? 0))}
+            subtitle={`${formatNumber(monthSales._count)} sales`}
+            icon={Banknote}
+          />
+        )}
         <StatCard
           title="Stock on hand"
           value={formatNumber(units._sum.quantity ?? 0)}
@@ -165,22 +170,24 @@ export default async function ShopDetailPage(props: {
       </section>
 
       <div className="grid grid-cols-1 gap-6 xl:grid-cols-3">
-        <Card className="xl:col-span-2">
-          <CardHeader className="flex-row items-center justify-between space-y-0">
-            <CardTitle>Recent sales</CardTitle>
-            <Link
-              href={`/sales?shop=${shop.id}`}
-              className="text-sm font-medium text-accent hover:underline"
-            >
-              View all
-            </Link>
-          </CardHeader>
-          <CardContent className="p-0">
-            <RecentSalesTable sales={recentSales} />
-          </CardContent>
-        </Card>
+        {canSeeSales && (
+          <Card className="xl:col-span-2">
+            <CardHeader className="flex-row items-center justify-between space-y-0">
+              <CardTitle>Recent sales</CardTitle>
+              <Link
+                href={`/sales?shop=${shop.id}`}
+                className="text-sm font-medium text-accent hover:underline"
+              >
+                View all
+              </Link>
+            </CardHeader>
+            <CardContent className="p-0">
+              <RecentSalesTable sales={recentSales} />
+            </CardContent>
+          </Card>
+        )}
 
-        <Card>
+        <Card className={canSeeSales ? undefined : "xl:col-span-3"}>
           <CardHeader>
             <CardTitle>Staff</CardTitle>
           </CardHeader>

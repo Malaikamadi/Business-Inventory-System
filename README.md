@@ -61,7 +61,9 @@ The app opens on the login page. Pick a role card, or sign in with email.
 All of these use the password `password123`. Replace them before any real
 deployment. Recording a sale is a salesperson action. Each shop manager adds
 stock and catalog items for that shop only. The owner reviews shop
-performance, those arrivals, and sales by each salesperson.
+performance, those arrivals, and sales by each salesperson. A salesperson
+records till sales and checks stock; they do not see shop revenue or
+what others sold.
 
 | Email | Name | Role | Shop |
 | --- | --- | --- | --- |

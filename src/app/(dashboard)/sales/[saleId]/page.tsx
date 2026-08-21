@@ -5,8 +5,8 @@ import { PERMISSIONS } from "@/lib/constants";
 import type { ReceiptData } from "@/lib/receipt";
 import { isQuickVoid } from "@/lib/review-rules";
 import { formatCurrency, formatDateTime } from "@/lib/utils";
-import { can, getCurrentUser } from "@/server/auth-context";
-import { requireShopAccess } from "@/server/page-guards";
+import { can, canViewSalesHistory, getCurrentUser } from "@/server/auth-context";
+import { requireCanViewSale } from "@/server/page-guards";
 import { getSaleDetail } from "@/server/services/sales.queries";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -27,7 +27,8 @@ export default async function SaleDetailPage(props: {
   const sale = await getSaleDetail(saleId);
   if (!sale) notFound();
 
-  requireShopAccess(user, sale.shopId, `/sales/${saleId}`);
+  requireCanViewSale(user, sale, `/sales/${saleId}`);
+  const canSeeHistory = canViewSalesHistory(user);
 
   const margin = Number(sale.totalAmount) - Number(sale.totalCost);
   const canVoid = can(user, PERMISSIONS.SALES_VOID) && sale.status !== "VOIDED";
@@ -60,15 +61,17 @@ export default async function SaleDetailPage(props: {
   return (
     <div className="space-y-6">
       <div className="print:hidden">
-        <Link
-          href="/sales"
-          className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to sales
-        </Link>
+        {canSeeHistory && (
+          <Link
+            href="/sales"
+            className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to sales
+          </Link>
+        )}
 
-        <div className="mt-3 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <div className={`${canSeeHistory ? "mt-3 " : ""}flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between`}>
           <div>
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="text-2xl font-bold tracking-tight text-text-primary">
