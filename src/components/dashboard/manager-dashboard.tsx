@@ -57,8 +57,8 @@ export async function ManagerDashboard({
           Welcome, {firstName}
         </h1>
         <p className="mt-2 max-w-xl text-sm text-text-secondary">
-          Day-to-day operations for your shop. Add stock, manage this shop's
-          catalog, and watch live sales. Salespeople record the till.
+          Day-to-day operations for your shop. Add stock, manage this catalog,
+          and watch live sales. Salespeople record the till.
         </p>
       </div>
 

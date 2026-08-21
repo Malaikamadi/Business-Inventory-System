@@ -76,7 +76,7 @@ export async function OwnerDashboard({ firstName }: { firstName: string }) {
         <StatCard
           title="Shops"
           value={formatNumber(kpis.totalShops)}
-          subtitle="All branches"
+          subtitle="Electronics, pharmacy, building"
           icon={Store}
         />
       </section>

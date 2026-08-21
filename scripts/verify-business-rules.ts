@@ -55,6 +55,7 @@ async function main() {
   });
   const product = await prisma.product.create({
     data: {
+      shopId: shopA.id,
       name: "__test_widget",
       sku: `__TEST-${Date.now()}`,
       costPrice: 4,
@@ -140,6 +141,7 @@ async function main() {
     // ── Rule: a multi-line sale is all-or-nothing ──────────────────────
     const scarce = await prisma.product.create({
       data: {
+        shopId: shopA.id,
         name: "__test_scarce",
         sku: `__TEST-SCARCE-${Date.now()}`,
         costPrice: 1,
@@ -178,6 +180,7 @@ async function main() {
     console.log("\nConcurrency");
     const contested = await prisma.product.create({
       data: {
+        shopId: shopA.id,
         name: "__test_contested",
         sku: `__TEST-RACE-${Date.now()}`,
         costPrice: 1,

@@ -1,8 +1,9 @@
-# Multi-Branch Inventory & Sales Management System
+# Multi-Shop Inventory & Sales Management System
 
-Inventory and sales management for a business operating several shops. The
-owner watches performance across shops; a manager runs stock, catalog, and
-staff; salespeople get a shop-scoped view built around recording sales quickly.
+Inventory and sales for three distinct businesses under one owner: electronics,
+a pharmacy, and building materials. Each shop has its own manager, salesperson,
+and catalog. The owner watches performance across shops; a manager runs stock
+and catalog for their shop; salespeople get a shop-scoped till.
 
 ## The one rule that shapes everything
 
@@ -58,17 +59,19 @@ npm run dev
 
 The app opens on the login page. Pick a role card, or sign in with email.
 All of these use the password `password123`. Replace them before any real
-deployment. Recording a sale is a salesperson action. The manager adds stock
-and staff. The owner reviews shop performance, those arrivals, and sales by
-each salesperson.
+deployment. Recording a sale is a salesperson action. Each shop manager adds
+stock and catalog items for that shop only. The owner reviews shop
+performance, those arrivals, and sales by each salesperson.
 
 | Email | Name | Role | Shop |
 | --- | --- | --- | --- |
-| `admin@invsys.com` | Ram Jalloh | Owner | All shops |
-| `manager@invsys.com` | Isata Koroma | Manager | All shops |
-| `fatmata@invsys.com` | Fatmata Kamara | Salesperson | Freetown Central |
-| `mohamed@invsys.com` | Mohamed Sesay | Salesperson | Lumley Branch |
-| `aminata@invsys.com` | Aminata Bangura | Salesperson | Bo Town Branch |
+| `admin@invsys.com` | Ram Jalloh | Owner | All three businesses |
+| `mohamed@invsys.com` | Mohamed Sesay | Manager | Jalloh Electronics |
+| `manager@invsys.com` | Isata Koroma | Manager | Jalloh Pharmacy |
+| `ibrahim@invsys.com` | Ibrahim Turay | Manager | Jalloh Building Materials |
+| `fatmata@invsys.com` | Fatmata Kamara | Salesperson | Jalloh Electronics |
+| `aminata@invsys.com` | Aminata Bangura | Salesperson | Jalloh Pharmacy |
+| `musa@invsys.com` | Musa Conteh | Salesperson | Jalloh Building Materials |
 
 ## Scripts
 

@@ -52,7 +52,7 @@ export function UserForm({
 
   const isEdit = Boolean(initialValues?.id);
 
-  // Owner and manager see every shop, so assignment does not apply.
+  // Only the owner sees every shop. Managers and salespeople need an assignment.
   const selectedRoleName = useMemo(
     () => roles.find((role) => role.id === values.roleId)?.name,
     [roles, values.roleId]
@@ -215,8 +215,8 @@ export function UserForm({
                 Assigned shops
               </legend>
               <p className="mb-3 text-xs text-text-muted">
-                This user can only see and sell at the shops selected here. The
-                primary shop is the one they land on after signing in.
+                This user can only work at the shops selected here. The primary
+                shop is the one they land on after signing in.
               </p>
 
               <div className="space-y-2">

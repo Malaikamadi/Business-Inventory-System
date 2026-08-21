@@ -45,6 +45,7 @@ export function StockEntryForm({
   const [quantity, setQuantity] = useState("");
   const [direction, setDirection] = useState<"increase" | "decrease">("decrease");
   const [reason, setReason] = useState("");
+  const isArrival = mode === "arrival";
 
   const shopProducts = useMemo(
     () => products.filter((product) => product.shopId === shopId),
