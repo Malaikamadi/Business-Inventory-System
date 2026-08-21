@@ -1,7 +1,7 @@
 import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-import { CURRENCY_CODE, CURRENCY_LOCALE } from "@/lib/currency";
+import { CURRENCY_CODE, CURRENCY_LOCALE, createCurrencyFormat } from "@/lib/currency";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -19,12 +19,20 @@ export function formatCurrency(
   locale = CURRENCY_LOCALE
 ): string {
   const num = typeof amount === "string" ? parseFloat(amount) : amount;
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(Number.isFinite(num) ? num : 0);
+  const value = Number.isFinite(num) ? num : 0;
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  } catch {
+    return createCurrencyFormat({
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    }).format(value);
+  }
 }
 
 /**
@@ -35,13 +43,21 @@ export function formatCompactCurrency(
   currency = CURRENCY_CODE,
   locale = CURRENCY_LOCALE
 ): string {
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-    notation: "compact",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 1,
-  }).format(Number.isFinite(amount) ? amount : 0);
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+      notation: "compact",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 1,
+    }).format(Number.isFinite(amount) ? amount : 0);
+  } catch {
+    return createCurrencyFormat({
+      notation: "compact",
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 1,
+    }).format(Number.isFinite(amount) ? amount : 0);
+  }
 }
 
 /**
